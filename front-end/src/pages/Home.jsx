@@ -1,0 +1,181 @@
+import React, { useState } from "react";
+import Map from "../components/Map";
+import "./styles/Home.css";
+
+const Home = () => {
+  const [origin, setOrigin] = useState("");
+  const [destination, setDestination] = useState("");
+  const [preferences, setPreferences] = useState({
+    optimization: "fastest", // fastest, cheapest, minimal_walking, greenest
+    language: "en",
+    theme: "light"
+  });
+  const [routeData, setRouteData] = useState(null);
+
+  const handleSearch = async () => {
+    // TODO: Connect to your backend API
+    console.log("Searching route from:", origin, "to:", destination);
+    
+    // For now, simulate a route
+    const mockRoute = {
+      origin: { lat: 24.4539, lng: 54.3773 },
+      destination: { lat: 24.4810, lng: 54.3581 },
+      duration: "45 min",
+      fare: "AED 5.00",
+      walkingDistance: "800 m",
+      transfers: 1,
+      routeOptions: [
+        { id: 1, type: "fastest", duration: "40 min", fare: "AED 6.00", walking: "1.2 km" },
+        { id: 2, type: "cheapest", duration: "55 min", fare: "AED 3.00", walking: "500 m" },
+        { id: 3, type: "minimal_walking", duration: "50 min", fare: "AED 4.50", walking: "300 m" }
+      ]
+    };
+    
+    setRouteData(mockRoute);
+  };
+
+  return (
+    <div className="home-container">
+      {/* Sidebar */}
+      <div className="sidebar">
+        <div className="logo-section">
+          <h2>🚍 Smart Bus Route Planner</h2>
+          <p>Abu Dhabi Public Transport</p>
+        </div>
+
+        <div className="search-section">
+          <div className="input-group">
+            <label>From</label>
+            <input 
+              type="text" 
+              placeholder="Enter start location" 
+              value={origin}
+              onChange={(e) => setOrigin(e.target.value)}
+            />
+          </div>
+
+          <div className="input-group">
+            <label>To</label>
+            <input 
+              type="text" 
+              placeholder="Enter destination" 
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+            />
+          </div>
+
+          <button className="search-btn" onClick={handleSearch}>
+            Search Route
+          </button>
+        </div>
+
+        <div className="preferences-section">
+          <h3>⚙️ Preferences</h3>
+          <div className="preference-options">
+            <label>
+              <input 
+                type="radio" 
+                name="optimization" 
+                value="fastest"
+                checked={preferences.optimization === "fastest"}
+                onChange={(e) => setPreferences({...preferences, optimization: e.target.value})}
+              />
+              Fastest Route
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="optimization" 
+                value="cheapest"
+                checked={preferences.optimization === "cheapest"}
+                onChange={(e) => setPreferences({...preferences, optimization: e.target.value})}
+              />
+              Cheapest Route
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="optimization" 
+                value="minimal_walking"
+                checked={preferences.optimization === "minimal_walking"}
+                onChange={(e) => setPreferences({...preferences, optimization: e.target.value})}
+              />
+              Minimal Walking
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="optimization" 
+                value="greenest"
+                checked={preferences.optimization === "greenest"}
+                onChange={(e) => setPreferences({...preferences, optimization: e.target.value})}
+              />
+              Greenest Route
+            </label>
+          </div>
+
+          <div className="language-selector">
+            <label>Language:</label>
+            <select 
+              value={preferences.language}
+              onChange={(e) => setPreferences({...preferences, language: e.target.value})}
+            >
+              <option value="en">English</option>
+              <option value="ar">العربية</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Route Results Section */}
+        {routeData && (
+          <div className="results-section">
+            <h3>📋 Route Options</h3>
+            <div className="route-summary">
+              <p><strong>Duration:</strong> {routeData.duration}</p>
+              <p><strong>Estimated Fare:</strong> {routeData.fare}</p>
+              <p><strong>Walking Distance:</strong> {routeData.walkingDistance}</p>
+              <p><strong>Transfers:</strong> {routeData.transfers}</p>
+            </div>
+            
+            <div className="route-options">
+              {routeData.routeOptions.map(option => (
+                <div key={option.id} className="route-option">
+                  <h4>{option.type.toUpperCase()} OPTION</h4>
+                  <p>⏱️ {option.duration}</p>
+                  <p>💰 {option.fare}</p>
+                  <p>🚶‍♂️ {option.walking} walking</p>
+                  <button className="select-btn">Select This Route</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Virtual Wallet Section */}
+        <div className="wallet-section">
+          <h3>💳 Virtual Wallet</h3>
+          <p>Balance: <strong>AED 25.50</strong></p>
+          <button className="recharge-btn">Recharge</button>
+        </div>
+      </div>
+
+      {/* Map Section */}
+      <div className="map-section">
+        <Map 
+          origin={routeData?.origin || { lat: 24.4539, lng: 54.3773 }}
+          destination={routeData?.destination}
+          busStops={[
+            { position: { lat: 24.4600, lng: 54.3700 }, name: "Main Bus Station" },
+            { position: { lat: 24.4700, lng: 54.3650 }, name: "City Center Stop" }
+          ]}
+          liveBusPositions={[
+            { position: { lat: 24.4550, lng: 54.3720 }, id: "B101", route: "Route 5" },
+            { position: { lat: 24.4750, lng: 54.3600 }, id: "B102", route: "Route 7" }
+          ]}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default Home;
