@@ -2,7 +2,7 @@
 @import 'leaflet/dist/leaflet.css';
 
 /* Main layout */
-.home-container {
+.homeContainer {
   display: flex;
   height: 100vh;
   background-color: #f3f4f6;
@@ -19,34 +19,34 @@
   overflow-x: hidden;
 }
 
-.logo-section {
+.logoSection {
   margin-bottom: 25px;
   padding-bottom: 15px;
   border-bottom: 2px solid #e5e7eb;
 }
 
-.logo-section h2 {
+.logoSection h2 {
   margin: 0 0 8px 0;
   color: #1f2937;
   font-size: 24px;
 }
 
-.logo-section p {
+.logoSection p {
   margin: 0;
   color: #6b7280;
   font-size: 14px;
 }
 
 /* Search Section */
-.search-section {
+.searchSection {
   margin-bottom: 25px;
 }
 
-.input-group {
+.inputGroup {
   margin-bottom: 15px;
 }
 
-.input-group label {
+.inputGroup label {
   display: block;
   margin-bottom: 6px;
   font-size: 14px;
@@ -54,7 +54,7 @@
   color: #374151;
 }
 
-.input-group input {
+.inputGroup input {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #d1d5db;
@@ -64,13 +64,13 @@
   box-sizing: border-box;
 }
 
-.input-group input:focus {
+.inputGroup input:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.search-btn {
+.searchBtn {
   width: 100%;
   padding: 12px;
   background-color: #2563eb;
@@ -83,36 +83,36 @@
   transition: background-color 0.2s;
 }
 
-.search-btn:hover {
+.searchBtn:hover {
   background-color: #1d4ed8;
 }
 
-.search-btn:active {
+.searchBtn:active {
   transform: translateY(1px);
 }
 
 /* Preferences Section */
-.preferences-section {
+.preferencesSection {
   margin-bottom: 25px;
   padding: 15px;
   background-color: #f9fafb;
   border-radius: 8px;
 }
 
-.preferences-section h3 {
+.preferencesSection h3 {
   margin: 0 0 12px 0;
   font-size: 16px;
   color: #1f2937;
 }
 
-.preference-options {
+.preferenceOptions {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-bottom: 15px;
 }
 
-.preference-options label {
+.preferenceOptions label {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -122,18 +122,18 @@
   padding: 4px 0;
 }
 
-.preference-options input[type="radio"] {
+.preferenceOptions input[type="radio"] {
   cursor: pointer;
   width: auto;
 }
 
-.language-selector {
+.languageSelector {
   margin-top: 15px;
   padding-top: 15px;
   border-top: 1px solid #e5e7eb;
 }
 
-.language-selector label {
+.languageSelector label {
   display: block;
   margin-bottom: 6px;
   font-size: 14px;
@@ -141,7 +141,7 @@
   color: #374151;
 }
 
-.language-selector select {
+.languageSelector select {
   width: 100%;
   padding: 8px 10px;
   border: 1px solid #d1d5db;
@@ -153,7 +153,7 @@
 }
 
 /* Results Section */
-.results-section {
+.resultsSection {
   margin-bottom: 25px;
   padding: 15px;
   background-color: #eff6ff;
@@ -161,43 +161,43 @@
   border: 1px solid #bfdbfe;
 }
 
-.results-section h3 {
+.resultsSection h3 {
   margin: 0 0 12px 0;
   font-size: 16px;
   color: #1e40af;
 }
 
-.route-summary {
+.routeSummary {
   background-color: white;
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 15px;
 }
 
-.route-summary p {
+.routeSummary p {
   margin: 6px 0;
   font-size: 14px;
   color: #374151;
 }
 
-.route-summary strong {
+.routeSummary strong {
   color: #1f2937;
 }
 
-.route-options {
+.routeOptions {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.route-option {
+.routeOption {
   background-color: white;
   padding: 12px;
   border-radius: 6px;
   border: 1px solid #e5e7eb;
 }
 
-.route-option h4 {
+.routeOption h4 {
   margin: 0 0 8px 0;
   font-size: 13px;
   color: #2563eb;
@@ -205,13 +205,13 @@
   letter-spacing: 0.5px;
 }
 
-.route-option p {
+.routeOption p {
   margin: 4px 0;
   font-size: 13px;
   color: #6b7280;
 }
 
-.select-btn {
+.selectBtn {
   width: 100%;
   padding: 8px;
   margin-top: 8px;
@@ -225,38 +225,38 @@
   transition: all 0.2s;
 }
 
-.select-btn:hover {
+.selectBtn:hover {
   background-color: #2563eb;
   color: white;
   border-color: #2563eb;
 }
 
 /* Wallet Section */
-.wallet-section {
+.walletSection {
   padding: 15px;
   background-color: #f0fdf4;
   border-radius: 8px;
   border: 1px solid #86efac;
 }
 
-.wallet-section h3 {
+.walletSection h3 {
   margin: 0 0 10px 0;
   font-size: 16px;
   color: #166534;
 }
 
-.wallet-section p {
+.walletSection p {
   margin: 0 0 12px 0;
   font-size: 14px;
   color: #374151;
 }
 
-.wallet-section strong {
+.walletSection strong {
   font-size: 18px;
   color: #15803d;
 }
 
-.recharge-btn {
+.rechargeBtn {
   width: 100%;
   padding: 10px;
   background-color: #22c55e;
@@ -269,36 +269,36 @@
   transition: background-color 0.2s;
 }
 
-.recharge-btn:hover {
+.rechargeBtn:hover {
   background-color: #16a34a;
 }
 
 /* Map Section */
-.map-section {
+.mapSection {
   flex: 1;
   position: relative;
   background-color: #e5e7eb;
 }
 
 /* Fix for Leaflet custom icons */
-.custom-bus-stop-icon,
-.custom-bus-icon {
+.customBusStopIcon,
+.customBusIcon {
   background: transparent !important;
   border: none !important;
 }
 
 /* Leaflet popup customization */
-.leaflet-popup-content-wrapper {
+.leafletPopupContentWrapper {
   border-radius: 6px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.leaflet-popup-content {
+.leafletPopupContent {
   margin: 10px 12px;
   font-size: 14px;
 }
 
-.leaflet-popup-content b {
+.leafletPopupContent b {
   color: #1f2937;
   display: block;
   margin-bottom: 4px;
@@ -324,7 +324,7 @@
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .home-container {
+  .homeContainer {
     flex-direction: column;
   }
   
@@ -334,7 +334,7 @@
     overflow-y: auto;
   }
   
-  .map-section {
+  .mapSection {
     height: 50vh;
   }
 }

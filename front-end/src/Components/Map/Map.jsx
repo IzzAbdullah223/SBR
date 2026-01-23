@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import styles from './Map.module.css';
 
 // Fix for default marker icons
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -59,19 +60,11 @@ function MapBoundsUpdater({ origin, destination }) {
   return null;
 }
 
-const Map = ({ origin, destination, busStops = [], liveBusPositions = [] }) => {
+const Map = ({ origin, destination, busStops = [], liveBusPositions = [] }) => { 
   // Validate origin prop
   if (!origin || typeof origin.lat !== 'number' || typeof origin.lng !== 'number') {
     return (
-      <div style={{ 
-        width: '100%', 
-        height: '100%', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        backgroundColor: '#e5e7eb',
-        color: '#6b7280'
-      }}>
+      <div className={styles.loadingContainer}>
         Loading map...
       </div>
     );
@@ -94,7 +87,7 @@ const Map = ({ origin, destination, busStops = [], liveBusPositions = [] }) => {
     <MapContainer 
       center={center} 
       zoom={13} 
-      style={{ width: '100%', height: '100%' }}
+      className={styles.mapContainer}
       scrollWheelZoom={true}
     >
       <TileLayer

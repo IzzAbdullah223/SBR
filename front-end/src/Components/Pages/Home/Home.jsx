@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Map from "../components/Map";
-import '../Styles/Home.css'
+import Map from "../../Map/Map";
+import styles from './home.module.css'
 
 const Home = () => {
   const [origin, setOrigin] = useState("");
@@ -37,16 +37,16 @@ const Home = () => {
   };
 
   return (
-    <div className="home-container">
+    <div className={styles.homeContainer}>
       {/* Sidebar */}
-      <div className="sidebar">
-        <div className="logo-section">
+      <div className={styles.sidebar}>
+        <div className={styles.logoSection}>
           <h2>🚍 Smart Bus Route Planner</h2>
           <p>Abu Dhabi Public Transport</p>
         </div>
 
-        <div className="search-section">
-          <div className="input-group">
+        <div className={styles.searchSection}>
+          <div className={styles.inputGroup}>
             <label>From</label>
             <input 
               type="text" 
@@ -56,7 +56,7 @@ const Home = () => {
             />
           </div>
 
-          <div className="input-group">
+          <div className={styles.inputGroup}>
             <label>To</label>
             <input 
               type="text" 
@@ -66,14 +66,14 @@ const Home = () => {
             />
           </div>
 
-          <button className="search-btn" onClick={handleSearch}>
+          <button className={styles.searchBtn} onClick={handleSearch}>
             Search Route
           </button>
         </div>
 
-        <div className="preferences-section">
+        <div className={styles.preferencesSection}>
           <h3>⚙️ Preferences</h3>
-          <div className="preference-options">
+          <div className={styles.preferenceOptions}>
             <label>
               <input 
                 type="radio" 
@@ -116,7 +116,7 @@ const Home = () => {
             </label>
           </div>
 
-          <div className="language-selector">
+          <div className={styles.languageSelector}>
             <label>Language:</label>
             <select 
               value={preferences.language}
@@ -130,23 +130,23 @@ const Home = () => {
 
         {/* Route Results Section */}
         {routeData && (
-          <div className="results-section">
+          <div className={styles.resultsSection}>
             <h3>📋 Route Options</h3>
-            <div className="route-summary">
+            <div className={styles.routeSummary}>
               <p><strong>Duration:</strong> {routeData.duration}</p>
               <p><strong>Estimated Fare:</strong> {routeData.fare}</p>
               <p><strong>Walking Distance:</strong> {routeData.walkingDistance}</p>
               <p><strong>Transfers:</strong> {routeData.transfers}</p>
             </div>
             
-            <div className="route-options">
+            <div className={styles.routeOptions}>
               {routeData.routeOptions.map(option => (
-                <div key={option.id} className="route-option">
+                <div key={option.id} className={styles.routeOption}>
                   <h4>{option.type.replace('_', ' ').toUpperCase()}</h4>
                   <p>⏱️ {option.duration}</p>
                   <p>💰 {option.fare}</p>
                   <p>🚶‍♂️ {option.walking} walking</p>
-                  <button className="select-btn">Select This Route</button>
+                  <button className={styles.selectBtn}>Select This Route</button>
                 </div>
               ))}
             </div>
@@ -154,15 +154,15 @@ const Home = () => {
         )}
 
         {/* Virtual Wallet Section */}
-        <div className="wallet-section">
+        <div className={styles.walletSection}>
           <h3>💳 Virtual Wallet</h3>
           <p>Balance: <strong>AED 25.50</strong></p>
-          <button className="recharge-btn">Recharge</button>
+          <button className={styles.rechargeBtn}>Recharge</button>
         </div>
       </div>
 
       {/* Map Section */}
-      <div className="map-section">
+      <div className={styles.mapSection}>
         <Map 
           origin={routeData?.origin || defaultCenter}
           destination={routeData?.destination}
