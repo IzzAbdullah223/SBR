@@ -1,22 +1,24 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Map from "../components/Map";
-import "./styles/Home.css";
+import '../Styles/Home.css'
 
 const Home = () => {
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
   const [preferences, setPreferences] = useState({
-    optimization: "fastest", // fastest, cheapest, minimal_walking, greenest
+    optimization: "fastest",
     language: "en",
     theme: "light"
   });
   const [routeData, setRouteData] = useState(null);
 
+  // Default map center (Abu Dhabi)
+  const defaultCenter = { lat: 24.4539, lng: 54.3773 };
+
   const handleSearch = async () => {
-    // TODO: Connect to your backend API
     console.log("Searching route from:", origin, "to:", destination);
     
-    // For now, simulate a route
+    // Mock route data
     const mockRoute = {
       origin: { lat: 24.4539, lng: 54.3773 },
       destination: { lat: 24.4810, lng: 54.3581 },
@@ -140,7 +142,7 @@ const Home = () => {
             <div className="route-options">
               {routeData.routeOptions.map(option => (
                 <div key={option.id} className="route-option">
-                  <h4>{option.type.toUpperCase()} OPTION</h4>
+                  <h4>{option.type.replace('_', ' ').toUpperCase()}</h4>
                   <p>⏱️ {option.duration}</p>
                   <p>💰 {option.fare}</p>
                   <p>🚶‍♂️ {option.walking} walking</p>
@@ -162,7 +164,7 @@ const Home = () => {
       {/* Map Section */}
       <div className="map-section">
         <Map 
-          origin={routeData?.origin || { lat: 24.4539, lng: 54.3773 }}
+          origin={routeData?.origin || defaultCenter}
           destination={routeData?.destination}
           busStops={[
             { position: { lat: 24.4600, lng: 54.3700 }, name: "Main Bus Station" },
