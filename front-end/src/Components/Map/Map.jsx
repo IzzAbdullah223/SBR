@@ -41,6 +41,18 @@ const busIcon = new L.Icon({
   popupAnchor: [0, -15],
 });
 
+const userLocationIcon = new L.Icon({
+  iconUrl: 'data:image/svg+xml,' + encodeURIComponent(`
+    <svg width="30" height="30" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="15" cy="15" r="10" fill="#2196F3" stroke="white" stroke-width="3"/>
+      <circle cx="15" cy="15" r="4" fill="white"/>
+    </svg>
+  `),
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+  popupAnchor: [0, -15],
+});
+
 // Component to handle map bounds updates
 function MapBoundsUpdater({ origin, destination }) {
   const map = useMap();
@@ -60,7 +72,7 @@ function MapBoundsUpdater({ origin, destination }) {
   return null;
 }
 
-const Map = ({ origin, destination, busStops = [], liveBusPositions = [] }) => { 
+const Map = ({ origin, destination, userLocation, busStops = [], liveBusPositions = [] }) => { 
   // Validate origin prop
   if (!origin || typeof origin.lat !== 'number' || typeof origin.lng !== 'number') {
     return (
@@ -96,6 +108,15 @@ const Map = ({ origin, destination, busStops = [], liveBusPositions = [] }) => {
       />
 
       <MapBoundsUpdater origin={origin} destination={destination} />
+
+      {userLocation && (
+        <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon}>
+          <Popup>
+            <strong>Your Location</strong><br />
+            Current position
+          </Popup>
+        </Marker>
+      )}
 
       <Marker position={[origin.lat, origin.lng]}>
         <Popup>

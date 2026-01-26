@@ -12,9 +12,35 @@ const Home = () => {
   const [routeData, setRouteData] = useState(null);
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
   const [routeError, setRouteError] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+  const [isLocating, setIsLocating] = useState(false);
 
   // Default map center (Abu Dhabi)
   const defaultCenter = { lat: 24.4539, lng: 54.3773 };
+
+  const handleLocateMe = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser');
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const location = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        setUserLocation(location);
+        setIsLocating(false);
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        alert('Unable to get your location. Please check your browser permissions.');
+        setIsLocating(false);
+      }
+    );
+  };
 
   const handleOriginChange = (e, locationData) => {
     setOrigin(e.target.value);
@@ -108,13 +134,23 @@ const Home = () => {
             onChange={handleDestinationChange}
           />
 
-          <button 
-            className={styles.searchBtn} 
-            onClick={handleSearch}
-            disabled={isLoadingRoute}
-          >
-            {isLoadingRoute ? 'Searching...' : 'Search Route'}
-          </button>
+          <div className={styles.buttonGroup}>
+            <button 
+              className={styles.locateMeBtn}
+              onClick={handleLocateMe}
+              disabled={isLocating}
+            >
+              {isLocating ? '📍 Locating...' : '📍 Locate Me'}
+            </button>
+
+            <button 
+              className={styles.searchBtn} 
+              onClick={handleSearch}
+              disabled={isLoadingRoute}
+            >
+              {isLoadingRoute ? 'Searching...' : 'Search Route'}
+            </button>
+          </div>
 
           {routeError && (
             <div className={styles.errorMessage}>
@@ -152,8 +188,9 @@ const Home = () => {
       {/* Map Section */}
       <div className={styles.mapSection}>
         <Map 
-          origin={routeData?.origin || defaultCenter}
+          origin={routeData?.origin || userLocation || defaultCenter}
           destination={routeData?.destination}
+          userLocation={userLocation}
           busStops={[
             { position: { lat: 24.4600, lng: 54.3700 }, name: "Main Bus Station" },
             { position: { lat: 24.4700, lng: 54.3650 }, name: "City Center Stop" }
