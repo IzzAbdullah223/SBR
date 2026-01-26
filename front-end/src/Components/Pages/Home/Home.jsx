@@ -1,39 +1,87 @@
 import { useState } from "react";
 import Map from "../../Map/Map";
+import SearchInput from "../../SearchInput/SearchInput";
 import styles from './home.module.css'
 
 const Home = () => {
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
-  const [preferences, setPreferences] = useState({
-    optimization: "fastest",
-    language: "en",
-    theme: "light"
-  });
+  const [originCoords, setOriginCoords] = useState(null);
+  const [destinationCoords, setDestinationCoords] = useState(null);
+  const [optimization, setOptimization] = useState("fastest");
   const [routeData, setRouteData] = useState(null);
+  const [isLoadingRoute, setIsLoadingRoute] = useState(false);
+  const [routeError, setRouteError] = useState(null);
 
   // Default map center (Abu Dhabi)
   const defaultCenter = { lat: 24.4539, lng: 54.3773 };
 
+  const handleOriginChange = (e, locationData) => {
+    setOrigin(e.target.value);
+    if (locationData) {
+      setOriginCoords(locationData);
+    }
+  };
+
+  const handleDestinationChange = (e, locationData) => {
+    setDestination(e.target.value);
+    if (locationData) {
+      setDestinationCoords(locationData);
+    }
+  };
+
   const handleSearch = async () => {
-    console.log("Searching route from:", origin, "to:", destination);
+    if (!originCoords || !destinationCoords) {
+      alert("Please select both origin and destination from the dropdown");
+      return;
+    }
+
+    setIsLoadingRoute(true);
+    setRouteError(null);
+    setRouteData(null);
+
+    console.log("Searching route from:", originCoords, "to:", destinationCoords);
     
-    // Mock route data
-    const mockRoute = {
-      origin: { lat: 24.4539, lng: 54.3773 },
-      destination: { lat: 24.4810, lng: 54.3581 },
-      duration: "45 min",
-      fare: "AED 5.00",
-      walkingDistance: "800 m",
-      transfers: 1,
-      routeOptions: [
-        { id: 1, type: "fastest", duration: "40 min", fare: "AED 6.00", walking: "1.2 km" },
-        { id: 2, type: "cheapest", duration: "55 min", fare: "AED 3.00", walking: "500 m" },
-        { id: 3, type: "minimal_walking", duration: "50 min", fare: "AED 4.50", walking: "300 m" }
-      ]
-    };
+    // TODO: Replace with actual API call when backend is ready
+    // const response = await fetch('/api/routes/plan', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({
+    //     origin: originCoords,
+    //     destination: destinationCoords,
+    //     optimization: optimization
+    //   })
+    // });
+    // 
+    // if (!response.ok) {
+    //   setRouteError('Failed to find routes. Please try again.');
+    //   setIsLoadingRoute(false);
+    //   return;
+    // }
+    //
+    // const data = await response.json();
+    // setRouteData(data);
+    // setIsLoadingRoute(false);
     
-    setRouteData(mockRoute);
+    // Mock route data using actual coordinates (TEMPORARY - Remove when backend ready)
+    setTimeout(() => {
+      const mockRoute = {
+        origin: originCoords,
+        destination: destinationCoords,
+        duration: "45 min",
+        fare: "AED 5.00",
+        walkingDistance: "800 m",
+        transfers: 1,
+        routeOptions: [
+          { id: 1, type: "fastest", duration: "40 min", fare: "AED 6.00", walking: "1.2 km" },
+          { id: 2, type: "cheapest", duration: "55 min", fare: "AED 3.00", walking: "500 m" },
+          { id: 3, type: "minimal_walking", duration: "50 min", fare: "AED 4.50", walking: "300 m" }
+        ]
+      };
+      
+      setRouteData(mockRoute);
+      setIsLoadingRoute(false);
+    }, 1000);
   };
 
   return (
@@ -46,86 +94,33 @@ const Home = () => {
         </div>
 
         <div className={styles.searchSection}>
-          <div className={styles.inputGroup}>
-            <label>From</label>
-            <input 
-              type="text" 
-              placeholder="Enter start location" 
-              value={origin}
-              onChange={(e) => setOrigin(e.target.value)}
-            />
-          </div>
+          <SearchInput
+            label="From"
+            placeholder="Enter start location"
+            value={origin}
+            onChange={handleOriginChange}
+          />
 
-          <div className={styles.inputGroup}>
-            <label>To</label>
-            <input 
-              type="text" 
-              placeholder="Enter destination" 
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-            />
-          </div>
+          <SearchInput
+            label="To"
+            placeholder="Enter destination"
+            value={destination}
+            onChange={handleDestinationChange}
+          />
 
-          <button className={styles.searchBtn} onClick={handleSearch}>
-            Search Route
+          <button 
+            className={styles.searchBtn} 
+            onClick={handleSearch}
+            disabled={isLoadingRoute}
+          >
+            {isLoadingRoute ? 'Searching...' : 'Search Route'}
           </button>
-        </div>
 
-        <div className={styles.preferencesSection}>
-          <h3>⚙️ Preferences</h3>
-          <div className={styles.preferenceOptions}>
-            <label>
-              <input 
-                type="radio" 
-                name="optimization" 
-                value="fastest"
-                checked={preferences.optimization === "fastest"}
-                onChange={(e) => setPreferences({...preferences, optimization: e.target.value})}
-              />
-              Fastest Route
-            </label>
-            <label>
-              <input 
-                type="radio" 
-                name="optimization" 
-                value="cheapest"
-                checked={preferences.optimization === "cheapest"}
-                onChange={(e) => setPreferences({...preferences, optimization: e.target.value})}
-              />
-              Cheapest Route
-            </label>
-            <label>
-              <input 
-                type="radio" 
-                name="optimization" 
-                value="minimal_walking"
-                checked={preferences.optimization === "minimal_walking"}
-                onChange={(e) => setPreferences({...preferences, optimization: e.target.value})}
-              />
-              Minimal Walking
-            </label>
-            <label>
-              <input 
-                type="radio" 
-                name="optimization" 
-                value="greenest"
-                checked={preferences.optimization === "greenest"}
-                onChange={(e) => setPreferences({...preferences, optimization: e.target.value})}
-              />
-              Greenest Route
-            </label>
-          </div>
-
-          <div className={styles.languageSelector}>
-            <label>Language:</label>
-            <select 
-              value={preferences.language}
-              onChange={(e) => setPreferences({...preferences, language: e.target.value})}
-            >
-              <option value="en">English</option>
-              <option value="ar">العربية</option>
-            </select>
-          </div>
+          {routeError && (
+            <div className={styles.errorMessage}>
+              {routeError}
+            </div>
+          )}
         </div>
 
         {/* Route Results Section */}
@@ -152,13 +147,6 @@ const Home = () => {
             </div>
           </div>
         )}
-
-        {/* Virtual Wallet Section */}
-        <div className={styles.walletSection}>
-          <h3>💳 Virtual Wallet</h3>
-          <p>Balance: <strong>AED 25.50</strong></p>
-          <button className={styles.rechargeBtn}>Recharge</button>
-        </div>
       </div>
 
       {/* Map Section */}

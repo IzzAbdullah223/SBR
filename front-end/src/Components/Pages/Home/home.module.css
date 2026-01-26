@@ -40,6 +40,10 @@
 /* Search Section */
 .searchSection {
   margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  
 }
 
 .inputGroup {
@@ -337,4 +341,70 @@
   .mapSection {
     height: 50vh;
   }
+}
+
+
+
+/* Add these styles to your existing home.module.css */
+
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.locateMeBtn {
+  flex: 1;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.locateMeBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+}
+
+.locateMeBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.searchBtn {
+  flex: 2;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.searchBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+}
+
+.searchBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.errorMessage {
+  padding: 12px;
+  background-color: #fee;
+  color: #c33;
+  border-radius: 8px;
+  font-size: 14px;
+  border: 1px solid #fcc;
+  margin-top: 10px;
 }
