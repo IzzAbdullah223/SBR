@@ -18,6 +18,30 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 // Custom icons
+const originIcon = new L.Icon({
+  iconUrl: 'data:image/svg+xml,' + encodeURIComponent(`
+    <svg width="35" height="45" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.5 0C10.6 0 5 5.6 5 12.5c0 8.8 12.5 27.5 12.5 27.5S30 21.3 30 12.5C30 5.6 24.4 0 17.5 0z" fill="#4CAF50" stroke="white" stroke-width="2"/>
+      <circle cx="17.5" cy="12.5" r="5" fill="white"/>
+    </svg>
+  `),
+  iconSize: [35, 45],
+  iconAnchor: [17.5, 45],
+  popupAnchor: [0, -45],
+});
+
+const destinationIcon = new L.Icon({
+  iconUrl: 'data:image/svg+xml,' + encodeURIComponent(`
+    <svg width="35" height="45" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.5 0C10.6 0 5 5.6 5 12.5c0 8.8 12.5 27.5 12.5 27.5S30 21.3 30 12.5C30 5.6 24.4 0 17.5 0z" fill="#F44336" stroke="white" stroke-width="2"/>
+      <circle cx="17.5" cy="12.5" r="5" fill="white"/>
+    </svg>
+  `),
+  iconSize: [35, 45],
+  iconAnchor: [17.5, 45],
+  popupAnchor: [0, -45],
+});
+
 const busStopIcon = new L.Icon({
   iconUrl: 'data:image/svg+xml,' + encodeURIComponent(`
     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
@@ -118,7 +142,7 @@ const Map = ({ origin, destination, userLocation, busStops = [], liveBusPosition
         </Marker>
       )}
 
-      <Marker position={[origin.lat, origin.lng]}>
+      <Marker position={[origin.lat, origin.lng]} icon={originIcon}>
         <Popup>
           <strong>Origin</strong><br />
           Starting point
@@ -127,7 +151,7 @@ const Map = ({ origin, destination, userLocation, busStops = [], liveBusPosition
 
       {destination && (
         <>
-          <Marker position={[destination.lat, destination.lng]}>
+          <Marker position={[destination.lat, destination.lng]} icon={destinationIcon}>
             <Popup>
               <strong>Destination</strong><br />
               End point

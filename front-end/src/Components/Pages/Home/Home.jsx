@@ -46,6 +46,8 @@ const Home = () => {
     setOrigin(e.target.value);
     if (locationData) {
       setOriginCoords(locationData);
+      // Clear route data when changing origin
+      setRouteData(null);
     }
   };
 
@@ -53,6 +55,8 @@ const Home = () => {
     setDestination(e.target.value);
     if (locationData) {
       setDestinationCoords(locationData);
+      // Clear route data when changing destination
+      setRouteData(null);
     }
   };
 
@@ -188,8 +192,8 @@ const Home = () => {
       {/* Map Section */}
       <div className={styles.mapSection}>
         <Map 
-          origin={routeData?.origin || userLocation || defaultCenter}
-          destination={routeData?.destination}
+          origin={originCoords || routeData?.origin || userLocation || defaultCenter}
+          destination={destinationCoords || routeData?.destination}
           userLocation={userLocation}
           busStops={[
             { position: { lat: 24.4600, lng: 54.3700 }, name: "Main Bus Station" },
