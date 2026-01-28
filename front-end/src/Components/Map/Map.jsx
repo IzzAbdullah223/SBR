@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup,  useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import styles from './Map.module.css';
@@ -78,43 +78,44 @@ const userLocationIcon = new L.Icon({
 });
 
 // Component to handle map bounds updates
-function MapBoundsUpdater({ origin, destination }) {
+function MapBoundsUpdater({ origin, destination, userLocation, defaultCenter }) {
   const map = useMap();
 
   React.useEffect(() => {
-    if (destination) {
+    if (origin && destination) {
       const bounds = L.latLngBounds(
         [origin.lat, origin.lng],
         [destination.lat, destination.lng]
       );
       map.fitBounds(bounds, { padding: [50, 50] });
-    } else {
+    } else if (origin) {
       map.setView([origin.lat, origin.lng], 13);
+    } else if (userLocation) {
+      map.setView([userLocation.lat, userLocation.lng], 13);
+    } else {
+      map.setView([defaultCenter.lat, defaultCenter.lng], 13);
     }
-  }, [map, origin, destination]);
+  }, [map, origin, destination, userLocation, defaultCenter]);
 
   return null;
 }
 
-const Map = ({ origin, destination, userLocation, busStops = [], liveBusPositions = [] }) => { 
-  // Validate origin prop
-  if (!origin || typeof origin.lat !== 'number' || typeof origin.lng !== 'number') {
-    return (
-      <div className={styles.loadingContainer}>
-        Loading map...
-      </div>
-    );
-  }
-
+const Map = ({ defaultCenter, origin, destination, userLocation, busStops = [], liveBusPositions = [] }) => { 
   const center = useMemo(() => {
-    if (destination) {
+    if (origin && destination) {
       return [(origin.lat + destination.lat) / 2, (origin.lng + destination.lng) / 2];
     }
-    return [origin.lat, origin.lng];
-  }, [origin, destination]);
+    if (origin) {
+      return [origin.lat, origin.lng];
+    }
+    if (userLocation) {
+      return [userLocation.lat, userLocation.lng];
+    }
+    return [defaultCenter.lat, defaultCenter.lng];
+  }, [origin, destination, userLocation, defaultCenter]);
 
   const routePath = useMemo(() => {
-    return destination 
+    return origin && destination 
       ? [[origin.lat, origin.lng], [destination.lat, destination.lng]]
       : [];
   }, [origin, destination]);
@@ -131,7 +132,12 @@ const Map = ({ origin, destination, userLocation, busStops = [], liveBusPosition
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
-      <MapBoundsUpdater origin={origin} destination={destination} />
+      <MapBoundsUpdater 
+        origin={origin} 
+        destination={destination} 
+        userLocation={userLocation}
+        defaultCenter={defaultCenter}
+      />
 
       {userLocation && (
         <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon}>
@@ -142,12 +148,14 @@ const Map = ({ origin, destination, userLocation, busStops = [], liveBusPosition
         </Marker>
       )}
 
-      <Marker position={[origin.lat, origin.lng]} icon={originIcon}>
-        <Popup>
-          <strong>Origin</strong><br />
-          Starting point
-        </Popup>
-      </Marker>
+      {origin && (
+        <Marker position={[origin.lat, origin.lng]} icon={originIcon}>
+          <Popup>
+            <strong>Origin</strong><br />
+            Starting point
+          </Popup>
+        </Marker>
+      )}
 
       {destination && (
         <>
@@ -157,8 +165,6 @@ const Map = ({ origin, destination, userLocation, busStops = [], liveBusPosition
               End point
             </Popup>
           </Marker>
-
-       
         </>
       )}
 

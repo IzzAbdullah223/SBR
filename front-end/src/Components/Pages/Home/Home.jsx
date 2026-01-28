@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Map from "../../Map/Map";
-import SearchInput from "../../SearchInput/SearchInput";
+import Sidebar from "../../Sidebar/Sidebar";
 import styles from './home.module.css'
 
 const Home = () => {
@@ -8,7 +8,7 @@ const Home = () => {
   const [destination, setDestination] = useState("");
   const [originCoords, setOriginCoords] = useState(null);
   const [destinationCoords, setDestinationCoords] = useState(null);
-  const [optimization, setOptimization] = useState("fastest");
+  //const [optimization, setOptimization] = useState("fastest");
   const [routeData, setRouteData] = useState(null);//Stores the route options returned from the backend
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
   const [routeError, setRouteError] = useState(null);
@@ -96,67 +96,16 @@ const Home = () => {
   return (
     <div className={styles.homeContainer}>
       {/* Sidebar */}
-      <div className={styles.sidebar}>
-        <div className={styles.logoSection}>
-          <h2>🚍 Smart Bus Route Planner</h2>
-          <p>Abu Dhabi Public Transport</p>
-        </div>
-
-        <div className={styles.searchSection}>
-          <SearchInput
-            label="From"
-            placeholder="Enter start location"
-            value={origin}
-            onChange={handleOriginChange}
-          />
-
-          <SearchInput
-            label="To"
-            placeholder="Enter destination"
-            value={destination}
-            onChange={handleDestinationChange}
-          />
-
-          <button 
-            className={styles.searchBtn} 
-            onClick={handleSearch}
-            disabled={isLoadingRoute}
-          >
-            {isLoadingRoute ? 'Searching...' : 'Search Route'}
-          </button>
-
-          {routeError && (
-            <div className={styles.errorMessage}>
-              {routeError}
-            </div>
-          )}
-        </div>
-
-        {/* Route Results Section */}
-        {routeData && (
-          <div className={styles.resultsSection}>
-            <h3>📋 Route Options</h3>
-            <div className={styles.routeSummary}>
-              <p><strong>Duration:</strong> {routeData.duration}</p>
-              <p><strong>Estimated Fare:</strong> {routeData.fare}</p>
-              <p><strong>Walking Distance:</strong> {routeData.walkingDistance}</p>
-              <p><strong>Transfers:</strong> {routeData.transfers}</p>
-            </div>
-            
-            <div className={styles.routeOptions}>
-              {routeData.routeOptions.map(option => (
-                <div key={option.id} className={styles.routeOption}>
-                  <h4>{option.type.replace('_', ' ').toUpperCase()}</h4>
-                  <p>⏱️ {option.duration}</p>
-                  <p>💰 {option.fare}</p>
-                  <p>🚶‍♂️ {option.walking} walking</p>
-                  <button className={styles.selectBtn}>Select This Route</button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+      <Sidebar
+        origin={origin}
+        destination={destination}
+        onOriginChange={handleOriginChange}
+        onDestinationChange={handleDestinationChange}
+        onSearch={handleSearch}
+        isLoadingRoute={isLoadingRoute}
+        routeError={routeError}
+        routeData={routeData}
+      />
 
       {/* Map Section */}
       <div className={styles.mapSection}>
@@ -180,8 +129,9 @@ const Home = () => {
         </button>
 
         <Map 
-          origin={originCoords || routeData?.origin || userLocation || defaultCenter}
-          destination={destinationCoords || routeData?.destination}
+          defaultCenter={defaultCenter}
+          origin={originCoords}
+          destination={destinationCoords}
           userLocation={userLocation}
           busStops={[]}
           liveBusPositions={[]}
