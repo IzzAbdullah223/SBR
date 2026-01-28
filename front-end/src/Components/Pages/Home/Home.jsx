@@ -9,13 +9,13 @@ const Home = () => {
   const [originCoords, setOriginCoords] = useState(null);
   const [destinationCoords, setDestinationCoords] = useState(null);
   const [optimization, setOptimization] = useState("fastest");
-  const [routeData, setRouteData] = useState(null);
+  const [routeData, setRouteData] = useState(null);//Stores the route options returned from the backend
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
   const [routeError, setRouteError] = useState(null);
-  const [userLocation, setUserLocation] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);//Stores GPS coordinates when user clicks "Locate Me
   const [isLocating, setIsLocating] = useState(false);
 
-  // Default map center (Abu Dhabi)
+  
   const defaultCenter = { lat: 24.4539, lng: 54.3773 };
 
   const handleLocateMe = () => {
@@ -44,9 +44,8 @@ const Home = () => {
 
   const handleOriginChange = (e, locationData) => {
     setOrigin(e.target.value);
-    if (locationData) {
+    if (locationData) { // is the lat and lng data provided by the api in the dropdown.
       setOriginCoords(locationData);
-      // Clear route data when changing origin
       setRouteData(null);
     }
   };
@@ -74,7 +73,7 @@ const Home = () => {
     
     // TODO: Replace with actual API call when backend is ready
     // Mock route data using actual coordinates (TEMPORARY - Remove when backend ready)
-    setTimeout(() => {
+    
       const mockRoute = {
         origin: originCoords,
         destination: destinationCoords,
@@ -91,7 +90,7 @@ const Home = () => {
       
       setRouteData(mockRoute);
       setIsLoadingRoute(false);
-    }, 1000);
+    
   };
 
   return (
