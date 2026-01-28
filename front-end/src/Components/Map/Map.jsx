@@ -158,12 +158,7 @@ const Map = ({ origin, destination, userLocation, busStops = [], liveBusPosition
             </Popup>
           </Marker>
 
-          <Polyline 
-            positions={routePath} 
-            color="blue" 
-            weight={3} 
-            opacity={0.7} 
-          />
+       
         </>
       )}
 

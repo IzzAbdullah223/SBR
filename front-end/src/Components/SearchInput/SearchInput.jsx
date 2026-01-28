@@ -149,7 +149,7 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
               );
             })}
           </div>
-        )}s
+        )}
 
         {showDropdown && !isLoading && !error && suggestions.length === 0 && value.length >= 3 && (
           <div ref={dropdownRef} className={styles.dropdown}>

@@ -73,26 +73,6 @@ const Home = () => {
     console.log("Searching route from:", originCoords, "to:", destinationCoords);
     
     // TODO: Replace with actual API call when backend is ready
-    // const response = await fetch('/api/routes/plan', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({
-    //     origin: originCoords,
-    //     destination: destinationCoords,
-    //     optimization: optimization
-    //   })
-    // });
-    // 
-    // if (!response.ok) {
-    //   setRouteError('Failed to find routes. Please try again.');
-    //   setIsLoadingRoute(false);
-    //   return;
-    // }
-    //
-    // const data = await response.json();
-    // setRouteData(data);
-    // setIsLoadingRoute(false);
-    
     // Mock route data using actual coordinates (TEMPORARY - Remove when backend ready)
     setTimeout(() => {
       const mockRoute = {
@@ -138,23 +118,13 @@ const Home = () => {
             onChange={handleDestinationChange}
           />
 
-          <div className={styles.buttonGroup}>
-            <button 
-              className={styles.locateMeBtn}
-              onClick={handleLocateMe}
-              disabled={isLocating}
-            >
-              {isLocating ? '📍 Locating...' : '📍 Locate Me'}
-            </button>
-
-            <button 
-              className={styles.searchBtn} 
-              onClick={handleSearch}
-              disabled={isLoadingRoute}
-            >
-              {isLoadingRoute ? 'Searching...' : 'Search Route'}
-            </button>
-          </div>
+          <button 
+            className={styles.searchBtn} 
+            onClick={handleSearch}
+            disabled={isLoadingRoute}
+          >
+            {isLoadingRoute ? 'Searching...' : 'Search Route'}
+          </button>
 
           {routeError && (
             <div className={styles.errorMessage}>
@@ -191,18 +161,31 @@ const Home = () => {
 
       {/* Map Section */}
       <div className={styles.mapSection}>
+        {/* Floating Locate Me Button */}
+        <button 
+          className={styles.locateMeBtn}
+          onClick={handleLocateMe}
+          disabled={isLocating}
+          title="Locate Me"
+        >
+          {isLocating ? (
+            <svg className={styles.spinIcon} width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round"/>
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C12.5523 2 13 2.44772 13 3V4.05493C16.9463 4.51608 20 7.81465 20 11.8571V12C20 16.0425 16.9463 19.3411 13 19.8022V21C13 21.5523 12.5523 22 12 22C11.4477 22 11 21.5523 11 21V19.8022C7.05369 19.3411 4 16.0425 4 12V11.8571C4 7.81465 7.05369 4.51608 11 4.05493V3C11 2.44772 11.4477 2 12 2Z" fill="currentColor"/>
+              <circle cx="12" cy="12" r="3" fill="white"/>
+            </svg>
+          )}
+        </button>
+
         <Map 
           origin={originCoords || routeData?.origin || userLocation || defaultCenter}
           destination={destinationCoords || routeData?.destination}
           userLocation={userLocation}
-          busStops={[
-            { position: { lat: 24.4600, lng: 54.3700 }, name: "Main Bus Station" },
-            { position: { lat: 24.4700, lng: 54.3650 }, name: "City Center Stop" }
-          ]}
-          liveBusPositions={[
-            { position: { lat: 24.4550, lng: 54.3720 }, id: "B101", route: "Route 5" },
-            { position: { lat: 24.4750, lng: 54.3600 }, id: "B102", route: "Route 7" }
-          ]}
+          busStops={[]}
+          liveBusPositions={[]}
         />
       </div>
     </div>

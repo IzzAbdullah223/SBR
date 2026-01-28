@@ -43,117 +43,39 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  
-}
-
-.inputGroup {
-  margin-bottom: 15px;
-}
-
-.inputGroup label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-}
-
-.inputGroup input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-}
-
-.inputGroup input:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .searchBtn {
   width: 100%;
   padding: 12px;
-  background-color: #2563eb;
+  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
 }
 
-.searchBtn:hover {
-  background-color: #1d4ed8;
+.searchBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
 }
 
-.searchBtn:active {
-  transform: translateY(1px);
+.searchBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-/* Preferences Section */
-.preferencesSection {
-  margin-bottom: 25px;
-  padding: 15px;
-  background-color: #f9fafb;
+.errorMessage {
+  padding: 12px;
+  background-color: #fee;
+  color: #c33;
   border-radius: 8px;
-}
-
-.preferencesSection h3 {
-  margin: 0 0 12px 0;
-  font-size: 16px;
-  color: #1f2937;
-}
-
-.preferenceOptions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.preferenceOptions label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   font-size: 14px;
-  color: #374151;
-  cursor: pointer;
-  padding: 4px 0;
-}
-
-.preferenceOptions input[type="radio"] {
-  cursor: pointer;
-  width: auto;
-}
-
-.languageSelector {
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.languageSelector label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-}
-
-.languageSelector select {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  background-color: white;
-  cursor: pointer;
-  box-sizing: border-box;
+  border: 1px solid #fcc;
+  margin-top: 10px;
 }
 
 /* Results Section */
@@ -235,48 +157,6 @@
   border-color: #2563eb;
 }
 
-/* Wallet Section */
-.walletSection {
-  padding: 15px;
-  background-color: #f0fdf4;
-  border-radius: 8px;
-  border: 1px solid #86efac;
-}
-
-.walletSection h3 {
-  margin: 0 0 10px 0;
-  font-size: 16px;
-  color: #166534;
-}
-
-.walletSection p {
-  margin: 0 0 12px 0;
-  font-size: 14px;
-  color: #374151;
-}
-
-.walletSection strong {
-  font-size: 18px;
-  color: #15803d;
-}
-
-.rechargeBtn {
-  width: 100%;
-  padding: 10px;
-  background-color: #22c55e;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.rechargeBtn:hover {
-  background-color: #16a34a;
-}
-
 /* Map Section */
 .mapSection {
   flex: 1;
@@ -284,28 +164,52 @@
   background-color: #e5e7eb;
 }
 
-/* Fix for Leaflet custom icons */
-.customBusStopIcon,
-.customBusIcon {
-  background: transparent !important;
-  border: none !important;
+/* Floating Locate Me Button */
+.locateMeBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Leaflet popup customization */
-.leafletPopupContentWrapper {
-  border-radius: 6px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.locateMeBtn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(74, 144, 226, 0.5);
 }
 
-.leafletPopupContent {
-  margin: 10px 12px;
-  font-size: 14px;
+.locateMeBtn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
 }
 
-.leafletPopupContent b {
-  color: #1f2937;
-  display: block;
-  margin-bottom: 4px;
+.locateMeBtn:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.spinIcon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Scrollbar styling for sidebar */
@@ -341,70 +245,12 @@
   .mapSection {
     height: 50vh;
   }
-}
 
-
-
-/* Add these styles to your existing home.module.css */
-
-.buttonGroup {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.locateMeBtn {
-  flex: 1;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.locateMeBtn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
-}
-
-.locateMeBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.searchBtn {
-  flex: 2;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.searchBtn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
-}
-
-.searchBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.errorMessage {
-  padding: 12px;
-  background-color: #fee;
-  color: #c33;
-  border-radius: 8px;
-  font-size: 14px;
-  border: 1px solid #fcc;
-  margin-top: 10px;
+  .locateMeBtn {
+    top: 10px;
+    right: 10px;
+    width: 45px;
+    height: 45px;
+    font-size: 20px;
+  }
 }
