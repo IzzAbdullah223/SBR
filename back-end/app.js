@@ -1,12 +1,13 @@
 import express from 'express';
+import { db_connection } from './db/dbConnection.js';
 import dotenv from 'dotenv';
-import { db_Connection } from './db/dbConnection.js';
+
 
 const app = express();
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-await db_Connection();
+await db_connection();
 
 
 app.get('/', (req, res) => {
