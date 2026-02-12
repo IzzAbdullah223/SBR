@@ -1,10 +1,8 @@
 import BusStop from '../models/BusStop.js';
 import BusRoute from '../models/BusRoute.js';
+import { calculateDistance } from '../services/geoCalculator.service.js';
 
-/**
- * BUS STOP CONTROLLER
- * Contains all business logic for bus stop operations
- */
+
 
 /**
  * Get all bus stops
@@ -89,7 +87,7 @@ export const findNearbyStops = async (req, res) => {
     // Get all stops
     const allStops = await BusStop.find();
     
-    // Calculate distance for each stop
+    // Calculate distance for each stop using service
     const stopsWithDistance = allStops.map(stop => {
       const distance = calculateDistance(
         latitude,
@@ -123,52 +121,3 @@ export const findNearbyStops = async (req, res) => {
     });
   }
 };
-
-/**
- * Search stops by name
- */
-export const searchStops = async (req, res) => {
-  try {
-    const { query } = req.query;
-    
-    if (!query) {
-      return res.status(400).json({
-        success: false,
-        error: 'Search query is required'
-      });
-    }
-
-    // Search stops by name (case-insensitive)
-    const stops = await BusStop.find({
-      name: { $regex: query, $options: 'i' }
-    }).select('-__v');
-
-    res.json({
-      success: true,
-      count: stops.length,
-      query: query,
-      data: stops
-    });
-  } catch (error) {
-    console.error('Error searching stops:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Server error while searching stops'
-    });
-  }
-};
-
-/**
- * Helper: Calculate distance using Haversine formula
- */
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Earth's radius in km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; // Distance in km
-}

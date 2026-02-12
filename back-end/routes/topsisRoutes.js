@@ -1,7 +1,4 @@
-/**
- * TOPSIS ROUTES
- * Routes for bus finding and MCDM
- */
+
 
 import express from 'express';
 import { findBuses } from '../controllers/topsisController.js';
