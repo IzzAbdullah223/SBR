@@ -1,2 +1,13 @@
 node_modules/
 .env
+data/stop_times.txt
+data/translations.txt
+data/stops.txt
+data/routes.txt
+data/trips.txt
+data/calendar.txt
+data/shapes.txt
+data/transfers.txt
+data/agency.txt
+data/feed_info.txt
+data/calendar_dates.txt
