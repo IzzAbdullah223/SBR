@@ -21,19 +21,20 @@
 .slidersContainer {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 28px;
 }
 
 .sliderGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .sliderHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 4px;
 }
 
 .labelRow {
@@ -63,6 +64,7 @@
   -webkit-appearance: none;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin: 8px 0;
 }
 
 .slider::-webkit-slider-thumb {
@@ -102,10 +104,11 @@
   font-size: 13px;
   color: #999;
   font-style: italic;
+  line-height: 1.4;
 }
 
 .note {
-  margin-top: 20px;
+  margin-top: 24px;
   padding: 12px;
   background: #f0f4ff;
   border-radius: 8px;

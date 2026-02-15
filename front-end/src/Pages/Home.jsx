@@ -8,8 +8,8 @@ import Map from '../Components/Map/Map';
 import SearchInput from '../Components/SearchInput/SearchInput';
 import WeightSliders from '../Components/WeightSliders/WeightSliders';
 import BusResults from '../Components/BusResults/BusResults';
-import { Bus, Search } from 'lucide-react';
-import { MAP_CONFIG } from '../../utils/constants';
+import { Search, MapPin, Bus, Navigation } from 'lucide-react';
+import { MAP_CONFIG } from '../utils/constants';
 import styles from './Home.module.css';
 
 const Home = () => {

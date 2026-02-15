@@ -1,0 +1,2 @@
+feed_publisher_name,feed_publisher_url,feed_lang
+"Road and Transport Authority (RTA)","http://www.rta.ae","EN"

@@ -3,7 +3,7 @@
  * All API calls to backend centralized here
  */
 
-const API_BASE_URL = 'http://localhost:3000/api';  
+const API_BASE_URL = 'http://localhost:3000/api';  // ← CHANGED FROM 5000 TO 3000
 
 /**
  * Generic fetch wrapper with error handling
