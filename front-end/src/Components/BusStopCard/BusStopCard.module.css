@@ -1,64 +1,85 @@
+/* ═══════════════════════════════════════════════════════
+   BUSSTOPCARD.MODULE.CSS
+═══════════════════════════════════════════════════════ */
+
 .card {
   position: absolute;
   top: 20px;
   right: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
   padding: 20px;
-  max-width: 320px;
+  max-width: 300px;
   z-index: 1000;
+  border: 1px solid var(--gray-200);
+  animation: cardIn 0.3s ease;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(-12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .closeBtn {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: none;
+  top: 14px;
+  right: 14px;
+  background: var(--gray-100);
   border: none;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 50%;
+  padding: 6px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+  color: var(--gray-600);
 }
 
 .closeBtn:hover {
-  background: #f0f0f0;
+  background: var(--navy);
+  color: var(--white);
+  transform: scale(1.05);
 }
 
 .header {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  padding-right: 32px;
 }
 
 .header h3 {
   margin: 0;
-  font-size: 18px;
-  color: #333;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.3;
 }
 
 .stopId {
   margin: 4px 0 0 0;
-  font-size: 12px;
-  color: #999;
+  font-size: 11px;
+  color: var(--gray-400);
   font-family: monospace;
 }
 
 .content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .section h4 {
   margin: 0 0 8px 0;
-  font-size: 14px;
-  color: #666;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--gray-400);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -67,8 +88,11 @@
 .coordinates {
   margin: 0;
   font-size: 12px;
-  color: #999;
+  color: var(--gray-600);
   font-family: monospace;
+  background: var(--gray-100);
+  padding: 6px 10px;
+  border-radius: 6px;
 }
 
 .routeBadges {
@@ -78,19 +102,26 @@
 }
 
 .routeBadge {
-  background: #667eea;
+  background: var(--navy);
   color: white;
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  transition: background 0.2s ease;
+}
+
+.routeBadge:hover {
+  background: var(--gold);
+  color: var(--navy);
 }
 
 .amenitiesList {
   margin: 0;
-  padding-left: 20px;
+  padding-left: 16px;
   font-size: 13px;
-  color: #666;
+  color: var(--gray-600);
 }
 
 .amenitiesList li {

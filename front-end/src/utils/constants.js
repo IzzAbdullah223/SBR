@@ -11,10 +11,10 @@ export const API_CONFIG = {
 
 // Map Configuration
 export const MAP_CONFIG = {
-  DEFAULT_CENTER: {
-    lat: 24.4539,
-    lng: 54.3773,
-  },
+ DEFAULT_CENTER:
+  { lat: 25.2048, 
+    lng: 55.2708 },
+
   DEFAULT_ZOOM: 11,
   MIN_ZOOM: 10,
   MAX_ZOOM: 18,

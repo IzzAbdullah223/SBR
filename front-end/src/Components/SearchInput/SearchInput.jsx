@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import styles from './SearchInput.module.css';
 
+
+
 const SearchInput = ({ value, onChange, placeholder, label }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +24,7 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Debounced search function
+  // Debounced search
   useEffect(() => {
     if (value.length < 3) {
       setSuggestions([]);
@@ -41,13 +43,13 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
   const searchLocations = async (query) => {
     setIsLoading(true);
     setError(null);
-    
+
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?` +
       `q=${encodeURIComponent(query)}` +
       `&format=json` +
       `&limit=10` +
-      `&countrycodes=ae` +
+      `&countrycodes=ae` +  // UAE only
       `&addressdetails=1`,
       {
         headers: {
@@ -65,26 +67,22 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
     }
 
     const data = await response.json();
-    console.log('Search results:', data); // Debug log
-    
-    // Filter to show only Abu Dhabi results
-    const abuDhabiResults = data.filter(item => 
-      item.display_name.toLowerCase().includes('abu dhabi') ||
-      item.display_name.toLowerCase().includes('أبو ظبي')
+
+    // ← FIXED: Filter for Dubai instead of Abu Dhabi
+    const dubaiResults = data.filter(item =>
+      item.display_name.toLowerCase().includes('dubai') ||
+      item.display_name.toLowerCase().includes('دبي')
     );
-    
-    console.log('Filtered Abu Dhabi results:', abuDhabiResults); // Debug log
-    setSuggestions(abuDhabiResults);
-    setShowDropdown(abuDhabiResults.length > 0);
+
+    setSuggestions(dubaiResults);
+    setShowDropdown(dubaiResults.length > 0);
     setIsLoading(false);
   };
 
   const handleSelectSuggestion = (suggestion) => {
     const displayName = suggestion.display_name.split(',').slice(0, 2).join(',');
     onChange({
-      target: {
-        value: displayName
-      }
+      target: { value: displayName }
     }, {
       lat: parseFloat(suggestion.lat),
       lng: parseFloat(suggestion.lon),
@@ -115,7 +113,7 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
           onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
           className={styles.searchInput}
         />
-        
+
         {isLoading && (
           <div className={styles.loadingSpinner}>
             <div className={styles.spinner}></div>
@@ -123,9 +121,7 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
         )}
 
         {error && (
-          <div className={styles.errorTooltip}>
-            {error}
-          </div>
+          <div className={styles.errorTooltip}>{error}</div>
         )}
 
         {showDropdown && suggestions.length > 0 && (
@@ -133,7 +129,7 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
             {suggestions.map((suggestion) => {
               const mainAddress = suggestion.display_name.split(',').slice(0, 2).join(',');
               const subAddress = suggestion.display_name.split(',').slice(2, 4).join(',');
-              
+
               return (
                 <div
                   key={suggestion.place_id}
@@ -151,10 +147,11 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
           </div>
         )}
 
+
         {showDropdown && !isLoading && !error && suggestions.length === 0 && value.length >= 3 && (
           <div ref={dropdownRef} className={styles.dropdown}>
             <div className={styles.noResults}>
-              No locations found in Abu Dhabi
+              No locations found in Dubai
             </div>
           </div>
         )}

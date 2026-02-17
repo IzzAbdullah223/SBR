@@ -1,6 +1,7 @@
 /**
  * WEIGHT SLIDERS COMPONENT
  * Allows user to set importance of each criterion
+ * Weights are normalized to always sum to 1.0 for TOPSIS
  */
 
 import React from 'react';
@@ -39,12 +40,42 @@ const WeightSliders = ({ weights, onWeightChange }) => {
     },
   ];
 
-  const handleChange = (criteriaId, value) => {
-    onWeightChange(criteriaId, parseInt(value));
+  /**
+   * Normalize all weights to sum to 1.0 for the topsis Algorithm.
+   
+   */
+  const normalizeWeights = (rawWeights) => {
+    const total = Object.values(rawWeights).reduce((sum, val) => sum + val, 0);
+    if (total === 0) return rawWeights;
+    const normalized = {};
+    Object.keys(rawWeights).forEach(key => {
+      normalized[key] = parseFloat((rawWeights[key] / total).toFixed(4));
+    });
+    return normalized;
   };
 
-  const getPercentage = (value) => {
-    return Math.round((value / 100) * 100);
+  /**
+   * Calculate actual percentage each criterion gets
+   * Based on its share of the total
+   */
+  const getActualPercentage = (criterionId) => {
+    const total = Object.values(weights).reduce((sum, val) => sum + val, 0);
+    if (total === 0) return 25;
+    return Math.round((weights[criterionId] / total) * 100);
+  };
+
+  /**
+   * Handle slider change
+   * Sends normalized weights (0-1) to parent
+   */
+  const handleChange = (criterionId, sliderValue) => {
+    const newRawWeights = {
+      ...weights,
+      [criterionId]: parseInt(sliderValue)
+    };
+    // Normalize and send to parent
+    const normalized = normalizeWeights(newRawWeights);
+    onWeightChange(normalized);
   };
 
   return (
@@ -55,8 +86,8 @@ const WeightSliders = ({ weights, onWeightChange }) => {
       <div className={styles.slidersContainer}>
         {criteria.map((criterion) => {
           const Icon = criterion.icon;
-          const value = weights[criterion.id] || 50;
-          const percentage = getPercentage(value);
+          const rawValue = weights[criterion.id] || 25;
+          const actualPercentage = getActualPercentage(criterion.id);
 
           return (
             <div key={criterion.id} className={styles.sliderGroup}>
@@ -65,11 +96,12 @@ const WeightSliders = ({ weights, onWeightChange }) => {
                   <Icon size={20} color={criterion.color} />
                   <span className={styles.label}>{criterion.label}</span>
                 </div>
-                <span 
+                {/* Show actual normalized percentage */}
+                <span
                   className={styles.percentage}
                   style={{ color: criterion.color }}
                 >
-                  {percentage}%
+                  {actualPercentage}%
                 </span>
               </div>
 
@@ -77,11 +109,11 @@ const WeightSliders = ({ weights, onWeightChange }) => {
                 type="range"
                 min="0"
                 max="100"
-                value={value}
+                value={rawValue}
                 onChange={(e) => handleChange(criterion.id, e.target.value)}
                 className={styles.slider}
                 style={{
-                  background: `linear-gradient(to right, ${criterion.color} 0%, ${criterion.color} ${percentage}%, #e0e0e0 ${percentage}%, #e0e0e0 100%)`,
+                  background: `linear-gradient(to right, ${criterion.color} 0%, ${criterion.color} ${rawValue}%, #e0e0e0 ${rawValue}%, #e0e0e0 100%)`,
                 }}
               />
 
@@ -90,6 +122,23 @@ const WeightSliders = ({ weights, onWeightChange }) => {
           );
         })}
       </div>
+
+      {/* Show total = 100% always */}
+      <div className={styles.totalBar}>
+        {criteria.map((criterion) => (
+          <div
+            key={criterion.id}
+            style={{
+              width: `${getActualPercentage(criterion.id)}%`,
+              backgroundColor: criterion.color,
+              height: '8px',
+              transition: 'width 0.3s ease'
+            }}
+            title={`${criterion.label}: ${getActualPercentage(criterion.id)}%`}
+          />
+        ))}
+      </div>
+      <p className={styles.totalLabel}>Weights always sum to 100%</p>
 
       <div className={styles.note}>
         <p>💡 Tip: Higher values mean more importance in the recommendation</p>
