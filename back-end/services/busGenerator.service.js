@@ -1,25 +1,32 @@
-/**
- * BUS GENERATOR SERVICE (REFACTORED)
- * Generates bus schedules using real-time data
- * 
- * Dependencies:
- * - timeHelper.service.js: Time calculations and formatting
- * - scheduleGenerator.service.js: Schedule and journey time calculations
- * - geoCalculator.service.js: Distance calculations
- */
 
 import BusStop from '../models/BusStop.js';
 import { calculateWalkingDistance } from './geoCalculator.service.js';
 import * as timeHelper from './timeHelper.service.js';
 import * as scheduleGen from './scheduleGenerator.service.js';
 
+
+const DEFAULT_SCHEDULE = {
+  weekday: {
+    firstBus: '05:00',
+    lastBus: '23:30',
+    frequency: 15  // 15 minutes between buses
+  },
+  weekend: {
+    firstBus: '06:00',
+    lastBus: '23:00',
+    frequency: 20  // 20 minutes between buses
+  }
+};
+
+/**
+ * Get route schedule (use default if not available)
+ */
+const getRouteSchedule = (route) => {
+  return route.schedule || DEFAULT_SCHEDULE;
+};
+
 /**
  * Generate buses for a direct route
- * @param {Object} routeInfo - {route, originStop, destStop, type}
- * @param {Object} origin - {lat, lng}
- * @param {Object} destination - {lat, lng}
- * @param {Date} currentTime - Current Dubai time (optional)
- * @returns {Array} Array of bus objects with criteria
  */
 export const generateDirectBuses = (routeInfo, origin, destination, currentTime = null) => {
   const { route, originStop, destStop } = routeInfo;
@@ -27,14 +34,17 @@ export const generateDirectBuses = (routeInfo, origin, destination, currentTime 
   
   const dubaiTime = currentTime || timeHelper.getDubaiTime();
   
+  // Get schedule (use default if route doesn't have one)
+  const schedule = getRouteSchedule(route);
+  
   // Check if route is currently operating
-  if (!timeHelper.isWithinServiceHours(route.schedule, dubaiTime)) {
+  if (!timeHelper.isWithinServiceHours(schedule, dubaiTime)) {
     console.log(`⏰ Route ${route.routeNumber} is not currently in service`);
-    return buses; // Return empty if not in service
+    return buses;
   }
   
   // Get frequency for current time
-  const frequency = scheduleGen.getServiceFrequency(route.schedule, dubaiTime);
+  const frequency = scheduleGen.getServiceFrequency(schedule, dubaiTime);
   
   // Generate arrival times
   const arrivalTimes = scheduleGen.generateArrivalTimes(frequency, dubaiTime, 5);
@@ -43,7 +53,7 @@ export const generateDirectBuses = (routeInfo, origin, destination, currentTime 
   const walkingDistance = calculateWalkingDistance(origin, originStop);
   const walkingTime = scheduleGen.calculateWalkingTime(walkingDistance);
   
-  // Get route travel time
+  // Get route travel time (use default if not available)
   const routeTravelTime = route.stats?.duration || 20;
   
   // Generate bus objects
@@ -60,22 +70,22 @@ export const generateDirectBuses = (routeInfo, origin, destination, currentTime 
     buses.push({
       busId,
       routeNumber: route.routeNumber,
-      routeName: route.name,
-      routeType: route.type,
+      routeName: route.name || `Route ${route.routeNumber}`,
+      routeType: route.type || 'bus',
       color: route.color || '#667eea',
       
       // Criteria for TOPSIS (all in minutes)
-      arrivalTime: arrival.minutesFromNow, // Minutes until bus arrives
-      travelTime: routeTravelTime, // Time on bus
+      arrivalTime: arrival.minutesFromNow,
+      travelTime: routeTravelTime,
       cost: route.fare?.baseFare || 3,
       walkingDistance,
       walkingTime,
       transfers: 0,
       
       // Time details for display
-      departureTime: arrival.formatted, // e.g., "2:35 PM"
-      departureTime24: arrival.formatted24, // e.g., "14:35"
-      totalJourneyTime, // Total minutes from now to destination
+      departureTime: arrival.formatted,
+      departureTime24: arrival.formatted24,
+      totalJourneyTime,
       
       // Journey details
       journeyType: 'direct',
@@ -98,20 +108,19 @@ export const generateDirectBuses = (routeInfo, origin, destination, currentTime 
 
 /**
  * Generate buses for a transfer route
- * @param {Object} transferInfo - {route1, route2, originStop, transferStopId, destStop}
- * @param {Object} origin - {lat, lng}
- * @param {Object} destination - {lat, lng}
- * @param {Date} currentTime - Current Dubai time (optional)
- * @returns {Promise<Array>} Array of transfer bus combinations
  */
 export const generateTransferBuses = async (transferInfo, origin, destination, currentTime = null) => {
   const { route1, route2, originStop, transferStopId, destStop } = transferInfo;
   
   const dubaiTime = currentTime || timeHelper.getDubaiTime();
   
+  // Get schedules (use default if not available)
+  const schedule1 = getRouteSchedule(route1);
+  const schedule2 = getRouteSchedule(route2);
+  
   // Check if both routes are operating
-  const route1Operating = timeHelper.isWithinServiceHours(route1.schedule, dubaiTime);
-  const route2Operating = timeHelper.isWithinServiceHours(route2.schedule, dubaiTime);
+  const route1Operating = timeHelper.isWithinServiceHours(schedule1, dubaiTime);
+  const route2Operating = timeHelper.isWithinServiceHours(schedule2, dubaiTime);
   
   if (!route1Operating || !route2Operating) {
     console.log(`⏰ Transfer route not available (Route ${route1.routeNumber} or ${route2.routeNumber} not in service)`);
@@ -128,7 +137,7 @@ export const generateTransferBuses = async (transferInfo, origin, destination, c
   const buses = [];
   
   // Get frequencies
-  const frequency1 = scheduleGen.getServiceFrequency(route1.schedule, dubaiTime);
+  const frequency1 = scheduleGen.getServiceFrequency(schedule1, dubaiTime);
   
   // Calculate walking distance and time
   const walkingDistance = calculateWalkingDistance(origin, originStop);
@@ -137,25 +146,22 @@ export const generateTransferBuses = async (transferInfo, origin, destination, c
   // Get route durations
   const leg1Duration = route1.stats?.duration || 20;
   const leg2Duration = route2.stats?.duration || 20;
-  const transferWaitTime = 5; // Standard transfer wait time
+  const transferWaitTime = 5;
   
-  // Generate first leg arrivals (fewer for transfers to avoid clutter)
+  // Generate first leg arrivals
   const leg1Arrivals = scheduleGen.generateArrivalTimes(frequency1, dubaiTime, 3);
   
   // Generate combinations
   leg1Arrivals.forEach((leg1Arrival, i) => {
-    // Estimate when we'll arrive at transfer stop
     const arrivalAtTransfer = scheduleGen.estimateTransferStopArrival(
       leg1Arrival.minutesFromNow,
       walkingTime,
       leg1Duration
     );
     
-    // Calculate when second leg departs
     const leg2DepartureMin = Math.ceil(arrivalAtTransfer + transferWaitTime);
     const leg2DepartureTime = timeHelper.addMinutes(dubaiTime, leg2DepartureMin);
     
-    // Calculate total time and cost
     const totalTime = scheduleGen.calculateTransferTime(leg1Duration, transferWaitTime, leg2Duration);
     const totalCost = (route1.fare?.baseFare || 3) + (route2.fare?.baseFare || 3);
     
@@ -164,7 +170,7 @@ export const generateTransferBuses = async (transferInfo, origin, destination, c
     buses.push({
       busId,
       routeNumber: `${route1.routeNumber} → ${route2.routeNumber}`,
-      routeName: `${route1.name} + ${route2.name}`,
+      routeName: `${route1.name || route1.routeNumber} + ${route2.name || route2.routeNumber}`,
       routeType: 'transfer',
       color: route1.color || '#667eea',
       
@@ -186,14 +192,14 @@ export const generateTransferBuses = async (transferInfo, origin, destination, c
       journeyType: 'transfer',
       leg1: {
         routeNumber: route1.routeNumber,
-        routeName: route1.name,
+        routeName: route1.name || `Route ${route1.routeNumber}`,
         duration: leg1Duration,
         cost: route1.fare?.baseFare || 3,
         departureTime: leg1Arrival.formatted,
       },
       leg2: {
         routeNumber: route2.routeNumber,
-        routeName: route2.name,
+        routeName: route2.name || `Route ${route2.routeNumber}`,
         duration: leg2Duration,
         cost: route2.fare?.baseFare || 3,
         departureTime: timeHelper.formatTime(leg2DepartureTime),
@@ -221,11 +227,6 @@ export const generateTransferBuses = async (transferInfo, origin, destination, c
 
 /**
  * Generate all buses from route information
- * @param {Object} routeData - Output from routeFinder service
- * @param {Object} origin - {lat, lng}
- * @param {Object} destination - {lat, lng}
- * @param {Date} currentTime - Optional current time (for testing)
- * @returns {Promise<Array>} All generated buses
  */
 export const generateAllBuses = async (routeData, origin, destination, currentTime = null) => {
   const allBuses = [];
@@ -245,7 +246,7 @@ export const generateAllBuses = async (routeData, origin, destination, currentTi
     allBuses.push(...buses);
   }
 
-  console.log(`🚌 Generated ${allBuses.length} buses for current time`);
+  console.log(`🚌 Generated ${allBuses.length} total buses`);
 
   return allBuses;
 };
