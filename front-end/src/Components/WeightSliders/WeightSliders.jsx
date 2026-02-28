@@ -2,80 +2,83 @@
  * WEIGHT SLIDERS COMPONENT
  * Allows user to set importance of each criterion
  * Weights are normalized to always sum to 1.0 for TOPSIS
+ *
+ * ✅ FIX: Component now keeps its OWN internal raw state (0–100 integers).
+ * It sends normalized weights (0–1) UP to the parent via onWeightChange,
+ * but does NOT rely on the parent's weights prop for slider display.
+ * This prevents the slider from jumping to near-zero when parent stores 0.25.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Clock, DollarSign, MapPin, GitMerge } from 'lucide-react';
 import styles from './WeightSliders.module.css';
 
-const WeightSliders = ({ weights, onWeightChange }) => {
-  const criteria = [
-    {
-      id: 'time',
-      label: 'Travel Time',
-      icon: Clock,
-      description: 'How important is a shorter journey?',
-      color: '#667eea',
-    },
-    {
-      id: 'cost',
-      label: 'Fare Cost',
-      icon: DollarSign,
-      description: 'How important is a lower fare?',
-      color: '#4CAF50',
-    },
-    {
-      id: 'walkingDistance',
-      label: 'Walking Distance',
-      icon: MapPin,
-      description: 'How important is a nearby bus stop?',
-      color: '#FF9800',
-    },
-    {
-      id: 'transfers',
-      label: 'Number of Transfers',
-      icon: GitMerge,
-      description: 'How important is a direct route?',
-      color: '#F44336',
-    },
-  ];
+const criteria = [
+  {
+    id: 'time',
+    label: 'Travel Time',
+    icon: Clock,
+    description: 'How important is a shorter journey?',
+    color: '#667eea',
+  },
+  {
+    id: 'cost',
+    label: 'Fare Cost',
+    icon: DollarSign,
+    description: 'How important is a lower fare?',
+    color: '#4CAF50',
+  },
+  {
+    id: 'walkingDistance',
+    label: 'Walking Distance',
+    icon: MapPin,
+    description: 'How important is a nearby bus stop?',
+    color: '#FF9800',
+  },
+  {
+    id: 'transfers',
+    label: 'Number of Transfers',
+    icon: GitMerge,
+    description: 'How important is a direct route?',
+    color: '#F44336',
+  },
+];
 
-  /**
-   * Normalize all weights to sum to 1.0 for the topsis Algorithm.
-   
-   */
-  const normalizeWeights = (rawWeights) => {
-    const total = Object.values(rawWeights).reduce((sum, val) => sum + val, 0);
-    if (total === 0) return rawWeights;
+const WeightSliders = ({ onWeightChange }) => {
+  // ✅ Internal raw state (0–100) — completely independent from parent
+  const [rawWeights, setRawWeights] = useState({
+    time: 25,
+    cost: 25,
+    walkingDistance: 25,
+    transfers: 25,
+  });
+
+  // Normalize raw weights (0–100 integers) → (0–1 floats) summing to 1.0
+  const normalizeWeights = (raw) => {
+    const total = Object.values(raw).reduce((sum, val) => sum + val, 0);
+    if (total === 0) return { time: 0.25, cost: 0.25, walkingDistance: 0.25, transfers: 0.25 };
     const normalized = {};
-    Object.keys(rawWeights).forEach(key => {
-      normalized[key] = parseFloat((rawWeights[key] / total).toFixed(4));
+    Object.keys(raw).forEach(key => {
+      normalized[key] = parseFloat((raw[key] / total).toFixed(4));
     });
     return normalized;
   };
 
-  /**
-   * Calculate actual percentage each criterion gets
-   * Based on its share of the total
-   */
+  // Calculate display percentage for the total bar and label
   const getActualPercentage = (criterionId) => {
-    const total = Object.values(weights).reduce((sum, val) => sum + val, 0);
+    const total = Object.values(rawWeights).reduce((sum, val) => sum + val, 0);
     if (total === 0) return 25;
-    return Math.round((weights[criterionId] / total) * 100);
+    return Math.round((rawWeights[criterionId] / total) * 100);
   };
 
-  /**
-   * Handle slider change
-   * Sends normalized weights (0-1) to parent
-   */
+  // Handle slider move — update internal state AND notify parent with normalized values
   const handleChange = (criterionId, sliderValue) => {
-    const newRawWeights = {
-      ...weights,
-      [criterionId]: parseInt(sliderValue)
+    const newRaw = {
+      ...rawWeights,
+      [criterionId]: parseInt(sliderValue),
     };
-    // Normalize and send to parent
-    const normalized = normalizeWeights(newRawWeights);
-    onWeightChange(normalized);
+    setRawWeights(newRaw);
+    onWeightChange(normalizeWeights(newRaw));
   };
 
   return (
@@ -86,7 +89,7 @@ const WeightSliders = ({ weights, onWeightChange }) => {
       <div className={styles.slidersContainer}>
         {criteria.map((criterion) => {
           const Icon = criterion.icon;
-          const rawValue = weights[criterion.id] || 25;
+          const rawValue = rawWeights[criterion.id];
           const actualPercentage = getActualPercentage(criterion.id);
 
           return (
@@ -96,11 +99,7 @@ const WeightSliders = ({ weights, onWeightChange }) => {
                   <Icon size={20} color={criterion.color} />
                   <span className={styles.label}>{criterion.label}</span>
                 </div>
-                {/* Show actual normalized percentage */}
-                <span
-                  className={styles.percentage}
-                  style={{ color: criterion.color }}
-                >
+                <span className={styles.percentage} style={{ color: criterion.color }}>
                   {actualPercentage}%
                 </span>
               </div>
@@ -123,7 +122,7 @@ const WeightSliders = ({ weights, onWeightChange }) => {
         })}
       </div>
 
-      {/* Show total = 100% always */}
+      {/* Total bar — always sums to 100% */}
       <div className={styles.totalBar}>
         {criteria.map((criterion) => (
           <div
@@ -132,7 +131,7 @@ const WeightSliders = ({ weights, onWeightChange }) => {
               width: `${getActualPercentage(criterion.id)}%`,
               backgroundColor: criterion.color,
               height: '8px',
-              transition: 'width 0.3s ease'
+              transition: 'width 0.3s ease',
             }}
             title={`${criterion.label}: ${getActualPercentage(criterion.id)}%`}
           />

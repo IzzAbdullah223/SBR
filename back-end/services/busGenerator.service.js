@@ -1,4 +1,3 @@
-
 import BusStop from '../models/BusStop.js';
 import { calculateWalkingDistance } from './geoCalculator.service.js';
 import * as timeHelper from './timeHelper.service.js';
@@ -100,6 +99,9 @@ export const generateDirectBuses = (routeInfo, origin, destination, currentTime 
         position: destStop.position,
       },
       stops: route.stops || [],
+      // ✅ Shape IDs for drawing route on map
+      shapeId: route.shapeId || null,
+      shapeIdReturn: route.shapeIdReturn || null,
     });
   });
 
@@ -219,6 +221,9 @@ export const generateTransferBuses = async (transferInfo, origin, destination, c
         name: destStop.name,
         position: destStop.position,
       },
+      // ✅ Shape IDs for drawing route on map
+      shapeId: route1.shapeId || null,
+      shapeIdLeg2: route2.shapeId || null,
     });
   });
 

@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 
-
 const busStopSchema = new mongoose.Schema({
   stopId: {
     type: String,
@@ -8,106 +7,100 @@ const busStopSchema = new mongoose.Schema({
     unique: true,
     index: true
   },
-  
+
   name: {
     type: String,
     required: true,
     trim: true
   },
-  
+
+  // Flat position — kept for backward compatibility with all existing code
   position: {
-    lat: {
-      type: Number,
-      required: true,
-      min: -90,
-      max: 90
+    lat: { type: Number, required: true, min: -90, max: 90 },
+    lng: { type: Number, required: true, min: -180, max: 180 }
+  },
+
+  // ✅ GeoJSON Point — required for MongoDB $near geospatial queries
+  // Auto-populated by pre-save hook below, never set manually
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
     },
-    lng: {
-      type: Number,
-      required: true,
-      min: -180,
-      max: 180
+    coordinates: {
+      type: [Number], // [longitude, latitude] — GeoJSON order
+      required: true
     }
   },
-  
-  routes: [{
-    type: String,
-    trim: true
-  }],
-  
- 
+
+  routes: [{ type: String, trim: true }],
+
   amenities: [{
     type: String,
     enum: ['shelter', 'seating', 'display', 'lighting', 'accessibility'],
     trim: true
   }],
-  
 
   type: {
     type: String,
     enum: ['stop', 'station', 'terminal'],
     default: 'stop'
   },
-  
- 
+
   operator: {
     type: String,
-    default: 'Abu Dhabi Department of Transport',
+    default: 'Roads and Transport Authority (RTA) Dubai',
     trim: true
   },
-  
-  // Original OSM ID (for reference)
-  osm_id: {
-    type: Number,
-    sparse: true
-  },
-  
-  // Additional metadata
-  zone: {
-    type: String,
-    trim: true
-  },
-  
+
+  osm_id: { type: Number, sparse: true },
+  zone: { type: String, trim: true },
+
   status: {
     type: String,
     enum: ['active', 'inactive', 'maintenance'],
     default: 'active'
   }
-}, {
-  timestamps: true 
+
+}, { timestamps: true });
+
+// ✅ Auto-sync GeoJSON location from flat position before every save
+busStopSchema.pre('save', function (next) {
+  if (this.position?.lat != null && this.position?.lng != null) {
+    this.location = {
+      type: 'Point',
+      coordinates: [this.position.lng, this.position.lat] // GeoJSON: [lng, lat]
+    };
+  }
+  next();
 });
 
-// Create 2dsphere index for geospatial queries
-// This allows efficient "find nearby stops" queries
-busStopSchema.index({ position: '2dsphere' });
-
-// Create compound index for common queries
+// ✅ 2dsphere index on GeoJSON location field (NOT on flat position)
+busStopSchema.index({ location: '2dsphere' });
 busStopSchema.index({ routes: 1, status: 1 });
 
-// Instance method to calculate distance to another point
-busStopSchema.methods.distanceTo = function(lat, lng) {//Instance method: Called on a single bus stop object
-  const R = 6371; // Earth's radius in km
+busStopSchema.methods.distanceTo = function (lat, lng) {
+  const R = 6371;
   const dLat = (lat - this.position.lat) * Math.PI / 180;
   const dLng = (lng - this.position.lng) * Math.PI / 180;
   const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(this.position.lat * Math.PI / 180) * 
+            Math.cos(this.position.lat * Math.PI / 180) *
             Math.cos(lat * Math.PI / 180) *
             Math.sin(dLng/2) * Math.sin(dLng/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c; // Distance in km
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-// Static method to find stops within radius
-busStopSchema.statics.findNearby = function(lat, lng, radiusKm = 1) {//Called on the Model itself (BusStop.findNearby()),Returns multiple documents (array of bus stops)
-
+// ✅ Uses GeoJSON $near — fast indexed query, no full collection scan
+busStopSchema.statics.findNearby = function (lat, lng, radiusKm = 1) {
   return this.find({
-    position: {
+    location: {
       $near: {
         $geometry: {
           type: 'Point',
-          coordinates: [lng, lat] // Note: GeoJSON uses [lng, lat]
+          coordinates: [lng, lat] // GeoJSON: [lng, lat]
         },
-        $maxDistance: radiusKm * 1000 // Convert km to meters
+        $maxDistance: radiusKm * 1000
       }
     },
     status: 'active'

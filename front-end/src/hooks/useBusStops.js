@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import api from '../services/api';
+import api from '../services/Api';
 
 const useBusStops = () => {
   const [busStops, setBusStops] = useState([]);
@@ -41,7 +41,6 @@ const useBusStops = () => {
 
   const searchBusStops = (searchTerm) => {
     if (!searchTerm) return busStops;
-
     const term = searchTerm.toLowerCase();
     return busStops.filter(stop =>
       stop.name.toLowerCase().includes(term) ||

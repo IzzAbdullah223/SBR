@@ -5,26 +5,27 @@
 
 /**
  * Normalize weights to sum to 1
- * @param {Object} weights - User-defined weights
- * @returns {Object} Normalized weights
+ * @param {Object} weights - User-defined weights {time, cost, walkingDistance, transfers}
+ * @returns {Object} Normalized weights mapped to criteria keys
  */
 const normalizeWeights = (weights) => {
+ 
   const total = weights.time + weights.cost + weights.walkingDistance + weights.transfers;
-  
+
   return {
-    arrivalTime: weights.time / total,
-    travelTime: weights.time / total,
-    cost: weights.cost / total,
+    arrivalTime: (weights.time / 2) / total,
+    travelTime:  (weights.time / 2) / total,
+    cost:            weights.cost / total,
     walkingDistance: weights.walkingDistance / total,
-    transfers: weights.transfers / total,
+    transfers:       weights.transfers / total,
   };
 };
 
 /**
  * Run TOPSIS algorithm to rank buses
- * @param {Array} buses - Array of bus objects with criteria
+ * @param {Array} buses   - Array of bus objects with criteria values
  * @param {Object} weights - User preferences {time, cost, walkingDistance, transfers}
- * @returns {Array} Buses ranked by TOPSIS score
+ * @returns {Array} Buses sorted by TOPSIS score descending (best first)
  */
 export const rankBuses = (buses, weights) => {
   if (!buses || buses.length === 0) return [];
@@ -33,66 +34,54 @@ export const rankBuses = (buses, weights) => {
     return buses;
   }
 
-  // Criteria to evaluate (all are cost criteria - lower is better)
+  // All five criteria are "cost" type — lower value is better
   const criteria = ['arrivalTime', 'travelTime', 'cost', 'walkingDistance', 'transfers'];
-  
+
   // Normalize user weights
   const normalizedWeights = normalizeWeights(weights);
 
-  // Step 1: Normalize the decision matrix
+  // ── Step 1: Build the normalized decision matrix ──────────────────────────
   const normalizedMatrix = criteria.map(criterion => {
     const values = buses.map(bus => bus[criterion]);
-    const sumOfSquares = values.reduce((sum, val) => sum + val * val, 0);
-    const denominator = Math.sqrt(sumOfSquares);
-    
-    // Avoid division by zero
+    const denominator = Math.sqrt(values.reduce((sum, val) => sum + val * val, 0));
     if (denominator === 0) return values.map(() => 0);
-    
     return values.map(val => val / denominator);
   });
 
-  // Step 2: Apply weights to normalized matrix
-  const weightedMatrix = criteria.map((criterion, idx) => {
-    return normalizedMatrix[idx].map(val => val * normalizedWeights[criterion]);
-  });
+  // ── Step 2: Apply weights ─────────────────────────────────────────────────
+  const weightedMatrix = criteria.map((criterion, idx) =>
+    normalizedMatrix[idx].map(val => val * normalizedWeights[criterion])
+  );
 
-  // Step 3: Determine ideal and negative-ideal solutions
-  // All criteria are cost criteria (lower is better)
-  const idealSolution = criteria.map((_, idx) => Math.min(...weightedMatrix[idx]));
+  // ── Step 3: Ideal (A+) and Negative-Ideal (A-) solutions ─────────────────
+  // Lower is better → ideal = min, negative-ideal = max
+  const idealSolution        = criteria.map((_, idx) => Math.min(...weightedMatrix[idx]));
   const negativeIdealSolution = criteria.map((_, idx) => Math.max(...weightedMatrix[idx]));
 
-  // Step 4: Calculate separation measures
+  // ── Step 4: Separation distances D+ and D- for each bus ──────────────────
   const distances = buses.map((_, busIdx) => {
-    let distanceToIdeal = 0;
-    let distanceToNegative = 0;
-
-    criteria.forEach((_, criterionIdx) => {
-      const value = weightedMatrix[criterionIdx][busIdx];
-      distanceToIdeal += Math.pow(value - idealSolution[criterionIdx], 2);
-      distanceToNegative += Math.pow(value - negativeIdealSolution[criterionIdx], 2);
+    let dPlus = 0, dMinus = 0;
+    criteria.forEach((_, cIdx) => {
+      const v = weightedMatrix[cIdx][busIdx];
+      dPlus  += Math.pow(v - idealSolution[cIdx],         2);
+      dMinus += Math.pow(v - negativeIdealSolution[cIdx], 2);
     });
-
     return {
-      distanceToIdeal: Math.sqrt(distanceToIdeal),
-      distanceToNegative: Math.sqrt(distanceToNegative),
+      distanceToIdeal:   Math.sqrt(dPlus),
+      distanceToNegative: Math.sqrt(dMinus),
     };
   });
 
-  // Step 5: Calculate relative closeness to ideal solution (TOPSIS score)
+  // ── Step 5: Relative closeness score  C* = D- / (D+ + D-) ────────────────
+  // Score ranges 0 (worst) → 1 (best)
   const busesWithScores = buses.map((bus, idx) => {
     const { distanceToIdeal, distanceToNegative } = distances[idx];
-    
-    // Avoid division by zero
-    const denominator = distanceToIdeal + distanceToNegative;
-    const score = denominator === 0 ? 0 : distanceToNegative / denominator;
-    
-    return {
-      ...bus,
-      score: Math.round(score * 100) / 100, // Round to 2 decimals
-    };
+    const denom = distanceToIdeal + distanceToNegative;
+    const score = denom === 0 ? 0 : distanceToNegative / denom;
+    return { ...bus, score: Math.round(score * 100) / 100 };
   });
 
-  // Step 6: Sort by score (highest first = closest to ideal)
+  // ── Step 6: Sort descending by score ─────────────────────────────────────
   busesWithScores.sort((a, b) => b.score - a.score);
 
   return busesWithScores;

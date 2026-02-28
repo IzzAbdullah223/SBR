@@ -1,26 +1,13 @@
+const API_BASE_URL = '/api';
 
-
-const API_BASE_URL = 'http://localhost:5000/api'; 
-
-/**
- * Generic fetch wrapper with error handling
- */
 const fetchAPI = async (endpoint, options = {}) => {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers: { 'Content-Type': 'application/json', ...options.headers },
       ...options,
     });
-
     const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'API request failed');
-    }
-
+    if (!response.ok) throw new Error(data.error || data.message || 'API request failed');
     return data;
   } catch (error) {
     console.error(`API Error [${endpoint}]:`, error);
@@ -28,58 +15,46 @@ const fetchAPI = async (endpoint, options = {}) => {
   }
 };
 
-/**
- * BUS STOPS API
- */
 export const busStopsAPI = {
-  getAll: async () => {
-    return fetchAPI('/bus-stops');
-  },
-
-  getById: async (stopId) => {
-    return fetchAPI(`/bus-stops/${stopId}`);
-  },
-
-  getNearby: async (lat, lng, radius = 1) => {
-    return fetchAPI(`/bus-stops/nearby?lat=${lat}&lng=${lng}&radius=${radius}`);
-  },
+  getAll: () => fetchAPI('/bus-stops'),
+  getById: (stopId) => fetchAPI(`/bus-stops/${stopId}`),
+  getNearby: (lat, lng, radius = 1) =>
+    fetchAPI(`/bus-stops/nearby?lat=${lat}&lng=${lng}&radius=${radius}`),
 };
 
-/**
- * ROUTES API
- */
 export const routesAPI = {
-  getAll: async () => {
-    return fetchAPI('/routes');
-  },
-
-  getByNumber: async (routeNumber) => {
-    return fetchAPI(`/routes/${routeNumber}`);
-  },
+  getAll: () => fetchAPI('/routes'),
+  getByNumber: (routeNumber) => fetchAPI(`/routes/${routeNumber}`),
 };
 
-/**
- * TOPSIS API ← ADDED: This is your main feature!
- * POST /api/find-buses
- */
 export const topsisAPI = {
-  findBuses: async (origin, destination, weights) => {
-    return fetchAPI('/find-buses', {
+  findBuses: (origin, destination, weights) =>
+    fetchAPI('/find-buses', {
       method: 'POST',
-      body: JSON.stringify({
-        origin,      // { lat, lng }
-        destination, // { lat, lng }
-        weights,     // { time, cost, walkingDistance, transfers } - all 0 to 1, sum to 1
-      }),
-    });
-  },
+      body: JSON.stringify({ origin, destination, weights }),
+    }),
 };
 
+// ✅ NEW: Shape API for drawing real route paths on the map
+export const shapesAPI = {
+  // Get shape by GTFS shape ID (e.g. "81:1")
+  getById: (shapeId, originStopId, destStopId) => {
+    const params = new URLSearchParams();
+    if (originStopId) params.append('originStopId', originStopId);
+    if (destStopId) params.append('destStopId', destStopId);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return fetchAPI(`/shapes/${encodeURIComponent(shapeId)}${query}`);
+  },
+
+  // Get shape by route number (e.g. "81") — easier to use from frontend
+  getByRouteNumber: (routeNumber) => fetchAPI(`/shapes/route/${encodeURIComponent(routeNumber)}`),
+};
 
 const api = {
   busStops: busStopsAPI,
   routes: routesAPI,
-  topsis: topsisAPI, // ← ADDED
+  topsis: topsisAPI,
+  shapes: shapesAPI, // ✅ NEW
 };
 
 export default api;

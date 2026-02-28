@@ -1,151 +1,101 @@
-
-import React, { useState } from 'react';
-import Map from '../Components/Map/Map';
+import React, { useState, useMemo } from 'react';
+import MapComponent from '../Components/Map/Map';
 import SearchInput from '../Components/SearchInput/SearchInput';
 import WeightSliders from '../Components/WeightSliders/WeightSliders';
 import BusResults from '../Components/BusResults/BusResults';
 import { Search, Bus } from 'lucide-react';
 import { MAP_CONFIG } from '../utils/constants';
-import api from '../services/api';           // ← ADDED: use Api.js not raw fetch
-import useFindBuses from '../hooks/useFindBuses'; // ← ADDED: use the hook
+import useFindBuses from '../hooks/useFindBuses';
+import useShape from '../hooks/useShape';               // ✅ NEW
+import useNearbyStops from '../hooks/useNearbyStops';   // ✅ NEW
 import styles from './Home.module.css';
 
 const Home = () => {
-  // Search state
   const [originInput, setOriginInput] = useState('');
   const [destinationInput, setDestinationInput] = useState('');
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
-
-  // ← FIXED: Default weights normalized (sum to 1.0, not 50,50,50,50)
-  const [weights, setWeights] = useState({
-    time: 0.25,
-    cost: 0.25,
-    walkingDistance: 0.25,
-    transfers: 0.25,
-  });
-
-  // Selected bus for map display
   const [selectedBus, setSelectedBus] = useState(null);
 
-  // ← ADDED: Use the hook instead of manual fetch
+  const [weights, setWeights] = useState({
+    time: 0.25, cost: 0.25, walkingDistance: 0.25, transfers: 0.25,
+  });
+
   const { buses, loading, error, findBuses, clearResults } = useFindBuses();
 
-  // Handle origin selection from SearchInput
+  // ✅ NEW: Fetch real route shape when user selects a bus
+  const { shapeCoordinates, shapeCoordinatesLeg2 } = useShape(selectedBus);
+
+  // ✅ NEW: Fetch nearby stops as soon as origin/destination are selected
+  const { nearbyStops } = useNearbyStops(origin, destination, 0.8);
+
   const handleOriginChange = (e, locationData) => {
     setOriginInput(e.target.value);
-
-    if (locationData && locationData.lat && locationData.lng) {
-      setOrigin({
-        lat: locationData.lat,
-        lng: locationData.lng,
-        name: e.target.value,
-      });
+    if (locationData?.lat && locationData?.lng) {
+      setOrigin({ lat: locationData.lat, lng: locationData.lng, name: e.target.value });
     } else {
-      // User is typing but hasn't selected yet - clear origin coords
       setOrigin(null);
     }
   };
 
-  // Handle destination selection from SearchInput
   const handleDestinationChange = (e, locationData) => {
     setDestinationInput(e.target.value);
-
-    if (locationData && locationData.lat && locationData.lng) {
-      setDestination({
-        lat: locationData.lat,
-        lng: locationData.lng,
-        name: e.target.value,
-      });
+    if (locationData?.lat && locationData?.lng) {
+      setDestination({ lat: locationData.lat, lng: locationData.lng, name: e.target.value });
     } else {
       setDestination(null);
     }
   };
 
-  // ← FIXED: WeightSliders now sends full normalized object, not individual values
-  const handleWeightChange = (normalizedWeights) => {
-    setWeights(normalizedWeights);
-  };
+  const handleWeightChange = (normalizedWeights) => setWeights(normalizedWeights);
 
-  // Find buses using TOPSIS
   const handleFindBuses = async () => {
     if (!origin || !destination) {
       alert('Please select both origin and destination from the dropdown');
       return;
     }
-
-    setSelectedBus(null); // Clear previous selection
-    clearResults();       // Clear previous results
-
-    // ← FIXED: Uses useFindBuses hook instead of raw fetch
+    setSelectedBus(null);
+    clearResults();
     await findBuses(
       { lat: origin.lat, lng: origin.lng },
       { lat: destination.lat, lng: destination.lng },
-      weights // Already normalized from WeightSliders
+      weights
     );
-
-    // Auto-select top bus after search
-    // buses updates async so we handle this in useEffect below
   };
 
-  // Auto-select top bus when results come in
+  // Auto-select top ranked bus
   React.useEffect(() => {
-    if (buses && buses.length > 0 && !selectedBus) {
+    if (buses?.length > 0 && !selectedBus) {
       setSelectedBus(buses[0]);
     }
   }, [buses]);
 
-  // Handle bus selection from results list
-  const handleSelectBus = (bus) => {
-    setSelectedBus(bus);
-  };
+  const handleSelectBus = (bus) => setSelectedBus(bus);
 
-  // Get bus stops to show on map
-  // Shows origin + destination stops of selected bus
-  const getMapStops = () => {
-    if (!selectedBus) return [];
-
-    const stops = [];
-
-    if (selectedBus.originStop) {
-      stops.push({
-        stopId: selectedBus.originStop.stopId,
-        name: selectedBus.originStop.name,
-        position: selectedBus.originStop.position,
-      });
+  // ✅ NEW: Merge nearby stops with selected route stops for the map
+  // Shows both nearby stops (context) AND stops on the selected route (highlighted)
+  // ✅ useMemo prevents new array on every render (stops infinite loop)
+  const mapStops = useMemo(() => {
+    const stopMap = new Map();
+    for (const stop of nearbyStops) {
+      stopMap.set(stop.stopId, stop);
     }
-
-    if (selectedBus.destinationStop) {
-      stops.push({
-        stopId: selectedBus.destinationStop.stopId,
-        name: selectedBus.destinationStop.name,
-        position: selectedBus.destinationStop.position,
-      });
+    if (selectedBus) {
+      if (selectedBus.originStop) stopMap.set(selectedBus.originStop.stopId, selectedBus.originStop);
+      if (selectedBus.destinationStop) stopMap.set(selectedBus.destinationStop.stopId, selectedBus.destinationStop);
+      if (selectedBus.transferStop) stopMap.set(selectedBus.transferStop.stopId, selectedBus.transferStop);
     }
-
-    // For transfer routes, add transfer stop too
-    if (selectedBus.transferStop) {
-      stops.push({
-        stopId: selectedBus.transferStop.stopId,
-        name: selectedBus.transferStop.name,
-        position: selectedBus.transferStop.position,
-      });
-    }
-
-    return stops;
-  };
+    return Array.from(stopMap.values());
+  }, [nearbyStops, selectedBus]);
 
   return (
     <div className={styles.container}>
-      {/* Left Panel - Search & Preferences */}
+      {/* ── Left Panel ── */}
       <div className={styles.leftPanel}>
 
-        {/* Header */}
         <div className={styles.header}>
           <div className={styles.headerTop}>
-            <div className={styles.headerIcon}>
-              <Bus size={24} />
-            </div>
+            <div className={styles.headerIcon}><Bus size={24} /></div>
             <h1>Smart <span>Bus</span> Planner</h1>
           </div>
           <div className={styles.headerBadge}>
@@ -153,17 +103,14 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Search Section */}
         <div className={styles.section}>
           <p className={styles.sectionTitle}>📍 Where are you going?</p>
-
           <SearchInput
             label="Origin"
             placeholder="e.g., Dubai Mall, Gold Souk..."
             value={originInput}
             onChange={handleOriginChange}
           />
-
           <SearchInput
             label="Destination"
             placeholder="e.g., Mall of Emirates, Dubai Marina..."
@@ -172,32 +119,21 @@ const Home = () => {
           />
         </div>
 
-        {/* Weight Sliders */}
         <div className={styles.section}>
-          <WeightSliders
-            weights={weights}
-            onWeightChange={handleWeightChange}
-          />
+          <WeightSliders onWeightChange={handleWeightChange} />
         </div>
 
-        {/* Find Buses Button */}
         <button
-          className={styles.findButton}
+          className={`${styles.findButton} ${loading ? styles.loading : ''}`}
           onClick={handleFindBuses}
           disabled={!origin || !destination || loading}
         >
           <Search size={20} />
-          {loading ? 'Searching...' : 'Find Best Bus Routes'}
+          <span>{loading ? 'Searching...' : 'Find Best Bus Routes'}</span>
         </button>
 
-        {/* ← ADDED: Show error in UI instead of alert */}
-        {error && (
-          <div className={styles.errorMessage}>
-            ⚠️ {error}
-          </div>
-        )}
+        {error && <div className={styles.errorMessage}>⚠️ {error}</div>}
 
-        {/* Results Section */}
         {(buses.length > 0 || loading) && (
           <div className={styles.section}>
             <BusResults
@@ -211,13 +147,15 @@ const Home = () => {
 
       </div>
 
-      {/* Right Panel - Map */}
+      {/* ── Right Panel - Map ── */}
       <div className={styles.rightPanel}>
-        <Map
+        <MapComponent
           origin={origin || MAP_CONFIG.DEFAULT_CENTER}
           destination={destination}
-          busStops={getMapStops()}   // ← FIXED: Passes proper stop objects
+          busStops={mapStops}
           selectedRoute={selectedBus}
+          shapeCoordinates={shapeCoordinates}
+          shapeCoordinatesLeg2={shapeCoordinatesLeg2}
           onStopClick={() => {}}
         />
       </div>

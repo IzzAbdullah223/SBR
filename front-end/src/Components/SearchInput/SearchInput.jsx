@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import styles from './SearchInput.module.css';
 
-
-
 const LOCATIONIQ_TOKEN = import.meta.env.VITE_LOCATIONIQ_TOKEN;
 
 const SearchInput = ({ value, onChange, placeholder, label }) => {
@@ -13,7 +11,6 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
@@ -21,12 +18,10 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
         setShowDropdown(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Debounced search
   useEffect(() => {
     if (value.length < 2) {
       setSuggestions([]);
@@ -34,16 +29,13 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
       setError(null);
       return;
     }
-
     const delayDebounce = setTimeout(async () => {
       await searchLocations(value);
     }, 300);
-
     return () => clearTimeout(delayDebounce);
   }, [value]);
 
   const searchLocations = async (query) => {
-    // Check if token is configured
     if (!LOCATIONIQ_TOKEN || LOCATIONIQ_TOKEN === 'undefined') {
       setError('⚠️ LocationIQ token not configured. Check .env file.');
       setSuggestions([]);
@@ -55,23 +47,20 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
     setError(null);
 
     try {
-      // LocationIQ Autocomplete API
+      // ✅ FIX: Removed bounded=1 and tight viewbox — was causing 404 errors
+      // Now searches all UAE (countrycodes=ae) and filters Dubai results in JS
       const response = await fetch(
         `https://api.locationiq.com/v1/autocomplete?` +
         `key=${LOCATIONIQ_TOKEN}` +
         `&q=${encodeURIComponent(query)}` +
-        `&countrycodes=ae` +                    // UAE only
-        `&limit=8` +                            // Max 8 results
-        `&accept-language=en` +                 // English
-        `&normalizecity=1` +                    // Normalize city names
-        `&viewbox=54.8,24.7,55.6,25.4` +       // Dubai bounding box
-        `&bounded=1`                            // Strict bounding
+        `&countrycodes=ae` +
+        `&limit=10` +
+        `&accept-language=en` +
+        `&normalizecity=1`
       );
 
       if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error('Invalid API token');
-        }
+        if (response.status === 401) throw new Error('Invalid API token');
         throw new Error('Search failed');
       }
 
@@ -79,11 +68,10 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
 
       // Filter for Dubai results
       const dubaiResults = data.filter(item => {
-        const displayName = item.display_name.toLowerCase();
+        const displayName = item.display_name?.toLowerCase() || '';
         return displayName.includes('dubai') || displayName.includes('دبي');
       });
 
-      // Transform LocationIQ format to our format
       const formattedResults = dubaiResults.map(item => ({
         place_id: item.place_id,
         display_name: item.display_name,
@@ -100,13 +88,11 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
 
     } catch (err) {
       console.error('LocationIQ search error:', err);
-      
       if (err.message === 'Invalid API token') {
         setError('Invalid API token. Check your .env file.');
       } else {
         setError('Search temporarily unavailable');
       }
-      
       setSuggestions([]);
       setShowDropdown(false);
     } finally {
@@ -115,17 +101,10 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
   };
 
   const handleSelectSuggestion = (suggestion) => {
-    // Use the short name for display
-    const displayName = suggestion.name;
-
-    onChange({
-      target: { value: displayName }
-    }, {
-      lat: suggestion.lat,
-      lng: suggestion.lng,
-      fullAddress: suggestion.display_name
-    });
-
+    onChange(
+      { target: { value: suggestion.name } },
+      { lat: suggestion.lat, lng: suggestion.lng, fullAddress: suggestion.display_name }
+    );
     setShowDropdown(false);
     setSuggestions([]);
     setError(null);
@@ -133,9 +112,7 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
 
   const handleInputChange = (e) => {
     onChange(e);
-    if (e.target.value.length >= 2) {
-      setShowDropdown(true);
-    }
+    if (e.target.value.length >= 2) setShowDropdown(true);
   };
 
   return (
@@ -166,11 +143,9 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
         {showDropdown && suggestions.length > 0 && (
           <div ref={dropdownRef} className={styles.dropdown}>
             {suggestions.map((suggestion, index) => {
-              // Split address for display
               const parts = suggestion.display_name.split(',');
               const mainAddress = parts[0].trim();
               const subAddress = parts.slice(1, 3).join(',').trim();
-
               return (
                 <div
                   key={`${suggestion.place_id}-${index}`}
@@ -179,12 +154,8 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
                 >
                   <div className={styles.locationIcon}>📍</div>
                   <div className={styles.addressInfo}>
-                    <div className={styles.mainAddress}>
-                      {mainAddress}
-                    </div>
-                    <div className={styles.subAddress}>
-                      {subAddress || suggestion.type}
-                    </div>
+                    <div className={styles.mainAddress}>{mainAddress}</div>
+                    <div className={styles.subAddress}>{subAddress || suggestion.type}</div>
                   </div>
                 </div>
               );
@@ -194,9 +165,7 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
 
         {showDropdown && !isLoading && !error && suggestions.length === 0 && value.length >= 2 && (
           <div ref={dropdownRef} className={styles.dropdown}>
-            <div className={styles.noResults}>
-              No locations found in Dubai
-            </div>
+            <div className={styles.noResults}>No locations found in Dubai</div>
           </div>
         )}
       </div>

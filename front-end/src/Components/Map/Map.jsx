@@ -1,11 +1,5 @@
-/**
- * MAP COMPONENT
- * Clean map display with bus stops and routes
- * UI ONLY - No business logic
- */
-
-import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import React, { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import MapBoundsUpdater from './MapBoundsUpdater';
 import {
@@ -18,46 +12,49 @@ import {
 import { MAP_CONFIG } from '../../utils/constants';
 import styles from './Map.module.css';
 
-const Map = ({
+// ✅ Fits map bounds to the route shape
+const FitBounds = ({ coordinates }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (!coordinates || coordinates.length < 2) return;
+    const latLngs = coordinates.map(c => [c.lat, c.lng]);
+    map.fitBounds(latLngs, { padding: [40, 40] });
+  }, [coordinates]);
+  return null;
+};
+
+const MapView = ({
   origin,
   destination,
   userLocation,
   busStops = [],
   selectedRoute = null,
+  shapeCoordinates = null,
+  shapeCoordinatesLeg2 = null,
   onStopClick,
 }) => {
-  // Show loading if no origin
-  if (!origin || typeof origin.lat !== 'number' || typeof origin.lng !== 'number') {
-    return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
-        <p>Loading map...</p>
-      </div>
-    );
-  }
+  const isValidCoord = (val) => typeof val === 'number' && !isNaN(val);
+  const hasValidOrigin = origin && isValidCoord(origin.lat) && isValidCoord(origin.lng);
+  const hasValidDest = destination && isValidCoord(destination?.lat) && isValidCoord(destination?.lng);
 
-  // Calculate center point
-  const center = destination
-    ? [(origin.lat + destination.lat) / 2, (origin.lng + destination.lng) / 2]
-    : [origin.lat, origin.lng];
+  const center = hasValidOrigin
+    ? [origin.lat, origin.lng]
+    : [MAP_CONFIG.DEFAULT_CENTER.lat, MAP_CONFIG.DEFAULT_CENTER.lng];
 
-  // Calculate route path
-  const routePath = destination
+  const routeColor = selectedRoute?.color || '#667eea';
+  const leg2Color = '#00c9a7';
+
+  const leg1Positions = shapeCoordinates?.length > 1
+    ? shapeCoordinates.map(c => [c.lat, c.lng])
+    : null;
+
+  const leg2Positions = shapeCoordinatesLeg2?.length > 1
+    ? shapeCoordinatesLeg2.map(c => [c.lat, c.lng])
+    : null;
+
+  const fallbackPositions = !leg1Positions && hasValidOrigin && hasValidDest
     ? [[origin.lat, origin.lng], [destination.lat, destination.lng]]
-    : [];
-
-  // Get selected route coordinates
-  const getRouteCoordinates = () => {
-    if (!selectedRoute || !selectedRoute.stops) return [];
-
-    return selectedRoute.stops
-      .map(stop => {
-        const busStop = busStops.find(bs => bs.stopId === stop.stopId);
-        if (!busStop || !busStop.position) return null;
-        return [busStop.position.lat, busStop.position.lng];
-      })
-      .filter(coord => coord !== null);
-  };
+    : null;
 
   return (
     <MapContainer
@@ -68,91 +65,87 @@ const Map = ({
       minZoom={MAP_CONFIG.MIN_ZOOM}
       maxZoom={MAP_CONFIG.MAX_ZOOM}
     >
-      {/* Base Map Tiles */}
-      <TileLayer
-        attribution={MAP_CONFIG.ATTRIBUTION}
-        url={MAP_CONFIG.TILE_LAYER}
-      />
+      <TileLayer attribution={MAP_CONFIG.ATTRIBUTION} url={MAP_CONFIG.TILE_LAYER} />
 
-      {/* Auto-adjust bounds */}
-      <MapBoundsUpdater origin={origin} destination={destination} />
+      {hasValidOrigin && (
+        <MapBoundsUpdater origin={origin} destination={destination} />
+      )}
 
-      {/* User Location Marker */}
-      {userLocation && userLocation.lat && userLocation.lng && (
+      {/* Fit map to route shape */}
+      {leg1Positions && <FitBounds coordinates={shapeCoordinates} />}
+
+      {/* User Location */}
+      {userLocation && isValidCoord(userLocation.lat) && isValidCoord(userLocation.lng) && (
         <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon}>
+          <Popup><div className={styles.popup}><strong>Your Location</strong></div></Popup>
+        </Marker>
+      )}
+
+      {/* Origin */}
+      {hasValidOrigin && (
+        <Marker position={[origin.lat, origin.lng]} icon={originIcon}>
           <Popup>
             <div className={styles.popup}>
-              <strong>Your Location</strong>
-              <p>Current position</p>
+              <strong>Origin</strong>
+              <p>{origin.name || 'Starting point'}</p>
             </div>
           </Popup>
         </Marker>
       )}
 
-      {/* Origin Marker */}
-      <Marker position={[origin.lat, origin.lng]} icon={originIcon}>
-        <Popup>
-          <div className={styles.popup}>
-            <strong>Origin</strong>
-            <p>Starting point</p>
-          </div>
-        </Popup>
-      </Marker>
+      {/* Destination */}
+      {hasValidDest && (
+        <Marker position={[destination.lat, destination.lng]} icon={destinationIcon}>
+          <Popup>
+            <div className={styles.popup}>
+              <strong>Destination</strong>
+              <p>{destination.name || 'End point'}</p>
+            </div>
+          </Popup>
+        </Marker>
+      )}
 
-      {/* Destination Marker */}
-      {destination && destination.lat && destination.lng && (
-        <>
-          <Marker position={[destination.lat, destination.lng]} icon={destinationIcon}>
-            <Popup>
-              <div className={styles.popup}>
-                <strong>Destination</strong>
-                <p>End point</p>
-              </div>
-            </Popup>
-          </Marker>
+      {/* Leg 1 shape — real GTFS route */}
+      {leg1Positions && (
+        <Polyline positions={leg1Positions} color={routeColor} weight={5} opacity={0.85} />
+      )}
 
-          {/* Direct path line */}
-          <Polyline
-            positions={routePath}
-            color="#667eea"
-            weight={3}
-            opacity={0.5}
-            dashArray="5, 10"
-          />
-        </>
+      {/* Leg 2 shape — transfer route */}
+      {leg2Positions && (
+        <Polyline positions={leg2Positions} color={leg2Color} weight={5} opacity={0.85} />
+      )}
+
+      {/* Fallback dashed line */}
+      {fallbackPositions && (
+        <Polyline positions={fallbackPositions} color="#667eea" weight={3} opacity={0.5} dashArray="8,12" />
       )}
 
       {/* Bus Stop Markers */}
-      {busStops && busStops.length > 0 && busStops.map((stop) => {
-        // Safety check - skip stops without valid position
-        if (!stop || !stop.position || typeof stop.position.lat !== 'number' || typeof stop.position.lng !== 'number') {
-          return null;
-        }
+      {busStops.map((stop) => {
+        if (!stop?.position || !isValidCoord(stop.position.lat) || !isValidCoord(stop.position.lng)) return null;
 
-        const isOnSelectedRoute = selectedRoute?.stops?.some(s => s.stopId === stop.stopId);
-        const icon = isOnSelectedRoute ? selectedBusStopIcon : busStopIcon;
+        const isOnRoute = selectedRoute?.stops?.some(s => s.stopId === stop.stopId)
+          || selectedRoute?.originStop?.stopId === stop.stopId
+          || selectedRoute?.destinationStop?.stopId === stop.stopId
+          || selectedRoute?.transferStop?.stopId === stop.stopId;
 
         return (
           <Marker
             key={stop.stopId}
             position={[stop.position.lat, stop.position.lng]}
-            icon={icon}
-            eventHandlers={{
-              click: () => onStopClick && onStopClick(stop),
-            }}
+            icon={isOnRoute ? selectedBusStopIcon : busStopIcon}
+            eventHandlers={{ click: () => onStopClick && onStopClick(stop) }}
           >
             <Popup>
               <div className={styles.popup}>
                 <strong>{stop.name}</strong>
                 <p className={styles.stopId}>ID: {stop.stopId}</p>
-                {stop.routes && stop.routes.length > 0 && (
+                {stop.routes?.length > 0 && (
                   <div className={styles.routes}>
                     <p><strong>Routes:</strong></p>
                     <div className={styles.routeBadges}>
-                      {stop.routes.map(route => (
-                        <span key={route} className={styles.routeBadge}>
-                          {route}
-                        </span>
+                      {stop.routes.map(r => (
+                        <span key={r} className={styles.routeBadge}>{r}</span>
                       ))}
                     </div>
                   </div>
@@ -162,18 +155,8 @@ const Map = ({
           </Marker>
         );
       })}
-
-      {/* Selected Route Polyline */}
-      {selectedRoute && getRouteCoordinates().length > 0 && (
-        <Polyline
-          positions={getRouteCoordinates()}
-          color={selectedRoute.color}
-          weight={4}
-          opacity={0.8}
-        />
-      )}
     </MapContainer>
   );
 };
 
-export default Map;
+export default MapView;

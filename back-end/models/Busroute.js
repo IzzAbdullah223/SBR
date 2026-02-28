@@ -102,7 +102,15 @@ const busRouteSchema = new mongoose.Schema({
   type: {
     type: String,
     default: '3'  // GTFS route_type (3 = bus)
-  }
+  },
+  shapeId: {
+  type: String,
+  default: null,
+},
+shapeIdReturn: {
+  type: String,
+  default: null,
+},
   
 }, {
   timestamps: true
