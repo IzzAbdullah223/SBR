@@ -58,7 +58,7 @@ export const getMinutesFromNow = (futureTime, currentTime) => {
  * @returns {boolean} True if within service hours
  */
 export const isWithinServiceHours = (schedule, currentTime) => {
-  // just to fake the timing to test outService hours.
+  
   const currentHour = currentTime.getHours();
   const currentMinute = currentTime.getMinutes();
   const currentTimeInMinutes = currentHour * 60 + currentMinute;

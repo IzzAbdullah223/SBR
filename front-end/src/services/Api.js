@@ -7,9 +7,10 @@ const fetchAPI = async (endpoint, options = {}) => {
       ...options,
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || data.message || 'API request failed');
+    // ✅ FIX: Always return data so errorCode is preserved — don't throw on non-ok
     return data;
   } catch (error) {
+    // Only true network errors reach here (server down, no connection)
     console.error(`API Error [${endpoint}]:`, error);
     throw error;
   }
