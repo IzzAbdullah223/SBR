@@ -19,13 +19,6 @@ const createSVGString = (iconType, options = {}) => {
   } = options;
 
   const svgs = {
-    mapPinned: `
-      <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="${fill}" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M18 8c0 4.5-6 9-6 9s-6-4.5-6-9a6 6 0 0 1 12 0"/>
-        <circle cx="12" cy="8" r="2"/>
-        <path d="M8.835 14H5a1 1 0 0 0-.9.7l-2 6c-.1.1-.1.2-.1.3 0 .6.4 1 1 1h18c.6 0 1-.4 1-1 0-.1 0-.2-.1-.3l-2-6a1 1 0 0 0-.9-.7h-3.835"/>
-      </svg>
-    `,
     circle: `
       <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="${fill}" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"/>
@@ -99,54 +92,75 @@ const createLeafletIcon = (iconType, options = {}) => {
 };
 
 /**
- * ORIGIN ICON (Green MapPinned)
+ * ORIGIN ICON (Green teardrop pin)
  */
-export const originIcon = createLeafletIcon('mapPinned', {
-  color: ICON_COLORS.ORIGIN,
-  size: 40,
-  fill: ICON_COLORS.ORIGIN,
-  strokeWidth: 2,
-  background: 'white',
-  borderRadius: '50% 50% 50% 0',
-  className: 'origin-marker',
+export const originIcon = new L.DivIcon({
+  html: `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="40" viewBox="0 0 24 29"
+    style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35))">
+    <path fill-rule="evenodd" clip-rule="evenodd"
+      fill="#4CAF50"
+      d="M12 0C5.373 0 0 5.373 0 12c0 7.5 12 17 12 17S24 19.5 24 12C24 5.373 18.627 0 12 0z
+         M12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
+  </svg>`,
+  className: 'custom-leaflet-icon origin-marker',
+  iconSize: [36, 44],
+  iconAnchor: [18, 44],
+  popupAnchor: [0, -44],
 });
 
-/**
- * DESTINATION ICON (Red MapPinned)
- */
-export const destinationIcon = createLeafletIcon('mapPinned', {
-  color: ICON_COLORS.DESTINATION,
-  size: 40,
-  fill: ICON_COLORS.DESTINATION,
-  strokeWidth: 2,
-  background: 'white',
-  borderRadius: '50% 50% 50% 0',
-  className: 'destination-marker',
+export const destinationIcon = new L.DivIcon({
+  html: `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="40" viewBox="0 0 24 29"
+    style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35))">
+    <path fill-rule="evenodd" clip-rule="evenodd"
+      fill="#F44336"
+      d="M12 0C5.373 0 0 5.373 0 12c0 7.5 12 17 12 17S24 19.5 24 12C24 5.373 18.627 0 12 0z
+         M12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
+  </svg>`,
+  className: 'custom-leaflet-icon destination-marker',
+  iconSize: [36, 44],
+  iconAnchor: [18, 44],
+  popupAnchor: [0, -44],
 });
 
 /**
  * BUS STOP ICON (Blue Circle)
  */
-export const busStopIcon = createLeafletIcon('circle', {
-  color: ICON_COLORS.BUS_STOP,
-  size: 20,
-  fill: ICON_COLORS.BUS_STOP,
-  strokeWidth: 2,
-  background: 'white',
-  className: 'bus-stop-marker',
+export const busStopIcon = new L.DivIcon({
+  html: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="30" viewBox="0 0 40 50"
+    style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3))">
+    <path fill="#0a1628" d="M20 0C10.6 0 3 7.6 3 17c0 12.5 17 33 17 33S37 29.5 37 17C37 7.6 29.4 0 20 0z"/>
+    <circle cx="20" cy="17" r="12" fill="white"/>
+    <g transform="translate(10, 8)" fill="#0a1628">
+      <rect x="1" y="0" width="18" height="13" rx="2"/>
+      <rect x="3" y="2" width="14" height="7" fill="white"/>
+      <circle cx="5" cy="15" r="2"/>
+      <circle cx="15" cy="15" r="2"/>
+      <rect x="0" y="11" width="20" height="3"/>
+    </g>
+  </svg>`,
+  className: 'custom-leaflet-icon bus-stop-marker',
+  iconSize: [24, 30],
+  iconAnchor: [12, 30],
+  popupAnchor: [0, -30],
 });
 
-/**
- * SELECTED BUS STOP ICON (Larger Blue MapPin)
- */
-export const selectedBusStopIcon = createLeafletIcon('mapPin', {
-  color: ICON_COLORS.BUS_STOP,
-  size: 32,
-  fill: ICON_COLORS.BUS_STOP,
-  strokeWidth: 2.5,
-  background: 'white',
-  borderRadius: '50% 50% 50% 0',
-  className: 'selected-bus-stop-marker',
+export const selectedBusStopIcon = new L.DivIcon({
+  html: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 40 50"
+    style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4))">
+    <path fill="#f0a500" d="M20 0C10.6 0 3 7.6 3 17c0 12.5 17 33 17 33S37 29.5 37 17C37 7.6 29.4 0 20 0z"/>
+    <circle cx="20" cy="17" r="12" fill="white"/>
+    <g transform="translate(10, 8)" fill="#f0a500">
+      <rect x="1" y="0" width="18" height="13" rx="2"/>
+      <rect x="3" y="2" width="14" height="7" fill="white"/>
+      <circle cx="5" cy="15" r="2"/>
+      <circle cx="15" cy="15" r="2"/>
+      <rect x="0" y="11" width="20" height="3"/>
+    </g>
+  </svg>`,
+  className: 'custom-leaflet-icon selected-bus-stop-marker',
+  iconSize: [32, 40],
+  iconAnchor: [16, 40],
+  popupAnchor: [0, -40],
 });
 
 /**
@@ -188,9 +202,6 @@ export const createRouteIcon = (color) => {
   });
 };
 
-/**
- * Export all icons
- */
 export default {
   originIcon,
   destinationIcon,

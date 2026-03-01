@@ -150,7 +150,7 @@ const Home = () => {
       {/* ── Right Panel - Map ── */}
       <div className={styles.rightPanel}>
         <MapComponent
-          origin={origin || MAP_CONFIG.DEFAULT_CENTER}
+          origin={origin}
           destination={destination}
           busStops={mapStops}
           selectedRoute={selectedBus}
