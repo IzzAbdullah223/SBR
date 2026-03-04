@@ -8,6 +8,7 @@ import { MAP_CONFIG } from '../utils/constants';
 import useFindBuses from '../hooks/useFindBuses';
 import useShape from '../hooks/useShape';               // ✅ NEW
 import useNearbyStops from '../hooks/useNearbyStops';   // ✅ NEW
+import Navbar from '../Components/NavBar/Navbar';
 import styles from './Home.module.css';
 
 const Home = () => {
@@ -90,6 +91,11 @@ const Home = () => {
 
   return (
     <div className={styles.container}>
+      {/* ── Navbar ── */}
+      <Navbar />
+
+      {/* ── Main Content ── */}
+      <div className={styles.content}>
       {/* ── Left Panel ── */}
       <div className={styles.leftPanel}>
 
@@ -150,7 +156,7 @@ const Home = () => {
       {/* ── Right Panel - Map ── */}
       <div className={styles.rightPanel}>
         <MapComponent
-          origin={origin}
+          origin={origin || MAP_CONFIG.DEFAULT_CENTER}
           destination={destination}
           busStops={mapStops}
           selectedRoute={selectedBus}
@@ -158,6 +164,7 @@ const Home = () => {
           shapeCoordinatesLeg2={shapeCoordinatesLeg2}
           onStopClick={() => {}}
         />
+      </div>
       </div>
     </div>
   );

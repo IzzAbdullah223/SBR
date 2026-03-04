@@ -1,7 +1,4 @@
-/* ═══════════════════════════════════════════════════════
-   HOME.MODULE.CSS - Dubai Smart Bus Planner
-   Theme: Clean Dubai Metro inspired - deep navy + gold
-═══════════════════════════════════════════════════════ */
+
 
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 
@@ -30,10 +27,19 @@
 /* ─── Layout ─── */
 .container {
   display: flex;
+  flex-direction: column;  /* navbar on top, content below */
   height: 100vh;
   overflow: hidden;
   font-family: 'DM Sans', sans-serif;
   background: var(--navy);
+}
+
+/* ─── Content area below navbar ─── */
+.content {
+  display: flex;
+  flex: 1;               /* fills all remaining height below navbar */
+  overflow: hidden;
+  min-height: 0;         /* important — prevents flex children from overflowing */
 }
 
 /* ─── Left Panel ─── */

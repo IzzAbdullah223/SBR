@@ -1,3 +1,8 @@
+// useCallback → saves a FUNCTION
+// useMemo     → saves a VALUE (result of a function)
+
+// useCallback(() => doSomething(), [])   returns the function itself
+// useMemo(() => doSomething(), [])       returns what the function returns
 import { useState, useCallback } from 'react';
 import api from '../services/Api';
 
@@ -24,7 +29,10 @@ const useFindBuses = () => {
   const [error, setError] = useState(null);
   const [stats, setStats] = useState(null);
 
-  const findBuses = useCallback(async (origin, destination, weights) => {
+  const findBuses = useCallback(async (origin, destination, weights) => {//// useCallback saves a function in memory so React doesn't recreate it on every render.
+// Without it, every re-render creates a new function object — causing unnecessary re-renders in children.
+// Empty [] means create once and never recreate.
+// With dependencies [x] — only recreate when x changes.
 
     // Frontend validation
     if (!origin?.lat || !origin?.lng) {
@@ -46,14 +54,14 @@ const useFindBuses = () => {
       setBuses([]);
       setStats(null);
 
-      // ✅ fetchAPI now returns data directly without throwing on 404/500
+     
       const response = await api.topsis.findBuses(origin, destination, weights);
 
       if (response.success) {
         setBuses(response.buses);
         setStats(response.stats);
       } else {
-        // ✅ errorCode from backend maps to specific message
+        // errorCode from backend maps to specific message
         setError(getErrorMessage(response.errorCode, response.message));
       }
 
@@ -65,13 +73,13 @@ const useFindBuses = () => {
       setLoading(false);
     }
 
-  }, []);
+  }, []);// [] this empty [] for the useCallback means only calculate it once.
 
   const clearResults = useCallback(() => {
     setBuses([]);
     setError(null);
     setStats(null);
-  }, []);
+  }, []);// used later when doing another search to delete every bus results shown in the UI
 
   return { buses, loading, error, stats, findBuses, clearResults };
 };

@@ -2,12 +2,14 @@ const API_BASE_URL = '/api';
 
 const fetchAPI = async (endpoint, options = {}) => {
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {//'/api' + '/bus-stops/nearby?lat=25.1&lng=55.2'
+//= '/api/bus-stops/nearby?lat=25.1&lng=55.2'
       headers: { 'Content-Type': 'application/json', ...options.headers },
       ...options,
     });
+
     const data = await response.json();
-    // ✅ FIX: Always return data so errorCode is preserved — don't throw on non-ok
+
     return data;
   } catch (error) {
     // Only true network errors reach here (server down, no connection)
@@ -36,7 +38,7 @@ export const topsisAPI = {
     }),
 };
 
-// ✅ NEW: Shape API for drawing real route paths on the map
+
 export const shapesAPI = {
   // Get shape by GTFS shape ID (e.g. "81:1")
   getById: (shapeId, originStopId, destStopId) => {

@@ -8,36 +8,43 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [error, setError] = useState(null);
-  const dropdownRef = useRef(null);
-  const inputRef = useRef(null);
+  const dropdownRef = useRef(null);//useRef gives you a direct pointer to a real DOM element. Think of it as saying "I want to be able to grab this element later".
+  const inputRef = useRef(null);//dropdownRef will point to the dropdown div. inputRef will point to the text input. They start as null and get connected to the actual elements via the ref attribute in JSX later. We need these to detect clicks outside — we can't do that with just React state.
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
-          inputRef.current && !inputRef.current.contains(event.target)) {
+      if (dropdownRef.current/* does the dropdown exist in DOM right now */ && !dropdownRef.current.contains(event.target) &&
+          inputRef.current && !inputRef.current.contains(event.target)) {//was the click OUTSIDE the dropdown?, was the click OUTSIDE the input too?
         setShowDropdown(false);
       }
+    
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+
+// debounce
   useEffect(() => {
-    if (value.length < 2) {
+    if (value.length < 2) { // if user typed < 2 char their no point of searching so  stop
       setSuggestions([]);
       setShowDropdown(false);
       setError(null);
       return;
     }
+
     const delayDebounce = setTimeout(async () => {
+ 
       await searchLocations(value);
-    }, 300);
+    }, 300);//Sets a 300ms timer. If the user keeps typing, this effect runs again which cancels the previous timer and starts a new one. The API call only fires when the user stops typing for 300ms. This is called debouncing — prevents sending a request on every single keystroke.
     return () => clearTimeout(delayDebounce);
   }, [value]);
 
+
   const searchLocations = async (query) => {
     if (!LOCATIONIQ_TOKEN || LOCATIONIQ_TOKEN === 'undefined') {
-      setError('⚠️ LocationIQ token not configured. Check .env file.');
+      setError('⚠️ LocationIQ token not configured');
       setSuggestions([]);
       setShowDropdown(false);
       return;
@@ -47,8 +54,7 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
     setError(null);
 
     try {
-      // ✅ FIX: Removed bounded=1 and tight viewbox — was causing 404 errors
-      // Now searches all UAE (countrycodes=ae) and filters Dubai results in JS
+      
       const response = await fetch(
         `https://api.locationiq.com/v1/autocomplete?` +
         `key=${LOCATIONIQ_TOKEN}` +
@@ -66,17 +72,18 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
 
       const data = await response.json();
 
-      // Filter for Dubai results
-      const dubaiResults = data.filter(item => {
+      // Filter for Dubai results bec sometimes the data come not filtered well
+      const dubaiResults = data.filter(item => { 
         const displayName = item.display_name?.toLowerCase() || '';
         return displayName.includes('dubai') || displayName.includes('دبي');
       });
-
+   
+      // tranform the data into our format.
       const formattedResults = dubaiResults.map(item => ({
         place_id: item.place_id,
         display_name: item.display_name,
         name: item.display_name.split(',')[0].trim(),
-        lat: parseFloat(item.lat),
+        lat: parseFloat(item.lat),// convert string to numbers.
         lng: parseFloat(item.lon),
         type: item.type || 'place',
         address: item.address || {},
@@ -89,7 +96,7 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
     } catch (err) {
       console.error('LocationIQ search error:', err);
       if (err.message === 'Invalid API token') {
-        setError('Invalid API token. Check your .env file.');
+        setError('Invalid API token');
       } else {
         setError('Search temporarily unavailable');
       }
@@ -101,7 +108,7 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
   };
 
   const handleSelectSuggestion = (suggestion) => {
-    onChange(
+    onChange( // on change here is props from Home.
       { target: { value: suggestion.name } },
       { lat: suggestion.lat, lng: suggestion.lng, fullAddress: suggestion.display_name }
     );
