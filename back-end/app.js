@@ -1,4 +1,5 @@
 import express from 'express';
+import './config/passport.js';
 import cors from 'cors';
 import { db_connection } from './DB/dbConnection.js';
 import apiRoutes from './routes/index.js';
