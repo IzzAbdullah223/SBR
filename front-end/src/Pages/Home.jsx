@@ -3,7 +3,7 @@ import MapComponent from '../Components/Map/Map';
 import SearchInput from '../Components/SearchInput/SearchInput';
 import WeightSliders from '../Components/WeightSliders/WeightSliders';
 import BusResults from '../Components/BusResults/BusResults';
-import { Search, Bus } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { MAP_CONFIG } from '../utils/constants';
 import useFindBuses from '../hooks/useFindBuses';
 import useShape from '../hooks/useShape';
@@ -109,15 +109,7 @@ const Home = () => {
       <div className={styles.content}>
         <div className={styles.leftPanel}>
 
-          <div className={styles.header}>
-            <div className={styles.headerTop}>
-              <div className={styles.headerIcon}><Bus size={24} /></div>
-              <h1>Smart <span>Bus</span> Planner</h1>
-            </div>
-            <div className={styles.headerBadge}>
-              Dubai RTA • MCDM Route Recommendation
-            </div>
-          </div>
+ 
 
           <div className={styles.section}>
             <p className={styles.sectionTitle}>📍 Where are you going?</p>
