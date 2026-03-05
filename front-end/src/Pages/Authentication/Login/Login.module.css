@@ -2,13 +2,13 @@
   font-family: 'Syne', sans-serif;
   font-size: 24px;
   font-weight: 800;
-  color: var(--navy);
+  color: #0a1628;
   margin: 0 0 6px 0;
 }
 
 .subtitle {
   font-size: 14px;
-  color: var(--gray-400);
+  color: #9ba3c2;
   margin: 0 0 24px 0;
 }
 
@@ -27,24 +27,24 @@
 .field label {
   font-size: 12px;
   font-weight: 700;
-  color: var(--gray-600);
+  color: #5a6384;
   text-transform: uppercase;
   letter-spacing: 0.6px;
 }
 
 .field input {
   padding: 12px 14px;
-  border: 2px solid var(--gray-200);
-  border-radius: var(--radius-sm);
+  border: 2px solid #eef0f6;
+  border-radius: 10px;
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
-  color: var(--navy);
+  color: #0a1628;
   outline: none;
   transition: border-color 0.2s ease;
 }
 
 .field input:focus {
-  border-color: var(--navy);
+  border-color: #0a1628;
 }
 
 .error {
@@ -55,10 +55,10 @@
 
 .form button[type='submit'] {
   padding: 14px;
-  background: var(--navy);
-  color: var(--white);
+  background: #0a1628;
+  color: #ffffff;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   font-family: 'Syne', sans-serif;
   font-size: 15px;
   font-weight: 700;
@@ -68,12 +68,12 @@
 }
 
 .form button[type='submit']:hover:not(:disabled) {
-  background: var(--gold);
-  color: var(--navy);
+  background: #f0a500;
+  color: #0a1628;
 }
 
 .form button[type='submit']:disabled {
-  background: var(--gray-200);
-  color: var(--gray-400);
+  background: #eef0f6;
+  color: #9ba3c2;
   cursor: not-allowed;
 }

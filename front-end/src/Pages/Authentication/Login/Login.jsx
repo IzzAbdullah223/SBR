@@ -3,18 +3,31 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '../../../lib/schemas';
 import styles from './Login.module.css';
 
-export function Login() {
+// 🧪 Fake user for testing — replace with real API call later
+const FAKE_USER = {
+  email: 'test@gmail.com',
+  password: 'password123',
+  name: 'Ahmed',
+};
+
+export function Login({ onLoginSuccess }) {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setError,
     reset,
   } = useForm({
     resolver: zodResolver(loginSchema),
   });
 
   const onSubmit = async (data) => {
-    console.log(data);
+    // Simulate checking against fake user
+    if (data.email !== FAKE_USER.email || data.password !== FAKE_USER.password) {
+      setError('email', { type: 'server', message: 'Invalid email or password' });
+      return;
+    }
+    onLoginSuccess({ name: FAKE_USER.name });
     reset();
   };
 

@@ -1,5 +1,3 @@
-
-
 .navbar {
   width: 100%;
   height: 52px;
@@ -13,7 +11,6 @@
   z-index: 100;
 }
 
-/* ── Logo ── */
 .logo {
   display: flex;
   align-items: center;
@@ -57,7 +54,6 @@
   font-family: 'DM Sans', sans-serif;
 }
 
-/* ── Actions ── */
 .actions {
   display: flex;
   align-items: center;
@@ -71,7 +67,6 @@
   margin: 0 2px;
 }
 
-/* ── Settings Button ── */
 .settingsBtn {
   display: flex;
   align-items: center;
@@ -94,7 +89,6 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* ── Login Button ── */
 .loginBtn {
   display: flex;
   align-items: center;
@@ -116,7 +110,6 @@
   border-color: rgba(255, 255, 255, 0.25);
 }
 
-/* ── Signup Button ── */
 .signupBtn {
   display: flex;
   align-items: center;
@@ -137,4 +130,36 @@
   background: #ffc740;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(240, 165, 0, 0.35);
+}
+
+.greeting {
+  color: #ffffff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+}
+
+.greeting strong {
+  color: #f0a500;
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logoutBtn:hover {
+  background: rgba(255, 77, 109, 0.15);
+  border-color: rgba(255, 77, 109, 0.4);
+  color: #ff4d6d;
 }

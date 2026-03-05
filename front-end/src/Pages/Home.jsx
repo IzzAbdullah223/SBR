@@ -17,6 +17,7 @@ import styles from './Home.module.css';
 const Home = () => {
   const [showSignUp, setShowSignUp] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [user, setUser] = useState(null);
   const [originInput, setOriginInput] = useState('');
   const [destinationInput, setDestinationInput] = useState('');
   const [origin, setOrigin] = useState(null);
@@ -73,6 +74,15 @@ const Home = () => {
 
   const handleSelectBus = (bus) => setSelectedBus(bus);
 
+  const handleLoginSuccess = (loggedInUser) => {
+    setUser(loggedInUser);
+    setShowLogin(false);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+  };
+
   const mapStops = useMemo(() => {
     const stopMap = new Map();
     for (const stop of nearbyStops) {
@@ -92,6 +102,8 @@ const Home = () => {
       <Navbar
         onSignUpClick={() => setShowSignUp(true)}
         onLoginClick={() => setShowLogin(true)}
+        user={user}
+        onLogout={handleLogout}
       />
 
       <div className={styles.content}>
@@ -169,7 +181,7 @@ const Home = () => {
       </Modal>
 
       <Modal isOpen={showLogin} onClose={() => setShowLogin(false)}>
-        <Login />
+        <Login onLoginSuccess={handleLoginSuccess} />
       </Modal>
 
     </div>
