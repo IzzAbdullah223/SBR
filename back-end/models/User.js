@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 // User Schema - Represents app users
 const userSchema = new mongoose.Schema({

@@ -1,0 +1,73 @@
+.container h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--navy);
+  margin: 0 0 24px 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.field input {
+  padding: 12px 14px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--navy);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.field input:focus {
+  border-color: var(--navy);
+}
+
+.error {
+  color: var(--error);
+  font-size: 12px;
+  margin: 0;
+}
+
+.form button[type='submit'] {
+  padding: 14px;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  margin-top: 8px;
+}
+
+.form button[type='submit']:hover:not(:disabled) {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+.form button[type='submit']:disabled {
+  background: var(--gray-200);
+  color: var(--gray-400);
+  cursor: not-allowed;
+}

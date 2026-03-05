@@ -1,13 +1,9 @@
-
-
 import { Bus, Settings, LogIn, UserPlus } from 'lucide-react';
 import styles from './Navbar.module.css';
 
-const Navbar = () => {
+const Navbar = ({ onSignUpClick }) => {
   return (
     <nav className={styles.navbar}>
-
-      {/* ── Left — Logo ── */}
       <div className={styles.logo}>
         <div className={styles.logoIcon}>
           <Bus size={18} />
@@ -17,8 +13,6 @@ const Navbar = () => {
         </span>
         <div className={styles.logoBadge}>Dubai RTA</div>
       </div>
-
-      {/* ── Right — Actions ── */}
       <div className={styles.actions}>
         <button className={styles.settingsBtn}>
           <Settings size={15} />
@@ -29,12 +23,11 @@ const Navbar = () => {
           <LogIn size={15} />
           <span>Login</span>
         </button>
-        <button className={styles.signupBtn}>
+        <button className={styles.signupBtn} onClick={onSignUpClick}>
           <UserPlus size={15} />
           <span>Sign Up</span>
         </button>
       </div>
-
     </nav>
   );
 };
