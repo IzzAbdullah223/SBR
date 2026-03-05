@@ -11,10 +11,12 @@ import useNearbyStops from '../hooks/useNearbyStops';
 import Navbar from '../Components/NavBar/Navbar';
 import Modal from '../Components/Modal/Modal';
 import { SignUp } from './Authentication/SignUp/SignUp';
+import { Login } from './Authentication/Login/Login';
 import styles from './Home.module.css';
 
 const Home = () => {
   const [showSignUp, setShowSignUp] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
   const [originInput, setOriginInput] = useState('');
   const [destinationInput, setDestinationInput] = useState('');
   const [origin, setOrigin] = useState(null);
@@ -87,7 +89,10 @@ const Home = () => {
   return (
     <div className={styles.container}>
 
-      <Navbar onSignUpClick={() => setShowSignUp(true)} />
+      <Navbar
+        onSignUpClick={() => setShowSignUp(true)}
+        onLoginClick={() => setShowLogin(true)}
+      />
 
       <div className={styles.content}>
         <div className={styles.leftPanel}>
@@ -161,6 +166,10 @@ const Home = () => {
 
       <Modal isOpen={showSignUp} onClose={() => setShowSignUp(false)}>
         <SignUp />
+      </Modal>
+
+      <Modal isOpen={showLogin} onClose={() => setShowLogin(false)}>
+        <Login />
       </Modal>
 
     </div>
