@@ -11,12 +11,10 @@ export const findDirectRoutes = async (originStops, destStops) => {
     const destStop = destStops.find(stop => routeStopIds.includes(stop.stopId));
 
     if (originStop && destStop) {
-      const originIndex = route.stops.findIndex(s => s.stopId === originStop.stopId);
-      const destIndex = route.stops.findIndex(s => s.stopId === destStop.stopId);
-
-      if (destIndex > originIndex) {
-        connectingRoutes.push({ route, originStop, destStop, type: 'direct' });
-      }
+      // ✅ FIXED: removed direction check — both directions are valid
+      // direction check (destIndex > originIndex) was rejecting valid routes
+      // when user swapped origin and destination
+      connectingRoutes.push({ route, originStop, destStop, type: 'direct' });
     }
   });
 
@@ -56,9 +54,8 @@ export const findRoutesWithTransfer = async (originStops, destStops) => {
           const route2TransferIdx = route2.stops.findIndex(s => s.stopId === transferStopId);
           const route2DestIdx = route2.stops.findIndex(s => s.stopId === destStop.stopId);
 
-          if (route1TransferIdx > route1OriginIdx && route2DestIdx > route2TransferIdx) {
-            transferRoutes.push({ route1, route2, originStop, transferStopId, destStop, type: 'transfer' });
-          }
+          // ✅ FIXED: removed direction check — both directions are valid
+          transferRoutes.push({ route1, route2, originStop, transferStopId, destStop, type: 'transfer' });
         }
       }
     });
