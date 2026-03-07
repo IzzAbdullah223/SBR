@@ -12,27 +12,27 @@ const userSchema = new mongoose.Schema({
     trim: true,
     match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
   },
-  
+
   password: {
     type: String,
     required: [true, 'Password is required'],
     minlength: [6, 'Password must be at least 6 characters'],
-    select: false // Don't return password by default in queries
+    select: false // never returned in queries unless explicitly requested with .select('+password')
   },
-  
+
   // Profile information
   name: {
     type: String,
     required: [true, 'Name is required'],
     trim: true
   },
-  
+
   phone: {
     type: String,
     trim: true,
     match: [/^(\+971|00971|0)?[0-9]{9}$/, 'Please enter a valid UAE phone number']
   },
-  
+
   // User preferences
   preferences: {
     language: {
@@ -45,99 +45,62 @@ const userSchema = new mongoose.Schema({
       enum: ['light', 'dark'],
       default: 'light'
     },
-    // Default route optimization preference
     defaultOptimization: {
       type: String,
       enum: ['fastest', 'cheapest', 'minimal_walking'],
       default: 'fastest'
     },
-    // Walking speed preference (km/h)
     walkingSpeed: {
       type: Number,
       default: 5,
       min: 3,
       max: 7
     },
-    // Notifications
     notifications: {
-      email: {
-        type: Boolean,
-        default: true
-      },
-      push: {
-        type: Boolean,
-        default: true
-      },
-      busArrival: {
-        type: Boolean,
-        default: true
-      }
+      email: { type: Boolean, default: true },
+      push: { type: Boolean, default: true },
+      busArrival: { type: Boolean, default: true }
     }
   },
-  
+
   // Account status
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  
-  isVerified: {
-    type: Boolean,
-    default: false
-  },
-  
-  // Last login tracking
-  lastLogin: {
-    type: Date
-  },
-  
-  // Account creation source
+  isActive: { type: Boolean, default: true },
+  isVerified: { type: Boolean, default: false },
+  lastLogin: { type: Date },
   signupSource: {
     type: String,
     enum: ['web', 'mobile', 'admin'],
     default: 'web'
   }
-}, {
-  timestamps: true // Adds createdAt and updatedAt
-});
 
-// Index for efficient queries
+}, { timestamps: true });
+
+// Indexes for efficient queries
 userSchema.index({ email: 1 });
 userSchema.index({ isActive: 1 });
 
-// Pre-save middleware to hash password
-userSchema.pre('save', async function(next) {
-  // Only hash the password if it has been modified (or is new)
-  if (!this.isModified('password')) {
-    return next();
-  }
-  
-  try {
-    // Generate salt and hash password
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
+// Pre-save hook — hashes password before saving to MongoDB
+// using async without next — mixing async + next causes "next is not a function" error
+userSchema.pre('save', async function() {
+  // only hash if password was actually changed — prevents re-hashing on profile updates
+  if (!this.isModified('password')) return;
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Instance method to compare password
+// compares plain text password against hashed password in DB
+// used by passport local strategy during login
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  try {
-    return await bcrypt.compare(candidatePassword, this.password);
-  } catch (error) {
-    throw new Error('Password comparison failed');
-  }
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Instance method to update last login
+// updates lastLogin timestamp — called after successful login in authController
 userSchema.methods.updateLastLogin = function() {
   this.lastLogin = new Date();
   return this.save();
 };
 
-// Instance method to get public profile (without sensitive data)
+// returns safe user data to send to frontend — no password, no internal flags
 userSchema.methods.getPublicProfile = function() {
   return {
     id: this._id,
@@ -149,12 +112,12 @@ userSchema.methods.getPublicProfile = function() {
   };
 };
 
-// Static method to find active users
+// shortcut for finding only active users
 userSchema.statics.findActive = function() {
   return this.find({ isActive: true });
 };
 
-// Virtual for getting user's saved routes count (will populate later)
+// virtual — counts saved routes for this user (future feature)
 userSchema.virtual('savedRoutesCount', {
   ref: 'SavedRoute',
   localField: '_id',
@@ -162,7 +125,7 @@ userSchema.virtual('savedRoutesCount', {
   count: true
 });
 
-// Virtual for getting user's wallet (will populate later)
+// virtual — links to user's wallet (future feature)
 userSchema.virtual('wallet', {
   ref: 'VirtualWallet',
   localField: '_id',
@@ -170,7 +133,7 @@ userSchema.virtual('wallet', {
   justOne: true
 });
 
-// Ensure virtuals are included in JSON output
+// include virtuals when converting to JSON or object
 userSchema.set('toJSON', { virtuals: true });
 userSchema.set('toObject', { virtuals: true });
 

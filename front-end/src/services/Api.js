@@ -2,9 +2,17 @@ const API_BASE_URL = '/api';
 
 const fetchAPI = async (endpoint, options = {}) => {
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {//'/api' + '/bus-stops/nearby?lat=25.1&lng=55.2'
-//= '/api/bus-stops/nearby?lat=25.1&lng=55.2'
-      headers: { 'Content-Type': 'application/json', ...options.headers },
+    // get token from localStorage — saved there after login/signup
+    const token = localStorage.getItem('token');
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        // attach token if it exists — backend verifyToken reads this
+        // format must be "Bearer <token>"
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
+      },
       ...options,
     });
 
@@ -12,11 +20,26 @@ const fetchAPI = async (endpoint, options = {}) => {
 
     return data;
   } catch (error) {
-    // Only true network errors reach here (server down, no connection)
     console.error(`API Error [${endpoint}]:`, error);
     throw error;
   }
 };
+
+
+export const authAPI = {
+  login: (email, password) =>
+    fetchAPI('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
+
+  signup: (name, email, password, phone) =>
+    fetchAPI('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password, phone }),
+    }),
+};
+
 
 export const busStopsAPI = {
   getAll: () => fetchAPI('/bus-stops'),

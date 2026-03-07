@@ -3,6 +3,10 @@ import './config/passport.js';
 import cors from 'cors';
 import { db_connection } from './DB/dbConnection.js';
 import apiRoutes from './routes/index.js';
+import passport from './config/passport.js';
+
+// load passport strategy config — must be imported before any routes
+import './config/passport.js';
 
 const app = express();
 await db_connection(); 
@@ -13,6 +17,10 @@ await db_connection();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+// initialize passport — must come after express.json() so req.body is available
+app.use(passport.initialize());
 
 /**
  * API ROUTES

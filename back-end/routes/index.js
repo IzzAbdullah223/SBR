@@ -16,6 +16,6 @@ router.use('/bus-stops', busStopRoutes);
 router.use('/routes', busRouteRoutes);
 router.use('/find-buses', topsisRoutes);
 router.use('/shapes', shapeRoutes);
-router.use('/auth',authRoutes)      // ✅ NEW: GET /api/shapes/:shapeId
+router.use('/auth',authRoutes)      
 
 export default router;
