@@ -3,7 +3,34 @@
   font-size: 24px;
   font-weight: 800;
   color: var(--navy);
+  margin: 0 0 6px 0;
+}
+
+/* ✅ FIX #6: added subtitle to match Login spacing — both modals
+   now have the same vertical rhythm at the top */
+.subtitle {
+  font-size: 14px;
+  color: var(--gray-400);
   margin: 0 0 24px 0;
+}
+
+/* ✅ FIX #8: general form-level error box for server/unknown errors */
+.formError {
+  background: rgba(255, 77, 109, 0.08);
+  border: 1px solid rgba(255, 77, 109, 0.25);
+  border-left: 4px solid var(--error);
+  border-radius: var(--radius-sm);
+  color: var(--error);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .form {
@@ -41,6 +68,15 @@
   border-color: var(--navy);
 }
 
+/* ✅ FIX #5: red border on the input itself when it has an error */
+.inputError {
+  border-color: var(--error) !important;
+}
+
+.inputError:focus {
+  border-color: var(--error) !important;
+}
+
 .error {
   color: var(--error);
   font-size: 12px;
@@ -70,4 +106,29 @@
   background: var(--gray-200);
   color: var(--gray-400);
   cursor: not-allowed;
+}
+
+/* ✅ FIX #9: switch link styles */
+.switchText {
+  margin: 20px 0 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--gray-400);
+}
+
+.switchBtn {
+  background: none;
+  border: none;
+  color: var(--navy);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.switchBtn:hover {
+  color: var(--gold);
 }

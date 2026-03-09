@@ -33,9 +33,9 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading }) => {
   };
 
   const getScoreColor = (score) => {
-    if (score >= 0.7) return '#4CAF50'; // Green
-    if (score >= 0.4) return '#FF9800'; // Orange
-    return '#F44336';                   // Red
+    if (score >= 0.7) return '#4CAF50';
+    if (score >= 0.4) return '#FF9800';
+    return '#F44336';
   };
 
   return (
@@ -78,7 +78,6 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading }) => {
                   <h3>{bus.routeName}</h3>
                   <div className={styles.badges}>
                     <span className={styles.busType}>{bus.routeType}</span>
-                    {/* ← NEW: Show journey type badge */}
                     {bus.journeyType === 'transfer' ? (
                       <span className={styles.transferBadge}>🔄 Transfer</span>
                     ) : (
@@ -91,27 +90,20 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading }) => {
               {/* TOPSIS Score */}
               <div className={styles.scoreSection}>
                 <div className={styles.scoreLabel}>TOPSIS Score</div>
-                <div
-                  className={styles.score}
-                  style={{ color: scoreColor }}
-                >
+                <div className={styles.score} style={{ color: scoreColor }}>
                   {(bus.score * 100).toFixed(1)}%
                 </div>
                 <div className={styles.scoreBar}>
                   <div
                     className={styles.scoreBarFill}
-                    style={{
-                      width: `${bus.score * 100}%`,
-                      backgroundColor: scoreColor
-                    }}
+                    style={{ width: `${bus.score * 100}%`, backgroundColor: scoreColor }}
                   />
                 </div>
               </div>
 
-              {/* ← FIXED: Correct field names + new fields */}
+              {/* Criteria Grid */}
               <div className={styles.criteria}>
 
-                {/* Departure Time - NEW */}
                 <div className={styles.criteriaItem}>
                   <Navigation size={16} color="#667eea" />
                   <span className={styles.criteriaLabel}>Departs:</span>
@@ -120,32 +112,24 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading }) => {
                   </span>
                 </div>
 
-                {/* Arrival Time - FIXED: was bus.time, now bus.arrivalTime */}
                 <div className={styles.criteriaItem}>
                   <Clock size={16} color="#667eea" />
                   <span className={styles.criteriaLabel}>Wait:</span>
-                  <span className={styles.criteriaValue}>
-                    {bus.arrivalTime} min
-                  </span>
+                  <span className={styles.criteriaValue}>{bus.arrivalTime} min</span>
                 </div>
 
-                {/* Travel Time */}
                 <div className={styles.criteriaItem}>
                   <Clock size={16} color="#9C27B0" />
                   <span className={styles.criteriaLabel}>Journey:</span>
-                  <span className={styles.criteriaValue}>
-                    {bus.travelTime} min
-                  </span>
+                  <span className={styles.criteriaValue}>{bus.travelTime} min</span>
                 </div>
 
-                {/* Cost */}
                 <div className={styles.criteriaItem}>
                   <DollarSign size={16} color="#4CAF50" />
                   <span className={styles.criteriaLabel}>Fare:</span>
                   <span className={styles.criteriaValue}>{bus.cost} AED</span>
                 </div>
 
-                {/* Walking */}
                 <div className={styles.criteriaItem}>
                   <MapPin size={16} color="#FF9800" />
                   <span className={styles.criteriaLabel}>Walk:</span>
@@ -154,7 +138,6 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading }) => {
                   </span>
                 </div>
 
-                {/* Transfers */}
                 <div className={styles.criteriaItem}>
                   <GitMerge size={16} color="#F44336" />
                   <span className={styles.criteriaLabel}>Transfers:</span>
@@ -163,14 +146,18 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading }) => {
 
               </div>
 
-              {/* Transfer Details - NEW: Show legs for transfer routes */}
+              {/* Transfer Details */}
               {bus.journeyType === 'transfer' && bus.leg1 && bus.leg2 && (
                 <div className={styles.transferDetails}>
                   <div className={styles.leg}>
                     <span className={styles.legBadge} style={{ backgroundColor: bus.color }}>
                       {bus.leg1.routeNumber}
                     </span>
-                    <span>{bus.leg1.routeName.substring(0, 25)}...</span>
+                    {/* ✅ FIXED: was bus.leg1.routeName.substring(0, 25) + "..."
+                        That always appended "..." even for short names.
+                        Now the text is in a span with CSS overflow ellipsis —
+                        truncation only happens when the text actually overflows. */}
+                    <span className={styles.legName}>{bus.leg1.routeName}</span>
                     <span>{bus.leg1.departureTime}</span>
                   </div>
                   <ArrowRight size={16} className={styles.legArrow} />
@@ -178,7 +165,7 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading }) => {
                     <span className={styles.legBadge} style={{ backgroundColor: '#667eea' }}>
                       {bus.leg2.routeNumber}
                     </span>
-                    <span>{bus.leg2.routeName.substring(0, 25)}...</span>
+                    <span className={styles.legName}>{bus.leg2.routeName}</span>
                     <span>{bus.leg2.departureTime}</span>
                   </div>
                 </div>
@@ -186,13 +173,9 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading }) => {
 
               {/* Stop Names */}
               <div className={styles.stopNames}>
-                <span className={styles.originStop}>
-                  📍 {bus.originStop?.name}
-                </span>
+                <span className={styles.originStop}>📍 {bus.originStop?.name}</span>
                 <ArrowRight size={14} />
-                <span className={styles.destStop}>
-                  🏁 {bus.destinationStop?.name}
-                </span>
+                <span className={styles.destStop}>🏁 {bus.destinationStop?.name}</span>
               </div>
 
               {/* Action Button */}

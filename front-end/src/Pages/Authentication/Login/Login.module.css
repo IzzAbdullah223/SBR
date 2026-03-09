@@ -1,15 +1,39 @@
+/* ✅ FIX #4: was using hardcoded hex values (#0a1628, #eef0f6, red).
+   Now uses CSS variables to match SignUp.module.css and the rest of the app.
+   If the theme ever changes, both modals update together. */
+
 .container h1 {
   font-family: 'Syne', sans-serif;
   font-size: 24px;
   font-weight: 800;
-  color: #0a1628;
+  color: var(--navy);
   margin: 0 0 6px 0;
 }
 
 .subtitle {
   font-size: 14px;
-  color: #9ba3c2;
+  color: var(--gray-400);
   margin: 0 0 24px 0;
+}
+
+/* ✅ FIX #7: general form-level error box for server/unknown errors
+   sits above the fields so it's clearly not tied to one input */
+.formError {
+  background: rgba(255, 77, 109, 0.08);
+  border: 1px solid rgba(255, 77, 109, 0.25);
+  border-left: 4px solid var(--error);
+  border-radius: var(--radius-sm);
+  color: var(--error);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .form {
@@ -27,38 +51,50 @@
 .field label {
   font-size: 12px;
   font-weight: 700;
-  color: #5a6384;
+  color: var(--gray-600);
   text-transform: uppercase;
   letter-spacing: 0.6px;
 }
 
 .field input {
   padding: 12px 14px;
-  border: 2px solid #eef0f6;
-  border-radius: 10px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-sm);
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
-  color: #0a1628;
+  color: var(--navy);
   outline: none;
   transition: border-color 0.2s ease;
 }
 
 .field input:focus {
-  border-color: #0a1628;
+  border-color: var(--navy);
+}
+
+/* ✅ FIX #5: red border on the input itself when it has an error —
+   visually connects the input to the error message below it */
+.inputError {
+  border-color: var(--error) !important;
+}
+
+.inputError:focus {
+  border-color: var(--error) !important;
 }
 
 .error {
-  color: red;
+  /* ✅ FIX #4: was 'color: red' — now uses var(--error) = #ff4d6d
+     matching SignUp.module.css and the rest of the design system */
+  color: var(--error);
   font-size: 12px;
   margin: 0;
 }
 
 .form button[type='submit'] {
   padding: 14px;
-  background: #0a1628;
-  color: #ffffff;
+  background: var(--navy);
+  color: var(--white);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   font-family: 'Syne', sans-serif;
   font-size: 15px;
   font-weight: 700;
@@ -68,12 +104,37 @@
 }
 
 .form button[type='submit']:hover:not(:disabled) {
-  background: #f0a500;
-  color: #0a1628;
+  background: var(--gold);
+  color: var(--navy);
 }
 
 .form button[type='submit']:disabled {
-  background: #eef0f6;
-  color: #9ba3c2;
+  background: var(--gray-200);
+  color: var(--gray-400);
   cursor: not-allowed;
+}
+
+/* ✅ FIX #9: switch link styles */
+.switchText {
+  margin: 20px 0 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--gray-400);
+}
+
+.switchBtn {
+  background: none;
+  border: none;
+  color: var(--navy);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.switchBtn:hover {
+  color: var(--gold);
 }

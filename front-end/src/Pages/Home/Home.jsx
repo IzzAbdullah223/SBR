@@ -8,16 +8,20 @@ import { MAP_CONFIG } from '../../utils/constants';
 import useFindBuses from '../../hooks/useFindBuses';
 import useShape from '../../hooks/useShape';
 import useNearbyStops from '../../hooks/useNearbyStops';
+import useAuth from '../../hooks/useAuth';
 import Navbar from '../../Components/NavBar/Navbar';
 import Modal from '../../Components/Modal/Modal';
 import { SignUp } from '../Authentication/SignUp/SignUp';
 import { Login } from '../Authentication/Login/Login';
 import styles from './Home.module.css';
 
+
+
 const Home = () => {
-  const [showSignUp, setShowSignUp] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
-  const [user, setUser] = useState(null);
+
+
+ 
+
   const [originInput, setOriginInput] = useState('');
   const [destinationInput, setDestinationInput] = useState('');
   const [origin, setOrigin] = useState(null);
@@ -30,46 +34,19 @@ const Home = () => {
   const { buses, loading, error, findBuses, clearResults } = useFindBuses();
   const { shapeCoordinates, shapeCoordinatesLeg2 } = useShape(selectedBus);
   const { nearbyStops } = useNearbyStops(origin, destination, 0.8);
-
-  // ── RESTORE USER ON PAGE REFRESH ──────────────────────────────────────────
-  // runs once when the app loads
-  // if a token exists in localStorage the user was previously logged in
-  // decode it and restore their state so they don't have to login again
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return; // no token — user was never logged in
-
-    try {
-      // JWT = header.payload.signature — we decode the middle part (payload)
-      // atob decodes base64 back to readable JSON
-      const payload = JSON.parse(atob(token.split('.')[1]));
-
-      // payload.exp is expiry in seconds, Date.now() is milliseconds
-      if (payload.exp * 1000 > Date.now()) {
-        setUser(payload.user); // restore user state
-      } else {
-        localStorage.removeItem('token'); // token expired — clean up
-      }
-    } catch {
-      localStorage.removeItem('token'); // token malformed — clean up
-    }
-  }, []); // empty array = only runs once on mount
-
-  // ── AUTH HANDLERS ──────────────────────────────────────────────────────────
-
-  // called by both Login and SignUp on success
-  // token already saved in localStorage by Login/SignUp before this is called
-  const handleLoginSuccess = (loggedInUser) => {
-    setUser(loggedInUser); // show user in navbar
-    setShowLogin(false);   // close login modal
-    setShowSignUp(false);  // close signup modal
-  };
-
-  // called when user clicks logout in navbar
-  const handleLogout = () => {
-    localStorage.removeItem('token'); // clear token so refresh doesn't restore them
-    setUser(null);                    // clear user — navbar goes back to login/signup buttons
-  };
+   const {
+    user,
+    showLogin,
+    showSignUp,
+    handleLoginSuccess,
+    handleLogout,
+    handleSwitchToSignUp,
+    handleSwitchToLogin,
+    openLogin,
+    openSignUp,
+    closeLogin,
+    closeSignUp,
+  } = useAuth();
 
   // ── SEARCH HANDLERS ────────────────────────────────────────────────────────
 
@@ -112,7 +89,7 @@ const Home = () => {
     if (buses?.length > 0 && !selectedBus) {
       setSelectedBus(buses[0]);
     }
-  }, [buses]);
+  }, [buses, selectedBus]);
 
   const handleSelectBus = (bus) => setSelectedBus(bus);
 
@@ -133,8 +110,8 @@ const Home = () => {
     <div className={styles.container}>
 
       <Navbar
-        onSignUpClick={() => setShowSignUp(true)}
-        onLoginClick={() => setShowLogin(true)}
+        onSignUpClick={openSignUp}
+        onLoginClick={openLogin}
         user={user}
         onLogout={handleLogout}
       />
@@ -200,13 +177,19 @@ const Home = () => {
       </div>
 
       {/* signup modal — passes onLoginSuccess so signup auto-logs user in */}
-      <Modal isOpen={showSignUp} onClose={() => setShowSignUp(false)}>
-        <SignUp onLoginSuccess={handleLoginSuccess} />
+      <Modal isOpen={showSignUp} onClose={closeSignUp}>
+        <SignUp
+          onLoginSuccess={handleLoginSuccess}
+          onSwitchToLogin={handleSwitchToLogin}
+        />
       </Modal>
 
       {/* login modal */}
-      <Modal isOpen={showLogin} onClose={() => setShowLogin(false)}>
-        <Login onLoginSuccess={handleLoginSuccess} />
+      <Modal isOpen={showLogin} onClose={closeLogin}>
+        <Login
+          onLoginSuccess={handleLoginSuccess}
+          onSwitchToSignUp={handleSwitchToSignUp}
+        />
       </Modal>
 
     </div>

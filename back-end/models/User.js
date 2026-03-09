@@ -76,7 +76,7 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Indexes for efficient queries
-userSchema.index({ email: 1 });
+
 userSchema.index({ isActive: 1 });
 
 // Pre-save hook — hashes password before saving to MongoDB

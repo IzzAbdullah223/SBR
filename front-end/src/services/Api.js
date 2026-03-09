@@ -2,21 +2,32 @@ const API_BASE_URL = '/api';
 
 const fetchAPI = async (endpoint, options = {}) => {
   try {
-    // get token from localStorage — saved there after login/signup
     const token = localStorage.getItem('token');
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       headers: {
         'Content-Type': 'application/json',
-        // attach token if it exists — backend verifyToken reads this
-        // format must be "Bearer <token>"
         ...(token && { Authorization: `Bearer ${token}` }),
         ...options.headers,
       },
       ...options,
     });
 
-    const data = await response.json();
+   
+    const text = await response.text();
+    let data = null;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      // body was plain text (e.g. "Unauthorized") — not JSON, that's fine
+      data = null;
+    }
+
+    if (!response.ok) {
+      // prefer data.message (our own error shape), fall back to plain text,
+      // then a generic fallback if the body was empty
+      throw new Error(data?.message || text || 'Something went wrong. Please try again.');
+    }
 
     return data;
   } catch (error) {
@@ -24,7 +35,6 @@ const fetchAPI = async (endpoint, options = {}) => {
     throw error;
   }
 };
-
 
 export const authAPI = {
   login: (email, password) =>
@@ -39,7 +49,6 @@ export const authAPI = {
       body: JSON.stringify({ name, email, password, phone }),
     }),
 };
-
 
 export const busStopsAPI = {
   getAll: () => fetchAPI('/bus-stops'),
@@ -61,9 +70,7 @@ export const topsisAPI = {
     }),
 };
 
-
 export const shapesAPI = {
-  // Get shape by GTFS shape ID (e.g. "81:1")
   getById: (shapeId, originStopId, destStopId) => {
     const params = new URLSearchParams();
     if (originStopId) params.append('originStopId', originStopId);
@@ -71,16 +78,16 @@ export const shapesAPI = {
     const query = params.toString() ? `?${params.toString()}` : '';
     return fetchAPI(`/shapes/${encodeURIComponent(shapeId)}${query}`);
   },
-
-  // Get shape by route number (e.g. "81") — easier to use from frontend
-  getByRouteNumber: (routeNumber) => fetchAPI(`/shapes/route/${encodeURIComponent(routeNumber)}`),
+  getByRouteNumber: (routeNumber) =>
+    fetchAPI(`/shapes/route/${encodeURIComponent(routeNumber)}`),
 };
 
 const api = {
+  auth: authAPI,
   busStops: busStopsAPI,
   routes: routesAPI,
   topsis: topsisAPI,
-  shapes: shapesAPI, // ✅ NEW
+  shapes: shapesAPI,
 };
 
 export default api;

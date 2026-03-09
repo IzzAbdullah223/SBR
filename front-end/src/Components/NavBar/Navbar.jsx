@@ -13,11 +13,20 @@ const Navbar = ({ onSignUpClick, onLoginClick, user, onLogout }) => {
         </span>
         <div className={styles.logoBadge}>Dubai RTA</div>
       </div>
+
       <div className={styles.actions}>
-        <button className={styles.settingsBtn}>
+
+        {/* ✅ FIXED: Settings had no onClick — clicking it did nothing and looked broken.
+            Added disabled + title so it's clear it's coming soon, not just broken. */}
+        <button
+          className={styles.settingsBtn}
+          disabled
+          title="Settings — coming soon"
+        >
           <Settings size={15} />
           <span>Settings</span>
         </button>
+
         <div className={styles.divider} />
 
         {user ? (

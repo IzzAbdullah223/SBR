@@ -2,15 +2,13 @@ import BusStop from '../models/BusStop.js';
 import BusRoute from '../models/BusRoute.js';
 import { calculateDistance } from '../services/geoCalculator.service.js';
 
-
-
 /**
  * Get all bus stops
  */
 export const getAllStops = async (req, res) => {
   try {
     const stops = await BusStop.find().select('-__v');
-    
+
     res.json({
       success: true,
       count: stops.length,
@@ -31,7 +29,7 @@ export const getAllStops = async (req, res) => {
 export const getStopById = async (req, res) => {
   try {
     const stop = await BusStop.findOne({ stopId: req.params.stopId });
-    
+
     if (!stop) {
       return res.status(404).json({
         success: false,
@@ -41,7 +39,7 @@ export const getStopById = async (req, res) => {
 
     // Find all routes that include this stop
     const routes = await BusRoute.find({ 'stops.stopId': req.params.stopId });
-    
+
     const stopWithRoutes = {
       ...stop.toObject(),
       routes: routes.map(route => ({
@@ -52,7 +50,7 @@ export const getStopById = async (req, res) => {
         direction: route.stops.find(s => s.stopId === req.params.stopId)?.order
       }))
     };
-    
+
     res.json({
       success: true,
       data: stopWithRoutes
@@ -71,8 +69,8 @@ export const getStopById = async (req, res) => {
  */
 export const findNearbyStops = async (req, res) => {
   try {
-    const { lat, lng, radius = 1 } = req.query; // radius in km, default 1km
-    
+    const { lat, lng, radius = 1 } = req.query;
+
     if (!lat || !lng) {
       return res.status(400).json({
         success: false,
@@ -84,35 +82,26 @@ export const findNearbyStops = async (req, res) => {
     const longitude = parseFloat(lng);
     const searchRadius = parseFloat(radius);
 
-    // Get all stops
-    const allStops = await BusStop.find();
-    
-    // Calculate distance for each stop using service
-    const stopsWithDistance = allStops.map(stop => {
-      const distance = calculateDistance(
-        latitude,
-        longitude,
-        stop.position.lat,
-        stop.position.lng
-      );
-      
-      return {
-        ...stop.toObject(),
-        distance: parseFloat(distance.toFixed(2))
-      };
-    });
+   
+    const nearbyStops = await BusStop.findNearby(latitude, longitude, searchRadius);
 
-    // Filter stops within radius and sort by distance
-    const nearbyStops = stopsWithDistance
-      .filter(stop => stop.distance <= searchRadius)
-      .sort((a, b) => a.distance - b.distance);
+    const stopsWithDistance = nearbyStops.map(stop => ({
+      ...stop.toObject(),
+      distance: parseFloat(
+        calculateDistance(latitude, longitude, stop.position.lat, stop.position.lng).toFixed(2)
+      )
+    }));
+
+    // findNearby already returns results sorted by distance (MongoDB $near default)
+    // so no extra sort needed
 
     res.json({
       success: true,
-      count: nearbyStops.length,
-      searchRadius: searchRadius,
-      data: nearbyStops
+      count: stopsWithDistance.length,
+      searchRadius,
+      data: stopsWithDistance
     });
+
   } catch (error) {
     console.error('Error finding nearby stops:', error);
     res.status(500).json({

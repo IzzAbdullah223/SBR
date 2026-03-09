@@ -4,9 +4,8 @@ import cors from 'cors';
 import { db_connection } from './DB/dbConnection.js';
 import apiRoutes from './routes/index.js';
 import passport from './config/passport.js';
-
 // load passport strategy config — must be imported before any routes
-import './config/passport.js';
+
 
 const app = express();
 await db_connection(); 

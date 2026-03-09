@@ -36,7 +36,8 @@ export const findBuses = async (req, res) => {
 
     const routeData = await routeFinder.findAllRoutes(origin, destination);
 
-    // No stops near origin
+   
+
     if (routeData.originStops?.length === 0 && routeData.destStops?.length === 0) {
       return res.status(404).json({
         success: false,
@@ -61,6 +62,7 @@ export const findBuses = async (req, res) => {
       });
     }
 
+    // ✅ Generic fallback — only reached if success:false for some other reason
     if (!routeData.success) {
       return res.status(404).json({
         success: false,
@@ -110,7 +112,6 @@ export const findBuses = async (req, res) => {
       rankedBuses = topsisService.rankBuses(allBuses, weights);
     } catch (topsisError) {
       console.error('❌ TOPSIS ranking failed:', topsisError);
-      // Fall back to unranked buses
       rankedBuses = allBuses.map(b => ({ ...b, score: 0 }));
     }
 

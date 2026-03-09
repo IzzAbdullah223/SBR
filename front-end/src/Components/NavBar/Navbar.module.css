@@ -79,14 +79,15 @@
   font-family: 'DM Sans', sans-serif;
   font-size: 13px;
   font-weight: 500;
-  cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.settingsBtn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.2);
+/* ✅ FIXED: was cursor:pointer with a hover effect — made it look fully functional.
+   Now disabled so cursor becomes not-allowed and hover does nothing.
+   The title attribute shows "coming soon" tooltip on hover. */
+.settingsBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .loginBtn {
