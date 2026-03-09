@@ -7,13 +7,16 @@ const fetchAPI = async (endpoint, options = {}) => {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       headers: {
         'Content-Type': 'application/json',
+        // attach token if it exists — backend verifyToken reads this
+        // format must be "Bearer <token>"
         ...(token && { Authorization: `Bearer ${token}` }),
         ...options.headers,
       },
       ...options,
     });
 
-   
+    // read body as text first — some endpoints (e.g. passport 401) return
+    // plain text instead of JSON, calling .json() directly would crash
     const text = await response.text();
     let data = null;
     try {
@@ -23,10 +26,14 @@ const fetchAPI = async (endpoint, options = {}) => {
       data = null;
     }
 
-    if (!response.ok) {
-      // prefer data.message (our own error shape), fall back to plain text,
-      // then a generic fallback if the body was empty
-      throw new Error(data?.message || text || 'Something went wrong. Please try again.');
+    // allowErrorResponse: true — caller wants the body even on 4xx/5xx
+    // used by topsisAPI because "no routes found" comes back as 404 but
+    // it's a valid expected result with a structured errorCode, not a crash
+    // default behaviour (no flag) — throw on non-2xx so catch blocks fire
+    if (!response.ok && !options.allowErrorResponse) {
+      const error = new Error(data?.message || text || 'Something went wrong. Please try again.');
+      error.status = response.status; // attach status so callers check code not message text
+      throw error;
     }
 
     return data;
@@ -35,6 +42,7 @@ const fetchAPI = async (endpoint, options = {}) => {
     throw error;
   }
 };
+
 
 export const authAPI = {
   login: (email, password) =>
@@ -67,10 +75,14 @@ export const topsisAPI = {
     fetchAPI('/find-buses', {
       method: 'POST',
       body: JSON.stringify({ origin, destination, weights }),
+      // don't throw on 404/400 — return the body so useFindBuses can read
+      // response.errorCode and show the correct message (no stops, no routes etc.)
+      allowErrorResponse: true,
     }),
 };
 
 export const shapesAPI = {
+  // Get shape by GTFS shape ID (e.g. "81:1")
   getById: (shapeId, originStopId, destStopId) => {
     const params = new URLSearchParams();
     if (originStopId) params.append('originStopId', originStopId);
@@ -78,6 +90,8 @@ export const shapesAPI = {
     const query = params.toString() ? `?${params.toString()}` : '';
     return fetchAPI(`/shapes/${encodeURIComponent(shapeId)}${query}`);
   },
+
+  // Get shape by route number (e.g. "81") — easier to use from frontend
   getByRouteNumber: (routeNumber) =>
     fetchAPI(`/shapes/route/${encodeURIComponent(routeNumber)}`),
 };

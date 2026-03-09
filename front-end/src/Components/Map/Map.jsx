@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import MapBoundsUpdater from './MapBoundsUpdater';
@@ -12,14 +12,36 @@ import {
 import { MAP_CONFIG } from '../../utils/constants';
 import styles from './Map.module.css';
 
-// ✅ Fits map bounds to the route shape
+// ✅ FIXED: FitBounds now only fits on first shape load, not on every route switch.
+//
+// Old behavior: every time shapeCoordinates changed (i.e. every time the user
+// clicked a different route card), the map re-fitted to the new shape. This made
+// it look like origin/destination changed — the map jumped to wherever the new
+// shape happened to start, pushing the origin/destination pins off-screen.
+//
+// Fix: use a ref to track whether we've already fitted. Only fit once when a shape
+// first loads. After that the user can pan/zoom freely without the map jumping.
+// The ref resets when shapeCoordinates goes null (new search), so it fits again
+// for the next search result.
 const FitBounds = ({ coordinates }) => {
   const map = useMap();
+  const hasFitted = useRef(false);
+
   useEffect(() => {
-    if (!coordinates || coordinates.length < 2) return;
+    // reset when coordinates are cleared (new search started)
+    if (!coordinates || coordinates.length < 2) {
+      hasFitted.current = false;
+      return;
+    }
+
+    // only fit once per shape — don't re-fit when user switches route cards
+    if (hasFitted.current) return;
+
     const latLngs = coordinates.map(c => [c.lat, c.lng]);
     map.fitBounds(latLngs, { padding: [40, 40] });
+    hasFitted.current = true;
   }, [coordinates]);
+
   return null;
 };
 
@@ -71,7 +93,7 @@ const MapView = ({
         <MapBoundsUpdater origin={origin} destination={destination} />
       )}
 
-      {/* Fit map to route shape */}
+      {/* Fit map to shape — only on first load, not on every route switch */}
       {leg1Positions && <FitBounds coordinates={shapeCoordinates} />}
 
       {/* User Location */}

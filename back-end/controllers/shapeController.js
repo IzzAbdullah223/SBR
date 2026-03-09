@@ -54,11 +54,23 @@ export const getShapeById = async (req, res) => {
         const originIdx = findClosestPointIndex(coordinates, originStop.position.lat, originStop.position.lng);
         const destIdx = findClosestPointIndex(coordinates, destStop.position.lat, destStop.position.lng);
 
-        // Make sure we go in the right direction (origin before dest)
-        const startIdx = Math.min(originIdx, destIdx);
-        const endIdx = Math.max(originIdx, destIdx);
+        // ✅ FIXED: old code used Math.min/Math.max which always sliced forward
+        // through the shape array regardless of direction. This caused giant loops
+        // when the user travels in the opposite direction of the stored shape —
+        // e.g. shape 29:1 is stored Deira→Dubai Mall, but user goes Dubai Mall→Deira,
+        // so originIdx > destIdx. The old code took min→max (the long way around).
+        //
+        // Fix: respect direction. If origin comes before dest in the shape array,
+        // slice forward. If dest comes before origin, slice that segment and reverse
+        // so the polyline always flows origin → destination on screen.
+        if (originIdx <= destIdx) {
+          // travelling in the same direction as the stored shape — slice forward
+          coordinates = coordinates.slice(originIdx, destIdx + 1);
+        } else {
+          // travelling opposite to stored shape — slice and reverse
+          coordinates = coordinates.slice(destIdx, originIdx + 1).reverse();
+        }
 
-        coordinates = coordinates.slice(startIdx, endIdx + 1);
         console.log(`✂️  Trimmed shape ${shapeId}: ${shape.coordinates.length} → ${coordinates.length} points (stops ${originStopId} → ${destStopId})`);
       }
     }

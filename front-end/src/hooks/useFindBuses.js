@@ -6,6 +6,8 @@
 import { useState, useCallback } from 'react';
 import api from '../services/Api';
 
+// maps backend errorCodes to human-readable messages shown in the UI
+// falls back to the raw backend message if the code isn't recognised
 const getErrorMessage = (errorCode, message) => {
   const errors = {
     INVALID_ORIGIN:      '📍 Please select your origin from the dropdown — don\'t just type it.',
@@ -23,65 +25,95 @@ const getErrorMessage = (errorCode, message) => {
   return errors[errorCode] || `⚠️ ${message || 'Something went wrong. Please try again.'}`;
 };
 
+// errorCode categories — used by Home.jsx to style the error box differently
+// 'info'  = expected result, not a bug (no routes, out of service, no stops)
+// 'error' = something actually went wrong (server error, network down)
+export const ERROR_TYPES = {
+  INVALID_ORIGIN:      'error',
+  INVALID_DESTINATION: 'error',
+  NO_STOPS_BOTH:       'info',
+  NO_ORIGIN_STOPS:     'info',
+  NO_DEST_STOPS:       'info',
+  NO_STOPS:            'info',
+  NO_ROUTES:           'info',
+  OUT_OF_SERVICE:      'info',
+  SERVER_ERROR:        'error',
+  NETWORK_ERROR:       'error',
+};
+
 const useFindBuses = () => {
   const [buses, setBuses] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null);       // error message string
+  const [errorType, setErrorType] = useState(null); // 'info' | 'error' | null
   const [stats, setStats] = useState(null);
 
-  const findBuses = useCallback(async (origin, destination, weights) => {//// useCallback saves a function in memory so React doesn't recreate it on every render.
-// Without it, every re-render creates a new function object — causing unnecessary re-renders in children.
-// Empty [] means create once and never recreate.
-// With dependencies [x] — only recreate when x changes.
+  const findBuses = useCallback(async (origin, destination, weights) => {
+    // useCallback saves a function in memory so React doesn't recreate it on every render.
+    // Without it, every re-render creates a new function object — causing unnecessary re-renders in children.
+    // Empty [] means create once and never recreate.
+    // With dependencies [x] — only recreate when x changes.
 
-    // Frontend validation
+    // Frontend validation — catch obvious issues before hitting the server
     if (!origin?.lat || !origin?.lng) {
       setError(getErrorMessage('INVALID_ORIGIN'));
+      setErrorType('error');
       return;
     }
     if (!destination?.lat || !destination?.lng) {
       setError(getErrorMessage('INVALID_DESTINATION'));
+      setErrorType('error');
       return;
     }
     if (origin.lat === destination.lat && origin.lng === destination.lng) {
       setError('⚠️ Origin and destination cannot be the same place.');
+      setErrorType('error');
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
+      setErrorType(null);
       setBuses([]);
       setStats(null);
 
-     
+      // fetchData is used here (not fetchAPI) — it always returns the body
+      // even on 404/400 so we can read the errorCode and show the right message.
+      // see Api.js for why this distinction matters
       const response = await api.topsis.findBuses(origin, destination, weights);
 
       if (response.success) {
+        // happy path — buses found and ranked
         setBuses(response.buses);
         setStats(response.stats);
       } else {
-        // errorCode from backend maps to specific message
-        setError(getErrorMessage(response.errorCode, response.message));
+        // errorCode from backend maps to a specific human-readable message
+        const code = response.errorCode || 'SERVER_ERROR';
+        setError(getErrorMessage(code, response.message));
+        setErrorType(ERROR_TYPES[code] || 'error');
       }
 
     } catch (err) {
-      // Only true network errors reach here (server completely down)
+      // only true network errors reach here — server completely unreachable
+      // (fetchData only throws when fetch() itself throws, not on 4xx/5xx)
       console.error('Network error finding buses:', err);
       setError(getErrorMessage('NETWORK_ERROR'));
+      setErrorType('error');
     } finally {
       setLoading(false);
     }
 
-  }, []);// [] this empty [] for the useCallback means only calculate it once.
+  }, []); // [] this empty [] for the useCallback means only calculate it once.
 
   const clearResults = useCallback(() => {
     setBuses([]);
     setError(null);
+    setErrorType(null);
     setStats(null);
-  }, []);// used later when doing another search to delete every bus results shown in the UI
+  }, []); // used later when doing another search to delete every bus results shown in the UI
 
-  return { buses, loading, error, stats, findBuses, clearResults };
+  return { buses, loading, error, errorType, stats, findBuses, clearResults };
 };
 
 export default useFindBuses;

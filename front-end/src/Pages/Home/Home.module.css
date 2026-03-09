@@ -1,5 +1,3 @@
-
-
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 
 :root {
@@ -256,18 +254,33 @@
 }
 
 /* ─── Error Message ─── */
+/* base error box — shared layout for all error states */
 .errorMessage {
   margin: 0 24px 16px;
   padding: 14px 16px;
-  background: rgba(255, 77, 109, 0.08);
-  border: 1px solid rgba(255, 77, 109, 0.25);
-  border-left: 4px solid var(--error);
   border-radius: var(--radius-sm);
-  color: var(--error);
   font-size: 14px;
   font-weight: 500;
   animation: slideIn 0.3s ease;
   flex-shrink: 0;
+  line-height: 1.5;
+}
+
+/* errorBad — real problem: server down, network error, invalid input */
+.errorBad {
+  background: rgba(255, 77, 109, 0.08);
+  border: 1px solid rgba(255, 77, 109, 0.25);
+  border-left: 4px solid var(--error);
+  color: var(--error);
+}
+
+/* errorInfo — expected result: no routes, no stops, out of service hours
+   softer amber styling — not a crash, just an informational result */
+.errorInfo {
+  background: rgba(240, 165, 0, 0.08);
+  border: 1px solid rgba(240, 165, 0, 0.25);
+  border-left: 4px solid var(--gold);
+  color: #a07000;
 }
 
 @keyframes slideIn {

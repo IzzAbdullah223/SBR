@@ -5,17 +5,32 @@ export const findDirectRoutes = async (originStops, destStops) => {
   const allRoutes = await BusRoute.find();
   const connectingRoutes = [];
 
-  allRoutes.forEach(route => {
-    const routeStopIds = route.stops.map(s => s.stopId);
-    const originStop = originStops.find(stop => routeStopIds.includes(stop.stopId));
-    const destStop = destStops.find(stop => routeStopIds.includes(stop.stopId));
+  // seen tracks routeNumbers we already added — prevents the same route
+  // appearing multiple times when several nearby stops all match the same route
+  const seen = new Set();
 
-    if (originStop && destStop) {
-      // ✅ FIXED: removed direction check — both directions are valid
-      // direction check (destIndex > originIndex) was rejecting valid routes
-      // when user swapped origin and destination
-      connectingRoutes.push({ route, originStop, destStop, type: 'direct' });
-    }
+  allRoutes.forEach(route => {
+    // skip if we already have this route number
+    if (seen.has(route.routeNumber)) return;
+
+    const routeStopIds = route.stops.map(s => s.stopId);
+
+    // get ALL origin stops that this route serves, then pick the closest one
+    // to the user — instead of just taking the first match which is arbitrary
+    const matchingOriginStops = originStops.filter(s => routeStopIds.includes(s.stopId));
+    const matchingDestStops = destStops.filter(s => routeStopIds.includes(s.stopId));
+
+    if (matchingOriginStops.length === 0 || matchingDestStops.length === 0) return;
+
+    // sort by distance (attached by geoCalculator.findNearbyStops) and take closest
+    const originStop = matchingOriginStops.sort((a, b) => a.distance - b.distance)[0];
+    const destStop = matchingDestStops.sort((a, b) => a.distance - b.distance)[0];
+
+    // ✅ FIXED: removed direction check — both directions are valid
+    // direction check (destIndex > originIndex) was rejecting valid routes
+    // when user swapped origin and destination
+    connectingRoutes.push({ route, originStop, destStop, type: 'direct' });
+    seen.add(route.routeNumber);
   });
 
   return connectingRoutes;
@@ -24,6 +39,12 @@ export const findDirectRoutes = async (originStops, destStops) => {
 export const findRoutesWithTransfer = async (originStops, destStops) => {
   const allRoutes = await BusRoute.find();
   const transferRoutes = [];
+
+  // seen tracks route1+route2 pairs we already added — prevents the same
+  // transfer combination appearing multiple times when:
+  // - multiple nearby stops match route1
+  // - route1 and route2 share multiple common stops
+  const seen = new Set();
 
   const routesFromOrigin = allRoutes.filter(route => {
     const routeStopIds = route.stops.map(s => s.stopId);
@@ -39,24 +60,29 @@ export const findRoutesWithTransfer = async (originStops, destStops) => {
     routesToDest.forEach(route2 => {
       if (route1.routeNumber === route2.routeNumber) return;
 
+      // skip if we already have this exact route1+route2 combination
+      const pairKey = `${route1.routeNumber}→${route2.routeNumber}`;
+      if (seen.has(pairKey)) return;
+
       const route1StopIds = route1.stops.map(s => s.stopId);
       const route2StopIds = route2.stops.map(s => s.stopId);
       const commonStopIds = route1StopIds.filter(id => route2StopIds.includes(id));
 
-      if (commonStopIds.length > 0) {
-        const transferStopId = commonStopIds[0];
-        const originStop = originStops.find(stop => route1StopIds.includes(stop.stopId));
-        const destStop = destStops.find(stop => route2StopIds.includes(stop.stopId));
+      if (commonStopIds.length === 0) return;
 
-        if (originStop && destStop) {
-          const route1OriginIdx = route1.stops.findIndex(s => s.stopId === originStop.stopId);
-          const route1TransferIdx = route1.stops.findIndex(s => s.stopId === transferStopId);
-          const route2TransferIdx = route2.stops.findIndex(s => s.stopId === transferStopId);
-          const route2DestIdx = route2.stops.findIndex(s => s.stopId === destStop.stopId);
+      const transferStopId = commonStopIds[0];
 
-          // ✅ FIXED: removed direction check — both directions are valid
-          transferRoutes.push({ route1, route2, originStop, transferStopId, destStop, type: 'transfer' });
-        }
+      // pick closest matching origin stop for route1
+      const matchingOriginStops = originStops.filter(s => route1StopIds.includes(s.stopId));
+      const originStop = matchingOriginStops.sort((a, b) => a.distance - b.distance)[0];
+
+      // pick closest matching dest stop for route2
+      const matchingDestStops = destStops.filter(s => route2StopIds.includes(s.stopId));
+      const destStop = matchingDestStops.sort((a, b) => a.distance - b.distance)[0];
+
+      if (originStop && destStop) {
+        transferRoutes.push({ route1, route2, originStop, transferStopId, destStop, type: 'transfer' });
+        seen.add(pairKey);
       }
     });
   });

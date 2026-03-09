@@ -15,26 +15,9 @@ import { SignUp } from '../Authentication/SignUp/SignUp';
 import { Login } from '../Authentication/Login/Login';
 import styles from './Home.module.css';
 
-
-
 const Home = () => {
 
-
- 
-
-  const [originInput, setOriginInput] = useState('');
-  const [destinationInput, setDestinationInput] = useState('');
-  const [origin, setOrigin] = useState(null);
-  const [destination, setDestination] = useState(null);
-  const [selectedBus, setSelectedBus] = useState(null);
-  const [weights, setWeights] = useState({
-    time: 0.25, cost: 0.25, walkingDistance: 0.25, transfers: 0.25,
-  });
-
-  const { buses, loading, error, findBuses, clearResults } = useFindBuses();
-  const { shapeCoordinates, shapeCoordinatesLeg2 } = useShape(selectedBus);
-  const { nearbyStops } = useNearbyStops(origin, destination, 0.8);
-   const {
+  const {
     user,
     showLogin,
     showSignUp,
@@ -47,6 +30,19 @@ const Home = () => {
     closeLogin,
     closeSignUp,
   } = useAuth();
+
+  const [originInput, setOriginInput] = useState('');
+  const [destinationInput, setDestinationInput] = useState('');
+  const [origin, setOrigin] = useState(null);
+  const [destination, setDestination] = useState(null);
+  const [selectedBus, setSelectedBus] = useState(null);
+  const [weights, setWeights] = useState({
+    time: 0.25, cost: 0.25, walkingDistance: 0.25, transfers: 0.25,
+  });
+
+  const { buses, loading, error, errorType, findBuses, clearResults } = useFindBuses();
+  const { shapeCoordinates, shapeCoordinatesLeg2 } = useShape(selectedBus);
+  const { nearbyStops } = useNearbyStops(origin, destination, 0.8);
 
   // ── SEARCH HANDLERS ────────────────────────────────────────────────────────
 
@@ -148,7 +144,14 @@ const Home = () => {
             <span>{loading ? 'Searching...' : 'Find Best Bus Routes'}</span>
           </button>
 
-          {error && <div className={styles.errorMessage}>⚠️ {error}</div>}
+          {/* errorType 'info' = expected result (no routes, out of service) — softer styling
+              errorType 'error' = real problem (server down, network) — red warning styling
+              messages from useFindBuses already include their own emoji, don't add another */}
+          {error && (
+            <div className={`${styles.errorMessage} ${errorType === 'info' ? styles.errorInfo : styles.errorBad}`}>
+              {error}
+            </div>
+          )}
 
           {(buses.length > 0 || loading) && (
             <div className={styles.section}>

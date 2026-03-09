@@ -23,15 +23,28 @@ export const calculateDistance = (lat1, lng1, lat2, lng2) => {
 export const findNearbyStops = async (lat, lng, radiusKm = 1.0) => {
   try {
     const nearbyStops = await BusStop.findNearby(lat, lng, radiusKm);
-    return nearbyStops;
+
+    // attach distance to each stop so routeFinder can sort by it and always
+    // pick the closest matching stop to the user for each route — instead of
+    // just taking the first match which is arbitrary
+    return nearbyStops.map(stop => ({
+      ...stop.toObject(),
+      distance: calculateDistance(lat, lng, stop.position.lat, stop.position.lng)
+    }));
+
   } catch (error) {
     // If $near fails (e.g. index not ready), fall back to in-memory filter
     console.warn('⚠️  $near query failed, falling back to in-memory filter:', error.message);
     const allStops = await BusStop.find({ status: 'active' });
-    return allStops.filter(stop => {
-      const distance = calculateDistance(lat, lng, stop.position.lat, stop.position.lng);
-      return distance <= radiusKm;
-    });
+    return allStops
+      .filter(stop => {
+        const distance = calculateDistance(lat, lng, stop.position.lat, stop.position.lng);
+        return distance <= radiusKm;
+      })
+      .map(stop => ({
+        ...stop.toObject(),
+        distance: calculateDistance(lat, lng, stop.position.lat, stop.position.lng)
+      }));
   }
 };
 
