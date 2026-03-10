@@ -15,61 +15,55 @@ const savedRouteSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Route name is required'],
     trim: true,
-    maxlength: [50, 'Route name cannot exceed 50 characters']
+    maxlength: [100, 'Route name cannot exceed 100 characters']
   },
   
   // Origin location
   origin: {
-    name: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    // If it's a bus stop
-    stopId: {
-      type: String,
-      ref: 'BusStop'
-    },
-    // GPS coordinates (if custom location)
+    name: { type: String, required: true, trim: true },
+    stopId: { type: String, ref: 'BusStop' },
     position: {
-      lat: {
-        type: Number,
-        min: -90,
-        max: 90
-      },
-      lng: {
-        type: Number,
-        min: -180,
-        max: 180
-      }
+      lat: { type: Number, min: -90, max: 90 },
+      lng: { type: Number, min: -180, max: 180 }
     }
   },
   
   // Destination location
   destination: {
-    name: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    stopId: {
-      type: String,
-      ref: 'BusStop'
-    },
+    name: { type: String, required: true, trim: true },
+    stopId: { type: String, ref: 'BusStop' },
     position: {
-      lat: {
-        type: Number,
-        min: -90,
-        max: 90
-      },
-      lng: {
-        type: Number,
-        min: -180,
-        max: 180
-      }
+      lat: { type: Number, min: -90, max: 90 },
+      lng: { type: Number, min: -180, max: 180 }
     }
   },
-  
+
+  // ── Display fields stored at save-time ─────────────────────────────────────
+  // These let the saved routes panel show rich info without re-running TOPSIS
+
+  // Route number shown on the coloured badge (e.g. "81", "F55")
+  routeNumber: { type: String, trim: true, default: null },
+
+  // Hex colour of the route badge
+  routeColor: {
+    type: String,
+    default: '#667eea',
+    match: [/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Invalid color format'],
+  },
+
+  // 'direct' or 'transfer'
+  journeyType: {
+    type: String,
+    enum: ['direct', 'transfer', null],
+    default: null,
+  },
+
+  // Estimated travel time in minutes when the route was saved
+  estimatedTime: { type: Number, default: null },
+
+  // Fare in AED when the route was saved
+  fare: { type: Number, default: null },
+
   // Preferred optimization method
   optimizationPreference: {
     type: String,
@@ -79,68 +73,30 @@ const savedRouteSchema = new mongoose.Schema({
   
   // Usage statistics
   stats: {
-    timesUsed: {
-      type: Number,
-      default: 0
-    },
-    lastUsed: {
-      type: Date
-    },
-    // Average estimated time (in minutes)
-    averageTime: {
-      type: Number
-    },
-    // Average cost (in AED)
-    averageCost: {
-      type: Number
-    }
+    timesUsed: { type: Number, default: 0 },
+    lastUsed: { type: Date },
+    averageTime: { type: Number },
+    averageCost: { type: Number }
   },
   
   // Notification preferences for this route
   notifications: {
-    enabled: {
-      type: Boolean,
-      default: false
-    },
-    // Days of week to notify (0 = Sunday, 6 = Saturday)
-    notifyDays: [{
-      type: Number,
-      min: 0,
-      max: 6
-    }],
-    // Time to notify (format: "HH:MM")
+    enabled: { type: Boolean, default: false },
+    notifyDays: [{ type: Number, min: 0, max: 6 }],
     notifyTime: {
       type: String,
       match: [/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format']
     }
   },
   
-  // Route status
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  
-  // Tags for organization
-  tags: [{
-    type: String,
-    trim: true,
-    lowercase: true
-  }],
-  
-  // Color for visual identification (hex color)
+  isActive: { type: Boolean, default: true },
+  tags: [{ type: String, trim: true, lowercase: true }],
   color: {
     type: String,
     default: '#4CAF50',
     match: [/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Invalid color format']
   },
-  
-  // Notes
-  notes: {
-    type: String,
-    maxlength: [200, 'Notes cannot exceed 200 characters'],
-    trim: true
-  }
+  notes: { type: String, maxlength: [200, 'Notes cannot exceed 200 characters'], trim: true }
 }, {
   timestamps: true
 });
@@ -166,11 +122,8 @@ savedRouteSchema.methods.updateAverageStats = async function(time, cost) {
   const currentAvgTime = this.stats.averageTime || 0;
   const currentAvgCost = this.stats.averageCost || 0;
   const timesUsed = this.stats.timesUsed;
-  
-  // Calculate new averages
   this.stats.averageTime = ((currentAvgTime * (timesUsed - 1)) + time) / timesUsed;
   this.stats.averageCost = ((currentAvgCost * (timesUsed - 1)) + cost) / timesUsed;
-  
   await this.save();
   return this;
 };
@@ -201,20 +154,13 @@ savedRouteSchema.methods.removeTag = async function(tag) {
 // Static method to find user's routes
 savedRouteSchema.statics.findByUserId = function(userId, activeOnly = true) {
   const query = { userId };
-  if (activeOnly) {
-    query.isActive = true;
-  }
+  if (activeOnly) query.isActive = true;
   return this.find(query).sort({ 'stats.lastUsed': -1 });
 };
 
 // Static method to find most used routes for a user
 savedRouteSchema.statics.findMostUsed = function(userId, limit = 5) {
-  return this.find({ 
-    userId, 
-    isActive: true 
-  })
-  .sort({ 'stats.timesUsed': -1 })
-  .limit(limit);
+  return this.find({ userId, isActive: true }).sort({ 'stats.timesUsed': -1 }).limit(limit);
 };
 
 // Static method to find routes with notifications for a specific day and time
@@ -229,11 +175,7 @@ savedRouteSchema.statics.findDueNotifications = function(dayOfWeek, currentTime)
 
 // Static method to find routes by tag
 savedRouteSchema.statics.findByTag = function(userId, tag) {
-  return this.find({
-    userId,
-    isActive: true,
-    tags: tag.toLowerCase()
-  });
+  return this.find({ userId, isActive: true, tags: tag.toLowerCase() });
 };
 
 // Virtual for formatted origin

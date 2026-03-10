@@ -1,18 +1,84 @@
-/**
- * BUS RESULTS COMPONENT
- * Displays ranked buses from TOPSIS algorithm
- */
+// BusResults.jsx
+// Displays the ranked list of bus route results returned by TOPSIS
+// Each card now has an "Add to Favourites" button that calls onSaveRoute
+// Props:
+//   buses        — array of ranked bus objects from useFindBuses
+//   onSelectBus  — called when user clicks a card to highlight it on the map
+//   selectedBus  — the currently selected bus (for the "selected" card style)
+//   loading      — true while the search is in flight (shows spinner)
+//   onSaveRoute  — called with (bus) when user clicks "Add to Favourites"
+//   savingId     — busId currently being saved (shows spinner on that button)
+//   user         — current logged-in user (null hides the favourite button)
+//   savedRoutes  — list of already saved routes from useSavedRoutes hook
+//                  used to pre-mark buttons as "Route Saved ✓" on load/refresh
 
-import React from 'react';
-import { Clock, DollarSign, MapPin, GitMerge, Star, Award, Navigation, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Clock, DollarSign, MapPin, GitMerge, ArrowRight, Bookmark, BookmarkCheck } from 'lucide-react';
 import styles from './BusResults.module.css';
 
-const BusResults = ({ buses, onSelectBus, selectedBus, loading }) => {
+// Returns 🥇 🥈 🥉 for top 3, empty string otherwise
+const getMedal = (rank) => {
+  if (rank === 1) return '🥇';
+  if (rank === 2) return '🥈';
+  if (rank === 3) return '🥉';
+  return '';
+};
+
+// Maps TOPSIS score (0–1) to a colour — green = great, gold = ok, red = poor
+const getScoreColor = (score) => {
+  if (score >= 0.7) return '#00c9a7';
+  if (score >= 0.4) return '#f0a500';
+  return '#ff4d6d';
+};
+
+const BusResults = ({
+  buses,
+  onSelectBus,
+  selectedBus,
+  loading,
+  onSaveRoute,   // callback(bus) triggered by "Add to Favourites"
+  savingId,      // busId currently being saved (for button spinner)
+  user,          // null when logged out (hides favourite button)
+  savedRoutes,   // array of already saved routes from useSavedRoutes hook
+}) => {
+
+  // savedIds — Set of routeNumbers that have been saved
+  // we use routeNumber (not busId) because busId changes every search
+  // but routeNumber stays the same — so we can match across refreshes
+  const [savedIds, setSavedIds] = useState(new Set());
+
+  // whenever savedRoutes list changes (on load, after saving, after deleting)
+  // rebuild the savedIds Set from the routeNumbers in savedRoutes
+  // this makes the "Route Saved ✓" state persist across refreshes and new searches
+  useEffect(() => {
+    if (!savedRoutes || savedRoutes.length === 0) {
+      setSavedIds(new Set());
+      return;
+    }
+    // build a Set of routeNumbers that are already saved
+    // so we can do fast O(1) lookup per card instead of scanning the array each time
+    const alreadySaved = new Set(
+      savedRoutes.map((r) => r.routeNumber).filter(Boolean)
+    );
+    setSavedIds(alreadySaved);
+  }, [savedRoutes]);
+
+  // wraps the parent's onSaveRoute
+  // if the save succeeds, adds the routeNumber to savedIds so the button updates
+  const handleSave = async (bus) => {
+    const success = await onSaveRoute(bus);
+    // onSaveRoute in useSavedRoutes returns true on success, false on failure
+    if (success) {
+      // use routeNumber so it persists — busId is regenerated on every search
+      setSavedIds((prev) => new Set([...prev, bus.routeNumber]));
+    }
+  };
+
   if (loading) {
     return (
       <div className={styles.loading}>
-        <div className={styles.spinner}></div>
-        <p>Finding best bus routes...</p>
+        <div className={styles.spinner} />
+        <p>Finding your best routes...</p>
       </div>
     );
   }
@@ -20,40 +86,26 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading }) => {
   if (!buses || buses.length === 0) {
     return (
       <div className={styles.empty}>
-        <p>📍 Enter origin and destination to find buses</p>
+        <p>No results to display.</p>
       </div>
     );
   }
 
-  const getMedalIcon = (index) => {
-    if (index === 0) return <Award size={24} color="#FFD700" fill="#FFD700" />;
-    if (index === 1) return <Award size={24} color="#C0C0C0" fill="#C0C0C0" />;
-    if (index === 2) return <Award size={24} color="#CD7F32" fill="#CD7F32" />;
-    return <span className={styles.rank}>#{index + 1}</span>;
-  };
-
-  const getScoreColor = (score) => {
-    if (score >= 0.7) return '#4CAF50';
-    if (score >= 0.4) return '#FF9800';
-    return '#F44336';
-  };
-
   return (
     <div className={styles.container}>
+
       <div className={styles.header}>
-        <h2>
-          <Star size={24} color="#667eea" />
-          Recommended Routes
-        </h2>
-        <p className={styles.subtitle}>
-          {buses.length} buses ranked by your preferences using TOPSIS
-        </p>
+        <h2>🚌 {buses.length} Route{buses.length !== 1 ? 's' : ''} Found</h2>
+        <p className={styles.subtitle}>Ranked by your preferences using TOPSIS</p>
       </div>
 
       <div className={styles.resultsContainer}>
         {buses.map((bus, index) => {
           const isSelected = selectedBus?.busId === bus.busId;
-          const scoreColor = getScoreColor(bus.score);
+          // true while this specific card's save request is in flight
+          const isSaving = savingId === bus.busId;
+          // check by routeNumber so it survives page refreshes and new searches
+          const isSaved = savedIds.has(bus.routeNumber);
 
           return (
             <div
@@ -61,12 +113,15 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading }) => {
               className={`${styles.busCard} ${isSelected ? styles.selected : ''}`}
               onClick={() => onSelectBus(bus)}
             >
-              {/* Rank Medal */}
+
+              {/* ── Rank badge ── */}
               <div className={styles.medal}>
-                {getMedalIcon(index)}
+                {getMedal(index + 1) || (
+                  <span className={styles.rank}>#{index + 1}</span>
+                )}
               </div>
 
-              {/* Bus Header */}
+              {/* ── Bus number + route name ── */}
               <div className={styles.busHeader}>
                 <div
                   className={styles.busNumber}
@@ -75,113 +130,149 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading }) => {
                   {bus.routeNumber}
                 </div>
                 <div className={styles.busInfo}>
-                  <h3>{bus.routeName}</h3>
+                  <h3>{bus.routeName || `Route ${bus.routeNumber}`}</h3>
                   <div className={styles.badges}>
-                    <span className={styles.busType}>{bus.routeType}</span>
-                    {bus.journeyType === 'transfer' ? (
-                      <span className={styles.transferBadge}>🔄 Transfer</span>
+                    <span className={styles.busType}>
+                      {bus.type === '3' ? 'Bus' : 'Transit'}
+                    </span>
+                    {bus.journeyType === 'direct' ? (
+                      <span className={styles.directBadge}>Direct</span>
                     ) : (
-                      <span className={styles.directBadge}>✅ Direct</span>
+                      <span className={styles.transferBadge}>Transfer</span>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* TOPSIS Score */}
+              {/* ── TOPSIS score bar ── */}
               <div className={styles.scoreSection}>
-                <div className={styles.scoreLabel}>TOPSIS Score</div>
-                <div className={styles.score} style={{ color: scoreColor }}>
+                <p className={styles.scoreLabel}>TOPSIS Score</p>
+                <p className={styles.score} style={{ color: getScoreColor(bus.score) }}>
                   {(bus.score * 100).toFixed(1)}%
-                </div>
+                </p>
                 <div className={styles.scoreBar}>
                   <div
                     className={styles.scoreBarFill}
-                    style={{ width: `${bus.score * 100}%`, backgroundColor: scoreColor }}
+                    style={{
+                      width: `${bus.score * 100}%`,
+                      backgroundColor: getScoreColor(bus.score),
+                    }}
                   />
                 </div>
               </div>
 
-              {/* Criteria Grid */}
+              {/* ── Criteria grid ── */}
               <div className={styles.criteria}>
-
                 <div className={styles.criteriaItem}>
-                  <Navigation size={16} color="#667eea" />
-                  <span className={styles.criteriaLabel}>Departs:</span>
-                  <span className={styles.criteriaValue}>
-                    {bus.departureTime || `${bus.arrivalTime} min`}
-                  </span>
-                </div>
-
-                <div className={styles.criteriaItem}>
-                  <Clock size={16} color="#667eea" />
-                  <span className={styles.criteriaLabel}>Wait:</span>
+                  <Clock size={14} color="#667eea" />
+                  <span className={styles.criteriaLabel}>Time</span>
                   <span className={styles.criteriaValue}>{bus.arrivalTime} min</span>
                 </div>
-
                 <div className={styles.criteriaItem}>
-                  <Clock size={16} color="#9C27B0" />
-                  <span className={styles.criteriaLabel}>Journey:</span>
-                  <span className={styles.criteriaValue}>{bus.travelTime} min</span>
+                  <DollarSign size={14} color="#4CAF50" />
+                  <span className={styles.criteriaLabel}>Fare</span>
+                  <span className={styles.criteriaValue}>{bus.fare} AED</span>
                 </div>
-
                 <div className={styles.criteriaItem}>
-                  <DollarSign size={16} color="#4CAF50" />
-                  <span className={styles.criteriaLabel}>Fare:</span>
-                  <span className={styles.criteriaValue}>{bus.cost} AED</span>
-                </div>
-
-                <div className={styles.criteriaItem}>
-                  <MapPin size={16} color="#FF9800" />
-                  <span className={styles.criteriaLabel}>Walk:</span>
+                  <MapPin size={14} color="#FF9800" />
+                  <span className={styles.criteriaLabel}>Walk</span>
                   <span className={styles.criteriaValue}>
-                    {bus.walkingDistance} km ({bus.walkingTime} min)
+                    {bus.walkingDistance != null
+                      ? `${(bus.walkingDistance * 1000).toFixed(0)}m`
+                      : '—'}
                   </span>
                 </div>
-
                 <div className={styles.criteriaItem}>
-                  <GitMerge size={16} color="#F44336" />
-                  <span className={styles.criteriaLabel}>Transfers:</span>
-                  <span className={styles.criteriaValue}>{bus.transfers}</span>
+                  <GitMerge size={14} color="#F44336" />
+                  <span className={styles.criteriaLabel}>Transfers</span>
+                  <span className={styles.criteriaValue}>{bus.transfers ?? 0}</span>
                 </div>
-
               </div>
 
-              {/* Transfer Details */}
-              {bus.journeyType === 'transfer' && bus.leg1 && bus.leg2 && (
+              {/* ── Transfer details (only for transfer journeys) ── */}
+              {bus.journeyType === 'transfer' && bus.transferStop && (
                 <div className={styles.transferDetails}>
                   <div className={styles.leg}>
-                    <span className={styles.legBadge} style={{ backgroundColor: bus.color }}>
-                      {bus.leg1.routeNumber}
+                    <span
+                      className={styles.legBadge}
+                      style={{ backgroundColor: bus.color || '#667eea' }}
+                    >
+                      {bus.routeNumber}
                     </span>
-                    {/* ✅ FIXED: was bus.leg1.routeName.substring(0, 25) + "..."
-                        That always appended "..." even for short names.
-                        Now the text is in a span with CSS overflow ellipsis —
-                        truncation only happens when the text actually overflows. */}
-                    <span className={styles.legName}>{bus.leg1.routeName}</span>
-                    <span>{bus.leg1.departureTime}</span>
+                    <span className={styles.legName}>
+                      {bus.originStop?.name || 'Origin stop'}
+                    </span>
                   </div>
-                  <ArrowRight size={16} className={styles.legArrow} />
+                  <ArrowRight size={14} className={styles.legArrow} />
                   <div className={styles.leg}>
-                    <span className={styles.legBadge} style={{ backgroundColor: '#667eea' }}>
-                      {bus.leg2.routeNumber}
+                    <span
+                      className={styles.legBadge}
+                      style={{ backgroundColor: bus.colorLeg2 || '#00c9a7' }}
+                    >
+                      {bus.routeNumberLeg2}
                     </span>
-                    <span className={styles.legName}>{bus.leg2.routeName}</span>
-                    <span>{bus.leg2.departureTime}</span>
+                    <span className={styles.legName}>
+                      {bus.transferStop?.name || 'Transfer stop'}
+                    </span>
                   </div>
                 </div>
               )}
 
-              {/* Stop Names */}
-              <div className={styles.stopNames}>
-                <span className={styles.originStop}>📍 {bus.originStop?.name}</span>
-                <ArrowRight size={14} />
-                <span className={styles.destStop}>🏁 {bus.destinationStop?.name}</span>
+              {/* ── Stop names ── */}
+              {(bus.originStop || bus.destinationStop) && (
+                <div className={styles.stopNames}>
+                  <span className={styles.originStop}>
+                    📍 {bus.originStop?.name || '—'}
+                  </span>
+                  <ArrowRight size={12} />
+                  <span className={styles.destStop}>
+                    🏁 {bus.destinationStop?.name || '—'}
+                  </span>
+                </div>
+              )}
+
+              {/* ── Action buttons row ── */}
+              <div className={styles.actionRow}>
+
+                {/* View on Map button */}
+                <button
+                  className={`${styles.selectButton} ${isSelected ? styles.selectedBtn : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectBus(bus);
+                  }}
+                >
+                  {isSelected ? '✓ Selected' : 'View on Map'}
+                </button>
+
+                {/* Add to Favourites — only shown when user is logged in */}
+                {user && onSaveRoute && (
+                  <button
+                    className={`${styles.favouriteButton} ${isSaved ? styles.savedBtn : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // don't allow clicking again if already saved
+                      if (!isSaved) handleSave(bus);
+                    }}
+                    // disabled while saving OR after already saved successfully
+                    disabled={isSaving || isSaved}
+                    title={isSaved ? 'Already saved to favourites' : 'Add to Favourites'}
+                  >
+                    {isSaving ? (
+                      <span className={styles.savingSpinner} />
+                    ) : isSaved ? (
+                      <BookmarkCheck size={14} />
+                    ) : (
+                      <Bookmark size={14} />
+                    )}
+                    <span>
+                      {isSaving ? 'Saving...' : isSaved ? 'Route Saved ✓' : 'Add to Favourites'}
+                    </span>
+                  </button>
+                )}
+
               </div>
 
-              {/* Action Button */}
-              <button className={`${styles.selectButton} ${isSelected ? styles.selectedBtn : ''}`}>
-                {isSelected ? 'Selected ✓' : 'View on Map'}
-              </button>
             </div>
           );
         })}

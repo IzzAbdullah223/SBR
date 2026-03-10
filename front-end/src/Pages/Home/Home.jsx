@@ -1,14 +1,24 @@
+// Home.jsx
+// Main page — left sidebar (search, sliders, results, saved routes) + right map panel
+// Changes in this version:
+//   - useSavedRoutes hook wired in
+//   - "My Saved Routes" toggle button in the sidebar
+//   - SavedRoutes panel rendered below bus results
+//   - BusResults receives onSaveRoute, savingId, user, and savedRoutes props
+
 import React, { useState, useMemo, useEffect } from 'react';
 import MapComponent from '../../Components/Map/Map';
 import SearchInput from '../../Components/SearchInput/SearchInput';
 import WeightSliders from '../../Components/WeightSliders/WeightSliders';
 import BusResults from '../../Components/BusResults/BusResults';
-import { Search } from 'lucide-react';
+import SavedRoutes from '../../Components/savedRoutes/SavedRoutes';
+import { Search, Bookmark } from 'lucide-react';
 import { MAP_CONFIG } from '../../utils/constants';
 import useFindBuses from '../../hooks/useFindBuses';
 import useShape from '../../hooks/useShape';
 import useNearbyStops from '../../hooks/useNearbyStops';
 import useAuth from '../../hooks/useAuth';
+import useSavedRoutes from '../../hooks/useSavedRoutes';
 import Navbar from '../../Components/NavBar/Navbar';
 import Modal from '../../Components/Modal/Modal';
 import { SignUp } from '../Authentication/SignUp/SignUp';
@@ -44,6 +54,23 @@ const Home = () => {
   const { shapeCoordinates, shapeCoordinatesLeg2 } = useShape(selectedBus);
   const { nearbyStops } = useNearbyStops(origin, destination, 0.8);
 
+  // ── SAVED ROUTES ──────────────────────────────────────────────────────────
+  // useSavedRoutes manages fetching, saving, and deleting favourite routes
+  // user is passed so the hook can attach the JWT token to every request
+  // savedRoutes is also passed to BusResults so it can pre-mark already-saved
+  // routes as "Route Saved ✓" on load and after page refresh
+  const {
+    savedRoutes,
+    loadingSaved,
+    savingId,
+    saveError,
+    showSaved,
+    saveRoute,
+    deleteSavedRoute,
+    toggleSavedPanel,
+    setSaveError,
+  } = useSavedRoutes(user);
+
   // ── SEARCH HANDLERS ────────────────────────────────────────────────────────
 
   const handleOriginChange = (e, locationData) => {
@@ -73,6 +100,8 @@ const Home = () => {
     }
     setSelectedBus(null);
     clearResults();
+    // clear any leftover save errors when the user starts a new search
+    setSaveError(null);
     await findBuses(
       { lat: origin.lat, lng: origin.lng },
       { lat: destination.lat, lng: destination.lng },
@@ -88,6 +117,16 @@ const Home = () => {
   }, [buses, selectedBus]);
 
   const handleSelectBus = (bus) => setSelectedBus(bus);
+
+  // ── SAVE ROUTE HANDLER ─────────────────────────────────────────────────────
+  // Called by BusResults when user clicks "Add to Favourites" on a card
+  // Returns true/false so BusResults knows whether to mark the button as saved
+  const handleSaveRoute = async (bus) => {
+    if (!origin || !destination) return false;
+    // return the result so BusResults knows if the save succeeded
+    // BusResults uses this to switch the button to "Route Saved ✓"
+    return await saveRoute(bus, origin, destination);
+  };
 
   const mapStops = useMemo(() => {
     const stopMap = new Map();
@@ -153,16 +192,58 @@ const Home = () => {
             </div>
           )}
 
+          {/* saveError — shown when "Add to Favourites" fails (e.g. duplicate route name) */}
+          {saveError && (
+            <div className={`${styles.errorMessage} ${styles.errorBad}`}>
+              {saveError}
+            </div>
+          )}
+
           {(buses.length > 0 || loading) && (
             <div className={styles.section}>
+              {/* BusResults receives savedRoutes so it can pre-mark already-saved
+                  routes as "Route Saved ✓" on load and after page refresh */}
               <BusResults
                 buses={buses}
                 onSelectBus={handleSelectBus}
                 selectedBus={selectedBus}
                 loading={loading}
+                onSaveRoute={handleSaveRoute}
+                savingId={savingId}
+                user={user}
+                savedRoutes={savedRoutes}
               />
             </div>
           )}
+
+          {/* ── SAVED ROUTES SECTION ──────────────────────────────────────────
+              Always visible at the bottom of the sidebar so users can access
+              their saved routes at any time, even before searching */}
+          <div className={styles.section}>
+            <button
+              className={styles.savedRoutesToggle}
+              onClick={toggleSavedPanel}
+            >
+              <Bookmark size={16} />
+              <span>My Saved Routes</span>
+              {/* chevron rotates when the panel is open */}
+              <span className={`${styles.chevron} ${showSaved ? styles.chevronOpen : ''}`}>
+                ▾
+              </span>
+            </button>
+
+            {/* Collapsible panel — only rendered when showSaved is true */}
+            {showSaved && (
+              <div className={styles.savedPanel}>
+                <SavedRoutes
+                  savedRoutes={savedRoutes}
+                  loading={loadingSaved}
+                  onDelete={deleteSavedRoute}
+                  user={user}
+                />
+              </div>
+            )}
+          </div>
 
         </div>
 

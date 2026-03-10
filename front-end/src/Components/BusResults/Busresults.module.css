@@ -30,14 +30,12 @@
   color: var(--gray-400);
 }
 
-/* ─── Results List ─── */
 .resultsContainer {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* ─── Bus Card ─── */
 .busCard {
   background: var(--white);
   border: 2px solid var(--gray-200);
@@ -73,7 +71,6 @@
   box-shadow: var(--shadow-lg);
 }
 
-/* ─── Medal ─── */
 .medal {
   position: absolute;
   top: 14px;
@@ -90,7 +87,6 @@
   border-radius: 99px;
 }
 
-/* ─── Bus Header ─── */
 .busHeader {
   display: flex;
   align-items: center;
@@ -165,7 +161,6 @@
   border-radius: 6px;
 }
 
-/* ─── Score Section ─── */
 .scoreSection {
   margin-bottom: 14px;
   padding: 14px;
@@ -215,7 +210,6 @@
   transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ─── Criteria Grid ─── */
 .criteria {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -258,7 +252,6 @@
   color: var(--white);
 }
 
-/* ─── Transfer Details ─── */
 .transferDetails {
   display: flex;
   align-items: center;
@@ -303,7 +296,6 @@
   flex-shrink: 0;
 }
 
-/* ─── Stop Names ─── */
 .stopNames {
   display: flex;
   align-items: center;
@@ -326,9 +318,17 @@
   flex: 1;
 }
 
-/* ─── Select Button ─── */
+/* ─── Action Row — holds "View on Map" + "Add to Favourites" side by side ─── */
+.actionRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ─── View on Map button ─── */
 .selectButton {
-  width: 100%;
+  flex: 1;
   padding: 11px;
   background: var(--gray-100);
   color: var(--navy);
@@ -360,7 +360,80 @@
   border-color: rgba(255,255,255,0.3);
 }
 
-/* ─── Loading ─── */
+/* ─── Add to Favourites button ─── */
+.favouriteButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 14px;
+  background: rgba(240, 165, 0, 0.08);
+  color: var(--gold);
+  border: 2px solid rgba(240, 165, 0, 0.3);
+  border-radius: var(--radius-sm);
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
+}
+
+.favouriteButton:hover:not(:disabled) {
+  background: var(--gold);
+  color: var(--navy);
+  border-color: var(--gold);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(240, 165, 0, 0.25);
+}
+
+.favouriteButton:disabled {
+  cursor: default;
+}
+
+.busCard.selected .favouriteButton {
+  background: rgba(255,255,255,0.12);
+  color: var(--gold-light);
+  border-color: rgba(240, 165, 0, 0.4);
+}
+
+.busCard.selected .favouriteButton:hover:not(:disabled) {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+/* ─── Saved state — green styling after route is successfully saved ─── */
+.savedBtn {
+  background: rgba(0, 201, 167, 0.1) !important;
+  color: var(--teal) !important;
+  border-color: rgba(0, 201, 167, 0.3) !important;
+  cursor: default !important;
+  opacity: 1 !important;
+}
+
+.busCard.selected .savedBtn {
+  background: rgba(0, 201, 167, 0.2) !important;
+  color: var(--teal) !important;
+  border-color: rgba(0, 201, 167, 0.4) !important;
+}
+
+/* ─── Inline spinner inside the favourite button while saving ─── */
+.savingSpinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(240, 165, 0, 0.3);
+  border-top: 2px solid var(--gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .loading {
   display: flex;
   flex-direction: column;
@@ -378,10 +451,6 @@
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 .loading p {
   font-family: 'Syne', sans-serif;
   font-size: 14px;
@@ -390,7 +459,6 @@
   margin: 0;
 }
 
-/* ─── Empty ─── */
 .empty {
   padding: 48px 20px;
   text-align: center;
@@ -401,6 +469,7 @@
   color: var(--gray-400);
   margin: 0;
 }
+
 /* ✅ FIXED: replaces hardcoded substring(0,25)+"..." in JS
    CSS handles overflow gracefully — only shows ellipsis when text actually overflows */
 .legName {
