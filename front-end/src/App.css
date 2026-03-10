@@ -1,5 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
 
+:root {
+  --navy: #0a1628;
+  --gold: #f0a500;
+  --gold-light: #ffc740;
+  --gold-pale: #fff8e7;
+  --teal: #00c9a7;
+  --error: #ff4d6d;
+  --white: #ffffff;
+  --gray-100: #f7f8fc;
+  --gray-200: #eef0f6;
+  --gray-400: #9ba3c2;
+  --gray-600: #5a6384;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow-md: 0 4px 16px rgba(10, 22, 40, 0.12);
+  --shadow-lg: 0 8px 32px rgba(10, 22, 40, 0.2);
+}
+
 * {
   margin: 0;
   padding: 0;

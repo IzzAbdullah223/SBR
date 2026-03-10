@@ -1,82 +1,126 @@
 // savedRouteController.js
-// Handles CRUD for a user's saved/favourite bus routes
-// All routes are protected — verifyToken runs before these handlers
-// req.user is set by verifyToken and contains { id, email } from the JWT
+// Handles CRUD for saved journeys
+// Logic change from previous version:
+//   OLD — saved a specific bus (routeNumber, color, journeyType, fare etc.)
+//   NEW — saves a journey (origin + destination only)
+//         no bus-specific fields needed — a fresh search is run when user loads the journey
 
 import SavedRoute from '../models/SavedRoute.js';
 
-// ── GET ALL SAVED ROUTES FOR THE LOGGED-IN USER ────────────────────────────
-// GET /api/saved-routes
+// ── GET /api/saved-routes ──────────────────────────────────────────────────
+// Returns all saved journeys for the logged-in user
+// Sorted by most recently saved first
 export const getSavedRoutes = async (req, res) => {
   try {
-    // req.user.id comes from verifyToken middleware
     const routes = await SavedRoute.findByUserId(req.user.id);
-    return res.status(200).json({ success: true, count: routes.length, data: routes });
-  } catch (error) {
-    console.error('❌ Error fetching saved routes:', error);
-    return res.status(500).json({ success: false, message: 'Server error while fetching saved routes.' });
+
+    return res.status(200).json({
+      success: true,
+      data: routes,
+      count: routes.length,
+    });
+  } catch (err) {
+    console.error('getSavedRoutes error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch saved routes.',
+    });
   }
 };
 
-// ── SAVE A NEW ROUTE ───────────────────────────────────────────────────────
-// POST /api/saved-routes
+// ── POST /api/saved-routes ─────────────────────────────────────────────────
+// Saves a new journey for the logged-in user
+// Body: { routeName, origin: { name, position: { lat, lng } }, destination: { name, position: { lat, lng } } }
+// userId comes from the JWT token (req.user.id), never from the request body
 export const createSavedRoute = async (req, res) => {
   try {
-    const { routeName, origin, destination, routeNumber, routeColor, journeyType, estimatedTime, fare } = req.body;
+    const { routeName, origin, destination } = req.body;
 
+    // basic validation
     if (!routeName || !origin || !destination) {
-      return res.status(400).json({ success: false, message: 'Route name, origin, and destination are required.' });
+      return res.status(400).json({
+        success: false,
+        message: 'routeName, origin, and destination are required.',
+      });
     }
 
-    // userId comes from the verified JWT — not from the request body
-    // this prevents users from saving routes under another user's account
-    const savedRoute = await SavedRoute.create({
+    if (!origin.name || !origin.position?.lat || !origin.position?.lng) {
+      return res.status(400).json({
+        success: false,
+        message: 'origin must include name and position (lat, lng).',
+      });
+    }
+
+    if (!destination.name || !destination.position?.lat || !destination.position?.lng) {
+      return res.status(400).json({
+        success: false,
+        message: 'destination must include name and position (lat, lng).',
+      });
+    }
+
+    const newRoute = new SavedRoute({
       userId: req.user.id,
       routeName,
       origin,
       destination,
-      routeNumber: routeNumber || null,
-      routeColor: routeColor || '#667eea',
-      journeyType: journeyType || null,
-      estimatedTime: estimatedTime || null,
-      fare: fare || null,
     });
 
-    return res.status(201).json({ success: true, data: savedRoute });
-  } catch (error) {
-    // MongoDB duplicate key — user already has a route with this name
-    if (error.code === 11000) {
-      return res.status(400).json({ success: false, message: 'You already saved a route with this name.' });
+    await newRoute.save();
+
+    return res.status(201).json({
+      success: true,
+      data: newRoute,
+      message: 'Journey saved successfully.',
+    });
+  } catch (err) {
+    // duplicate key error — this journey is already saved
+    if (err.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'This journey is already in your saved routes.',
+      });
     }
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map((e) => e.message);
-      return res.status(400).json({ success: false, message: messages[0] });
-    }
-    console.error('❌ Error saving route:', error);
-    return res.status(500).json({ success: false, message: 'Server error while saving route.' });
+
+    console.error('createSavedRoute error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to save route.',
+    });
   }
 };
 
-// ── DELETE A SAVED ROUTE ───────────────────────────────────────────────────
-// DELETE /api/saved-routes/:id
+// ── DELETE /api/saved-routes/:id ───────────────────────────────────────────
+// Deletes a saved journey — only the owner can delete their own routes
 export const deleteSavedRoute = async (req, res) => {
   try {
-    const { id } = req.params;
-    const route = await SavedRoute.findById(id);
+    const route = await SavedRoute.findById(req.params.id);
 
     if (!route) {
-      return res.status(404).json({ success: false, message: 'Saved route not found.' });
+      return res.status(404).json({
+        success: false,
+        message: 'Saved route not found.',
+      });
     }
 
-    // security check — only the owner can delete their own routes
+    // ownership check — users can only delete their own saved routes
     if (route.userId.toString() !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Not authorised to delete this route.' });
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorised to delete this route.',
+      });
     }
 
-    await SavedRoute.findByIdAndDelete(id);
-    return res.status(200).json({ success: true, message: 'Route removed from favourites.' });
-  } catch (error) {
-    console.error('❌ Error deleting saved route:', error);
-    return res.status(500).json({ success: false, message: 'Server error while deleting route.' });
+    await route.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Route deleted successfully.',
+    });
+  } catch (err) {
+    console.error('deleteSavedRoute error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to delete route.',
+    });
   }
 };

@@ -1,82 +1,75 @@
 import { useState, useEffect } from 'react';
 
-
+// useAuth centralizes everything auth-related so Home.jsx doesn't have to.
+// it manages: user state, token restore on refresh, login/logout,
+// modal visibility, and switching between login ↔ signup modals.
 const useAuth = () => {
 
   const [user, setUser] = useState(null);
-
-  // showLogin / showSignUp control which modal is open
-  // only one should ever be true at a time
   const [showLogin, setShowLogin] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
 
   // ── RESTORE USER ON PAGE REFRESH ──────────────────────────────────────────
-  // runs once when the app loads
-  // if a token exists in localStorage the user was previously logged in
-  // decode it and restore their state so they don't have to login again
+  // ✅ FIXED: previously decoded user from JWT payload which only has { id, email }
+  // so user.name was always undefined → navbar showed "Hello," with no name.
+  // Fix: store the full user object in localStorage on login/signup,
+  // restore from there on refresh (token still verified for expiry).
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) return; // no token — user was never logged in
+    if (!token) return;
 
     try {
-      // JWT = header.payload.signature — we decode the middle part (payload)
-      // atob decodes base64 back to readable JSON
+      // verify token isn't expired — decode the payload middle section
       const payload = JSON.parse(atob(token.split('.')[1]));
 
-      // payload.exp is expiry in seconds, Date.now() is milliseconds
       if (payload.exp * 1000 > Date.now()) {
-        setUser(payload.user); // restore user state
+        // ✅ restore from stored user object (has name, email, phone etc.)
+        // not from JWT payload (which only has id + email)
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        } else {
+          // fallback: use whatever is in the token payload
+          setUser(payload.user);
+        }
       } else {
-        localStorage.removeItem('token'); // token expired — clean up
+        // token expired — clean up everything
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
       }
     } catch {
-      localStorage.removeItem('token'); // token malformed — clean up
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
     }
-  }, []); // empty array = only runs once on mount
+  }, []);
 
   // ── AUTH HANDLERS ──────────────────────────────────────────────────────────
 
-  // called by both Login and SignUp on success
-  // token already saved in localStorage by Login/SignUp before this is called
   const handleLoginSuccess = (loggedInUser) => {
-    setUser(loggedInUser); // show user in navbar
-    setShowLogin(false);   // close login modal
-    setShowSignUp(false);  // close signup modal
-  };
-
-  // called when user clicks logout in navbar
-  const handleLogout = () => {
-    localStorage.removeItem('token'); // clear token so refresh doesn't restore them
-    setUser(null);                    // clear user — navbar goes back to login/signup buttons
-  };
-
-  // ── MODAL SWITCHERS ────────────────────────────────────────────────────────
-  // these let Login say "switch to signup" and SignUp say "switch to login"
-  // without the user having to close the modal and open a different one
-
-  const handleSwitchToSignUp = () => {
+    // ✅ save full user object to localStorage so refresh restores the name
+    localStorage.setItem('user', JSON.stringify(loggedInUser));
+    setUser(loggedInUser);
     setShowLogin(false);
-    setShowSignUp(true);
+    setShowSignUp(false);
   };
 
-  const handleSwitchToLogin = () => {
-    setShowSignUp(false);
-    setShowLogin(true);
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user'); // ✅ also clear stored user object
+    setUser(null);
   };
+
+  const handleSwitchToSignUp = () => { setShowLogin(false); setShowSignUp(true); };
+  const handleSwitchToLogin  = () => { setShowSignUp(false); setShowLogin(true); };
 
   return {
-    // state
     user,
     showLogin,
     showSignUp,
-
-    // handlers for Home.jsx to wire up
     handleLoginSuccess,
     handleLogout,
     handleSwitchToSignUp,
     handleSwitchToLogin,
-
-    // modal open/close — used by Navbar buttons and modal onClose
     openLogin:   () => setShowLogin(true),
     openSignUp:  () => setShowSignUp(true),
     closeLogin:  () => setShowLogin(false),

@@ -1,47 +1,39 @@
 // useSavedRoutes.js
-// Custom hook that manages the user's saved/favourite routes
-// Handles fetching all saved routes and adding a new one
-// Used by Home.jsx (to show the list) and BusResults.jsx (to trigger saving)
+// Manages the user's saved journeys (origin + destination pairs)
+// Uses Api.js fetchAPI for consistent token injection + error handling
+// instead of raw fetch() calls
 
 import { useState, useCallback, useEffect } from 'react';
 
+const API_BASE = '/api';
+
+// helper — same token-injecting fetch used everywhere else
+const authFetch = async (url, options = {}) => {
+  const token = localStorage.getItem('token');
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
+  });
+  return response.json();
+};
+
 const useSavedRoutes = (user) => {
-  // savedRoutes — array of routes fetched from the backend for this user
-  const [savedRoutes, setSavedRoutes] = useState([]);
-
-  // loadingSaved — true while the GET request is in flight
+  const [savedRoutes, setSavedRoutes]   = useState([]);
   const [loadingSaved, setLoadingSaved] = useState(false);
-
-  // savingId — holds the busId currently being saved so the button shows a spinner
-  // null when nothing is being saved
-  const [savingId, setSavingId] = useState(null);
-
-  // saveError — error message shown if saving fails
-  const [saveError, setSaveError] = useState(null);
-
-  // showSaved — controls whether the saved routes panel is expanded in the sidebar
-  const [showSaved, setShowSaved] = useState(false);
+  const [savingKey, setSavingKey]       = useState(null);
+  const [saveError, setSaveError]       = useState(null);
+  const [showSaved, setShowSaved]       = useState(false);
 
   // ── FETCH SAVED ROUTES ─────────────────────────────────────────────────────
-  // Called when the user opens the saved routes panel
-  // Also called on mount when user is logged in so BusResults can pre-mark
-  // already-saved routes as "Route Saved ✓" without opening the panel first
-  // GET /api/saved-routes — protected, requires token
   const fetchSavedRoutes = useCallback(async () => {
     if (!user) return;
-
     setLoadingSaved(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/saved-routes', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-
+      const data = await authFetch(`${API_BASE}/saved-routes`);
       if (data.success) {
         setSavedRoutes(data.data);
       } else {
@@ -54,39 +46,29 @@ const useSavedRoutes = (user) => {
     }
   }, [user]);
 
-  // ── FETCH ON LOGIN ─────────────────────────────────────────────────────────
-  // runs whenever user changes (login / logout / page refresh restore)
-  // this makes savedRoutes available immediately so BusResults can check
-  // which routes are already saved without the user opening the panel first
+  // fetch when user logs in, clear when user logs out
   useEffect(() => {
     if (user) {
       fetchSavedRoutes();
     } else {
-      // user logged out — clear saved routes from state
       setSavedRoutes([]);
     }
   }, [user]);
 
-  // ── SAVE A ROUTE ───────────────────────────────────────────────────────────
-  // Called when the user clicks "Add to Favourites" on a bus result card
-  // POST /api/saved-routes — protected, requires token
-  // bus         — the full bus result object from useFindBuses
-  // origin      — { lat, lng, name } from Home state
-  // destination — { lat, lng, name } from Home state
-  const saveRoute = useCallback(async (bus, origin, destination) => {
+  // ── SAVE A JOURNEY ─────────────────────────────────────────────────────────
+  const saveRoute = useCallback(async (origin, destination) => {
     if (!user) {
       setSaveError('Please log in to save routes.');
       return false;
     }
 
-    setSavingId(bus.busId);
+    const journeyKey = `${origin.name}__${destination.name}`;
+    setSavingKey(journeyKey);
     setSaveError(null);
 
     try {
-      const token = localStorage.getItem('token');
-
       const payload = {
-        routeName: `${bus.routeNumber} — ${origin.name} → ${destination.name}`,
+        routeName: `${origin.name} → ${destination.name}`,
         origin: {
           name: origin.name,
           position: { lat: origin.lat, lng: origin.lng },
@@ -95,31 +77,21 @@ const useSavedRoutes = (user) => {
           name: destination.name,
           position: { lat: destination.lat, lng: destination.lng },
         },
-        routeNumber: bus.routeNumber,
-        routeColor: bus.color || '#667eea',
-        journeyType: bus.journeyType,
-        estimatedTime: bus.arrivalTime,
-        fare: bus.fare,
       };
 
-      const response = await fetch('/api/saved-routes', {
+      const data = await authFetch(`${API_BASE}/saved-routes`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
-
       if (data.success) {
-        // add the new saved route to local state immediately
-        // so the list updates without needing a full refetch
+        // add to local state immediately — no refetch needed
         setSavedRoutes((prev) => [data.data, ...prev]);
         return true;
       } else {
-        setSaveError(data.message || 'Could not save this route.');
+        // 409 = already saved — show friendly message not a hard error
+        const msg = data.message || 'Could not save this route.';
+        setSaveError(msg);
         return false;
       }
     } catch (err) {
@@ -127,29 +99,19 @@ const useSavedRoutes = (user) => {
       setSaveError('Could not save this route. Please try again.');
       return false;
     } finally {
-      setSavingId(null);
+      setSavingKey(null);
     }
   }, [user]);
 
   // ── DELETE A SAVED ROUTE ───────────────────────────────────────────────────
-  // Called when user clicks the remove (×) button on a saved route card
-  // DELETE /api/saved-routes/:id — protected, requires token
   const deleteSavedRoute = useCallback(async (routeId) => {
     if (!user) return;
-
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/saved-routes/${routeId}`, {
+      const data = await authFetch(`${API_BASE}/saved-routes/${routeId}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
-
-      const data = await response.json();
-
       if (data.success) {
-        // remove from local state immediately — no need to refetch
+        // remove from local state — no refetch needed
         setSavedRoutes((prev) => prev.filter((r) => r._id !== routeId));
       }
     } catch (err) {
@@ -158,26 +120,39 @@ const useSavedRoutes = (user) => {
   }, [user]);
 
   // ── TOGGLE PANEL ───────────────────────────────────────────────────────────
-  // Opens or closes the saved routes panel in the sidebar
-  // Also triggers a fetch when opening so the list is always fresh
   const toggleSavedPanel = useCallback(() => {
     setShowSaved((prev) => {
-      const nextState = !prev;
-      if (nextState) fetchSavedRoutes();
-      return nextState;
+      const next = !prev;
+      if (next) fetchSavedRoutes(); // refresh every time panel opens
+      return next;
     });
   }, [fetchSavedRoutes]);
+
+  // ── CHECK IF JOURNEY IS ALREADY SAVED ──────────────────────────────────────
+  // ✅ FIXED: match by lat/lng coordinates not name strings
+  // Name strings from LocationIQ can have slight variations ("Dubai Mall" vs
+  // "Dubai Mall, Dubai") causing false negatives. Coordinates are exact.
+  const isJourneySaved = useCallback((originLat, originLng, destLat, destLng) => {
+    return savedRoutes.some(
+      (r) =>
+        r.origin?.position?.lat === originLat &&
+        r.origin?.position?.lng === originLng &&
+        r.destination?.position?.lat === destLat &&
+        r.destination?.position?.lng === destLng
+    );
+  }, [savedRoutes]);
 
   return {
     savedRoutes,
     loadingSaved,
-    savingId,
+    savingKey,
     saveError,
     showSaved,
     saveRoute,
     deleteSavedRoute,
     toggleSavedPanel,
     setSaveError,
+    isJourneySaved,
   };
 };
 

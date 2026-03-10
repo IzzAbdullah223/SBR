@@ -1,196 +1,359 @@
 /* ═══════════════════════════════════════════════════════
-   SAVEDROUTES.MODULE.CSS
-   Sidebar panel that lists the user's saved/favourite routes
+   SAVEDROUTES — Citymapper-inspired redesign
+   Horizontal quick-chips when collapsed, full cards expanded
 ═══════════════════════════════════════════════════════ */
 
-.list {
+/* ── Wrapper ── */
+.wrapper {
+  margin-bottom: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COLLAPSED STATE — horizontal scrollable chips row
+   inspired by Citymapper's "Go to" quick shortcuts
+═══════════════════════════════════════════════════════ */
+
+.collapsedRow {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.card {
-  background: var(--white);
-  border: 2px solid var(--gray-200);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  position: relative;
-  animation: cardIn 0.35s ease both;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card:hover {
-  border-color: var(--gold);
-  box-shadow: 0 4px 14px rgba(240, 165, 0, 0.1);
-}
-
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.routeBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--white);
-  padding: 3px 10px;
-  border-radius: 8px;
-  font-family: 'Syne', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.routeName {
-  margin: 0 0 8px 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--navy);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  /* leave room for the delete button */
-  padding-right: 28px;
-}
-
-.routeStops {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
-
-.stopLabel {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--gray-400);
-}
-
-.stopName {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--navy);
-  max-width: 100px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.arrow {
-  font-size: 12px;
-  color: var(--gold);
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.metaBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 500;
-  background: var(--gray-100);
-  color: var(--gray-600);
-  padding: 3px 8px;
-  border-radius: 6px;
-}
-
-/* ─── Delete button — top-right corner of each card ─── */
-.deleteBtn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: var(--gray-100);
-  border: none;
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--gray-400);
-  transition: all 0.2s ease;
-}
-
-.deleteBtn:hover {
-  background: rgba(255, 77, 109, 0.1);
-  color: var(--error);
-  transform: scale(1.1);
-}
-
-/* ─── Empty state ─── */
-.emptyState {
-  padding: 32px 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 8px;
 }
 
-.emptyIcon {
-  color: var(--gray-400);
-  margin-bottom: 4px;
-  animation: pulse 3s ease-in-out infinite;
+/* small bookmark button that opens the full panel */
+.toggleChip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: var(--navy);
+  border: none;
+  border-radius: 99px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50%       { opacity: 1;   transform: scale(1.08); }
-}
+.toggleChip:hover { background: #0f1f38; }
 
-.emptyTitle {
-  margin: 0;
+.toggleChipIcon { color: var(--gold); }
+
+.toggleChipLabel {
   font-family: 'Syne', sans-serif;
-  font-size: 15px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.toggleChipCount {
+  background: var(--gold);
+  color: var(--navy);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 99px;
+  line-height: 1.5;
+}
+
+/* horizontal scroll rail for quick-access chips */
+.chipsRail {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  flex: 1;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.chipsRail::-webkit-scrollbar { display: none; }
+
+/* individual destination chip */
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  background: var(--white);
+  border: 1.5px solid var(--gray-200);
+  border-radius: 99px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.18s ease;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.chip:hover {
+  border-color: var(--gold);
+  background: rgba(240,165,0,0.06);
+  color: var(--navy);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(240,165,0,0.15);
+}
+
+.chipDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   EXPANDED STATE — full panel with all saved routes
+═══════════════════════════════════════════════════════ */
+
+.panel {
+  background: var(--white);
+  border: 1.5px solid var(--gray-200);
+  border-radius: 16px;
+  overflow: hidden;
+  animation: panelOpen 0.22s ease;
+  box-shadow: 0 4px 20px rgba(10,22,40,0.08);
+}
+
+@keyframes panelOpen {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* panel top bar */
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1.5px solid var(--gray-200);
+}
+
+.panelTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panelIconBox {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, var(--navy), #1a3a6e);
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panelIcon { color: var(--gold); }
+
+.panelTitle {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
   font-weight: 700;
   color: var(--navy);
 }
 
-.emptySubtitle {
-  margin: 0;
-  font-size: 13px;
-  color: var(--gray-400);
-  line-height: 1.5;
-  max-width: 240px;
+.panelCount {
+  background: var(--gray-100);
+  color: var(--gray-600);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-family: 'DM Sans', sans-serif;
 }
 
-/* ─── Loading state ─── */
-.loadingState {
+/* close X button */
+.closeBtn {
+  width: 28px;
+  height: 28px;
+  background: var(--gray-100);
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--gray-600);
+  transition: all 0.15s;
+}
+.closeBtn:hover { background: var(--gray-200); color: var(--navy); }
+
+/* ── Scrollable list ── */
+.list {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.list::-webkit-scrollbar { width: 3px; }
+.list::-webkit-scrollbar-track { background: transparent; }
+.list::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 99px; }
+
+/* ── Route card ── */
+.card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  border: 1.5px solid transparent;
+  position: relative;
+}
+
+.card:hover {
+  background: #f7f8fc;
+  border-color: var(--gray-200);
+}
+
+.card:hover .deleteBtn { opacity: 1; transform: scale(1); }
+
+/* connector column */
+.connector {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 32px 20px;
-  gap: 12px;
+  flex-shrink: 0;
+  gap: 0;
+}
+
+.dotA {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 0 3px rgba(0,201,167,0.15);
+}
+
+.connLine {
+  width: 2px;
+  height: 16px;
+  background: linear-gradient(to bottom, var(--teal), var(--gold));
+  opacity: 0.4;
+}
+
+.dotB {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 3px rgba(240,165,0,0.15);
+}
+
+/* text column */
+.journey {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.routeFrom {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
+}
+
+.routeTo {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
+}
+
+/* go arrow */
+.goArrow {
+  color: var(--gray-400);
+  flex-shrink: 0;
+  transition: all 0.18s;
+}
+.card:hover .goArrow {
+  color: var(--gold);
+  transform: translateX(2px);
+}
+
+/* delete — hidden until hover */
+.deleteBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: scale(0.8) translateY(-50%);
+  transform-origin: right center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(255,77,109,0.1);
+  color: #ff4d6d;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+.deleteBtn:hover { background: rgba(255,77,109,0.2); }
+
+/* ── Empty states ── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 20px;
+  text-align: center;
+  gap: 6px;
+}
+
+.emptyIllustration {
+  font-size: 36px;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.emptyTitle {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0;
+}
+
+.emptySubtitle {
+  font-size: 12px;
+  color: var(--gray-400);
+  margin: 0;
+  line-height: 1.5;
+  max-width: 210px;
+}
+
+/* loading */
+.loadingState {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 16px;
 }
 
 .spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--gray-200);
-  border-top: 3px solid var(--navy);
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--gray-200);
+  border-top: 2px solid var(--navy);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
 }
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.loadingState p {
-  margin: 0;
-  font-size: 13px;
-  color: var(--gray-400);
-  font-weight: 500;
-}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loadingState p { font-size: 13px; color: var(--gray-400); margin: 0; }

@@ -25,7 +25,7 @@
 /* ─── Layout ─── */
 .container {
   display: flex;
-  flex-direction: column;
+  flex-direction: column;  /* navbar on top, content below */
   height: 100vh;
   overflow: hidden;
   font-family: 'DM Sans', sans-serif;
@@ -35,9 +35,9 @@
 /* ─── Content area below navbar ─── */
 .content {
   display: flex;
-  flex: 1;
+  flex: 1;               /* fills all remaining height below navbar */
   overflow: hidden;
-  min-height: 0;
+  min-height: 0;         /* important — prevents flex children from overflowing */
 }
 
 /* ─── Left Panel ─── */
@@ -68,6 +68,7 @@
   overflow: hidden;
 }
 
+/* Animated background dots */
 .header::before {
   content: '';
   position: absolute;
@@ -247,11 +248,13 @@
   box-shadow: none;
 }
 
+/* Loading state animation on button */
 .findButton.loading {
   pointer-events: none;
 }
 
 /* ─── Error Message ─── */
+/* base error box — shared layout for all error states */
 .errorMessage {
   margin: 0 24px 16px;
   padding: 14px 16px;
@@ -271,7 +274,8 @@
   color: var(--error);
 }
 
-/* errorInfo — expected result: no routes, no stops, out of service hours */
+/* errorInfo — expected result: no routes, no stops, out of service hours
+   softer amber styling — not a crash, just an informational result */
 .errorInfo {
   background: rgba(240, 165, 0, 0.08);
   border: 1px solid rgba(240, 165, 0, 0.25);
@@ -282,57 +286,6 @@
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-/* ─── Saved Routes Toggle Button ─── */
-/* Always visible at the bottom of the sidebar
-   clicking it opens/closes the collapsible saved routes panel */
-.savedRoutesToggle {
-  width: 100%;
-  padding: 14px 16px;
-  background: var(--white);
-  color: var(--navy);
-  border: 2px solid var(--gray-200);
-  border-radius: var(--radius-sm);
-  font-family: 'Syne', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: all 0.2s ease;
-  letter-spacing: 0.2px;
-}
-
-.savedRoutesToggle:hover {
-  border-color: var(--gold);
-  background: var(--gold-pale);
-}
-
-/* chevron — the ▾ that shows open/closed state */
-.chevron {
-  margin-left: auto;
-  font-size: 14px;
-  color: var(--gray-400);
-  transition: transform 0.25s ease;
-  display: inline-block;
-}
-
-/* rotates 180° when the panel is open */
-.chevronOpen {
-  transform: rotate(180deg);
-}
-
-/* ─── Saved Routes Collapsible Panel ─── */
-.savedPanel {
-  margin-top: 12px;
-  animation: panelOpen 0.25s ease both;
-}
-
-@keyframes panelOpen {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ─── Right Panel (Map) ─── */
@@ -348,4 +301,9 @@
   .container { flex-direction: column; }
   .leftPanel { width: 100%; min-width: 100%; height: 65vh; border-right: none; border-bottom: 1px solid var(--gray-200); }
   .rightPanel { height: 35vh; }
+}
+/* ── Saved Routes panel — sticky at top of sidebar ── */
+/* Keeps the collapsible button always visible even when user scrolls down */
+.savedRoutesPinned {
+  margin-bottom: 14px;
 }
