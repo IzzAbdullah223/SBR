@@ -223,7 +223,9 @@ export const generateTransferBuses = async (transferInfo, origin, destination, c
       },
       // ✅ Shape IDs for drawing route on map
       shapeId: route1.shapeId || null,
+      shapeIdReturn: route1.shapeIdReturn || null,
       shapeIdLeg2: route2.shapeId || null,
+      shapeIdLeg2Return: route2.shapeIdReturn || null,
     });
   });
 

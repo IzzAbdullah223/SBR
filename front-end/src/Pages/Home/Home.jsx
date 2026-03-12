@@ -44,6 +44,8 @@ const Home = () => {
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
   const [selectedBus, setSelectedBus] = useState(null);
+  // true while input was filled by a saved-route chip — suppresses LocationIQ dropdown
+  const [programmaticFill, setProgrammaticFill] = useState(false);
   const [weights, setWeights] = useState({
     time: 0.25, cost: 0.25, walkingDistance: 0.25, transfers: 0.25,
   });
@@ -80,6 +82,7 @@ const Home = () => {
   // ── SEARCH HANDLERS ────────────────────────────────────────────────────────
 
   const handleOriginChange = (e, locationData) => {
+    if (programmaticFill) setProgrammaticFill(false); // user is typing — re-enable suggestions
     setOriginInput(e.target.value);
     if (locationData?.lat && locationData?.lng) {
       setOrigin({ lat: locationData.lat, lng: locationData.lng, name: e.target.value });
@@ -89,6 +92,7 @@ const Home = () => {
   };
 
   const handleDestinationChange = (e, locationData) => {
+    if (programmaticFill) setProgrammaticFill(false); // user is typing — re-enable suggestions
     setDestinationInput(e.target.value);
     if (locationData?.lat && locationData?.lng) {
       setDestination({ lat: locationData.lat, lng: locationData.lng, name: e.target.value });
@@ -136,6 +140,9 @@ const Home = () => {
   // Auto-fills the origin and destination search fields
   // User then presses "Find Best Bus Routes" themselves
   const handleSelectSavedJourney = (route) => {
+    // Suppress LocationIQ suggestion dropdown — user didn't type these values
+    setProgrammaticFill(true);
+
     // fill origin
     setOriginInput(route.origin.name);
     setOrigin({
@@ -202,29 +209,52 @@ const Home = () => {
               placeholder="e.g., Dubai Mall, Gold Souk..."
               value={originInput}
               onChange={handleOriginChange}
+              disableSuggestions={programmaticFill}
             />
             <SearchInput
               label="Destination"
               placeholder="e.g., Mall of Emirates, Dubai Marina..."
               value={destinationInput}
               onChange={handleDestinationChange}
+              disableSuggestions={programmaticFill}
             />
           </div>
 
-          {/* ── WEIGHT SLIDERS ── */}
-          <div className={styles.section}>
-            <WeightSliders onWeightChange={handleWeightChange} />
-          </div>
+          {/* ── WEIGHT SLIDERS + FIND BUTTON — hidden while results are shown ── */}
+          {buses.length === 0 && !loading && (
+            <>
+              <div className={styles.section}>
+                <WeightSliders onWeightChange={handleWeightChange} />
+              </div>
 
-          {/* ── FIND BUSES BUTTON ── */}
-          <button
-            className={`${styles.findButton} ${loading ? styles.loading : ''}`}
-            onClick={handleFindBuses}
-            disabled={!origin || !destination || loading}
-          >
-            <Search size={20} />
-            <span>{loading ? 'Searching...' : 'Find Best Bus Routes'}</span>
-          </button>
+              <button
+                className={`${styles.findButton} ${loading ? styles.loading : ''}`}
+                onClick={handleFindBuses}
+                disabled={!origin || !destination || loading}
+              >
+                <Search size={20} />
+                <span>Find Best Bus Routes</span>
+              </button>
+            </>
+          )}
+
+          {/* Loading state — show button as Searching... */}
+          {loading && (
+            <button className={`${styles.findButton} ${styles.loading}`} disabled>
+              <Search size={20} />
+              <span>Searching...</span>
+            </button>
+          )}
+
+          {/* Change route button — replaces sliders when results are shown */}
+          {buses.length > 0 && !loading && (
+            <button
+              className={styles.changeRouteButton}
+              onClick={() => { clearResults(); setSelectedBus(null); }}
+            >
+              ← Change Route
+            </button>
+          )}
 
           {/* search error */}
           {error && (

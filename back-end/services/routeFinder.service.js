@@ -70,8 +70,6 @@ export const findRoutesWithTransfer = async (originStops, destStops) => {
 
       if (commonStopIds.length === 0) return;
 
-      const transferStopId = commonStopIds[0];
-
       // pick closest matching origin stop for route1
       const matchingOriginStops = originStops.filter(s => route1StopIds.includes(s.stopId));
       const originStop = matchingOriginStops.sort((a, b) => a.distance - b.distance)[0];
@@ -80,10 +78,38 @@ export const findRoutesWithTransfer = async (originStops, destStops) => {
       const matchingDestStops = destStops.filter(s => route2StopIds.includes(s.stopId));
       const destStop = matchingDestStops.sort((a, b) => a.distance - b.distance)[0];
 
-      if (originStop && destStop) {
-        transferRoutes.push({ route1, route2, originStop, transferStopId, destStop, type: 'transfer' });
-        seen.add(pairKey);
-      }
+      if (!originStop || !destStop) return;
+
+      // ✅ FIXED: was commonStopIds[0] — just the first stop in route1's order
+      // which is often at the far end of the route, producing a very long leg 1.
+      //
+      // Instead: find the transfer stop that is geographically between the
+      // origin and destination. Score each common stop by:
+      //   dist(origin → transferStop) + dist(transferStop → dest)
+      // and pick the one with the smallest total — this naturally picks the
+      // stop that lies "on the way" rather than going far out of direction.
+      const originPos = originStop.position;
+      const destPos   = destStop.position;
+
+      const sq = (a, b) => (a.lat - b.lat) ** 2 + (a.lng - b.lng) ** 2;
+
+      // get the actual stop objects for common stops so we have positions
+      const commonStops = route1.stops.filter(s => commonStopIds.includes(s.stopId));
+
+      let bestTransferStopId = commonStopIds[0];
+      let bestScore = Infinity;
+
+      commonStops.forEach(stop => {
+        if (!stop.position) return;
+        const score = sq(originPos, stop.position) + sq(stop.position, destPos);
+        if (score < bestScore) {
+          bestScore = score;
+          bestTransferStopId = stop.stopId;
+        }
+      });
+
+      transferRoutes.push({ route1, route2, originStop, transferStopId: bestTransferStopId, destStop, type: 'transfer' });
+      seen.add(pairKey);
     });
   });
 

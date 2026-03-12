@@ -1,6 +1,56 @@
 import { useState, useEffect } from 'react';
 import api from '../services/Api';
 
+// Threshold: if trimmed segment is more than 75% of the full shape,
+// it means the stops are near the two termini and the "trim" didn't help much.
+// In that case, try the return shape — it may give a shorter segment.
+const TRIM_RATIO_THRESHOLD = 0.75;
+
+// Fetch a shape and trim it between two stops.
+// Returns the coordinate array, or null on failure.
+const fetchTrimmedShape = async (shapeId, originStopId, destStopId) => {
+  if (!shapeId) return null;
+  try {
+    const res = await api.shapes.getById(shapeId, originStopId, destStopId);
+    if (!res.success) return null;
+    return { coordinates: res.coordinates, trimRatio: res.trimRatio ?? 1.0 };
+  } catch {
+    return null;
+  }
+};
+
+// Fetch both the outbound and return shapes, return whichever gives a shorter segment.
+// Falls back to whichever one succeeds if only one is available.
+const fetchBestShape = async (shapeId, shapeIdReturn, originStopId, destStopId) => {
+  const outbound = await fetchTrimmedShape(shapeId, originStopId, destStopId);
+
+  // If outbound trim is already tight (< threshold), use it immediately
+  if (outbound && outbound.trimRatio < TRIM_RATIO_THRESHOLD) {
+    console.log(`✅ Outbound shape ${shapeId} trim ratio ${outbound.trimRatio.toFixed(2)} — using outbound`);
+    return outbound.coordinates;
+  }
+
+  // Otherwise try the return shape too
+  const returnShape = shapeIdReturn
+    ? await fetchTrimmedShape(shapeIdReturn, originStopId, destStopId)
+    : null;
+
+  if (!outbound && !returnShape) return null;
+  if (!outbound) return returnShape.coordinates;
+  if (!returnShape) {
+    console.log(`⚠️  Shape ${shapeId} trim ratio ${outbound.trimRatio.toFixed(2)} — no return shape, using outbound`);
+    return outbound.coordinates;
+  }
+
+  // Both available — use whichever gives the shorter (more focused) segment
+  if (returnShape.trimRatio < outbound.trimRatio) {
+    console.log(`🔄 Return shape ${shapeIdReturn} is better (${returnShape.trimRatio.toFixed(2)} < ${outbound.trimRatio.toFixed(2)})`);
+    return returnShape.coordinates;
+  }
+  console.log(`✅ Outbound shape ${shapeId} is better (${outbound.trimRatio.toFixed(2)} ≤ ${returnShape.trimRatio.toFixed(2)})`);
+  return outbound.coordinates;
+};
+
 const useShape = (selectedBus) => {
   const [shapeCoordinates, setShapeCoordinates] = useState(null);
   const [shapeCoordinatesLeg2, setShapeCoordinatesLeg2] = useState(null);
@@ -17,47 +67,64 @@ const useShape = (selectedBus) => {
     const fetchShape = async () => {
       setLoading(true);
       try {
-        // ── Direct route ─────────────────────────────────────────────────────
+
+        // ── Direct route ──────────────────────────────────────────────────
         if (selectedBus.journeyType === 'direct' && selectedBus.shapeId) {
           const originStopId = selectedBus.originStop?.stopId;
-          const destStopId = selectedBus.destinationStop?.stopId;
+          const destStopId   = selectedBus.destinationStop?.stopId;
 
-          console.log('🗺️ Fetching trimmed shape:', selectedBus.shapeId, originStopId, '→', destStopId);
+          console.log('🗺️ Fetching direct shape:', selectedBus.shapeId, originStopId, '→', destStopId);
 
-          const response = await api.shapes.getById(
+          const coords = await fetchBestShape(
             selectedBus.shapeId,
+            selectedBus.shapeIdReturn,
             originStopId,
             destStopId
           );
-
-          if (response.success) {
-            console.log('✅ Shape loaded:', response.coordinates?.length, 'points');
-            setShapeCoordinates(response.coordinates);
+          if (coords) {
+            console.log('✅ Direct shape loaded:', coords.length, 'points');
+            setShapeCoordinates(coords);
           }
         }
 
-        // ── Transfer route ───────────────────────────────────────────────────
+        // ── Transfer route ────────────────────────────────────────────────
         if (selectedBus.journeyType === 'transfer') {
+
+          // Leg 1: origin → transfer stop
           if (selectedBus.shapeId) {
-            const res1 = await api.shapes.getById(
+            const originStopId   = selectedBus.originStop?.stopId;
+            const transferStopId = selectedBus.transferStop?.stopId;
+
+            console.log('🗺️ Fetching leg1 shape:', selectedBus.shapeId, originStopId, '→', transferStopId);
+
+            const coords1 = await fetchBestShape(
               selectedBus.shapeId,
-              selectedBus.originStop?.stopId,
-              selectedBus.transferStop?.stopId  // leg1 ends at transfer stop
+              selectedBus.shapeIdReturn,
+              originStopId,
+              transferStopId
             );
-            if (res1.success) {
-              console.log('✅ Leg1 shape loaded:', res1.coordinates?.length, 'points');
-              setShapeCoordinates(res1.coordinates);
+            if (coords1) {
+              console.log('✅ Leg1 shape loaded:', coords1.length, 'points');
+              setShapeCoordinates(coords1);
             }
           }
+
+          // Leg 2: transfer stop → destination
           if (selectedBus.shapeIdLeg2) {
-            const res2 = await api.shapes.getById(
+            const transferStopId = selectedBus.transferStop?.stopId;
+            const destStopId     = selectedBus.destinationStop?.stopId;
+
+            console.log('🗺️ Fetching leg2 shape:', selectedBus.shapeIdLeg2, transferStopId, '→', destStopId);
+
+            const coords2 = await fetchBestShape(
               selectedBus.shapeIdLeg2,
-              selectedBus.transferStop?.stopId,  // leg2 starts at transfer stop
-              selectedBus.destinationStop?.stopId
+              selectedBus.shapeIdLeg2Return,  // ← now available from busGenerator
+              transferStopId,
+              destStopId
             );
-            if (res2.success) {
-              console.log('✅ Leg2 shape loaded:', res2.coordinates?.length, 'points');
-              setShapeCoordinatesLeg2(res2.coordinates);
+            if (coords2) {
+              console.log('✅ Leg2 shape loaded:', coords2.length, 'points');
+              setShapeCoordinatesLeg2(coords2);
             }
           }
         }

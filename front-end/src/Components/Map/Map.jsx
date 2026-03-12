@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import MapBoundsUpdater from './MapBoundsUpdater';
+import L from 'leaflet';
 import {
   originIcon,
   destinationIcon,
@@ -12,35 +12,57 @@ import {
 import { MAP_CONFIG } from '../../utils/constants';
 import styles from './Map.module.css';
 
-// ✅ FIXED: FitBounds now only fits on first shape load, not on every route switch.
+// ✅ FIXED: Single unified component for all map movement.
+// Replaces both FitBounds and MapBoundsUpdater which were fighting each other —
+// both fired independently and caused the map to jump unexpectedly.
 //
-// Old behavior: every time shapeCoordinates changed (i.e. every time the user
-// clicked a different route card), the map re-fitted to the new shape. This made
-// it look like origin/destination changed — the map jumped to wherever the new
-// shape happened to start, pushing the origin/destination pins off-screen.
+// Priority order:
+//   1. shape loaded + shapeKey changed → fit to route shape
+//   2. both origin + destination set → fit to show both pins
+//   3. only origin set → center on it
 //
-// Fix: use a ref to track whether we've already fitted. Only fit once when a shape
-// first loads. After that the user can pan/zoom freely without the map jumping.
-// The ref resets when shapeCoordinates goes null (new search), so it fits again
-// for the next search result.
-const FitBounds = ({ coordinates }) => {
+// Refs track the PREVIOUS values so we only move the map when something
+// genuinely changed, not just when React re-rendered with the same values.
+const SmartBounds = ({ origin, destination, shapeCoordinates, shapeKey }) => {
   const map = useMap();
-  const hasFitted = useRef(false);
+  const lastShapeKey   = useRef(null);
+  const lastOriginLat  = useRef(null);
+  const lastOriginLng  = useRef(null);
+  const lastDestLat    = useRef(null);
+  const lastDestLng    = useRef(null);
 
   useEffect(() => {
-    // reset when coordinates are cleared (new search started)
-    if (!coordinates || coordinates.length < 2) {
-      hasFitted.current = false;
+    // Priority 1 — fit to shape when user selects a different route
+    if (shapeCoordinates?.length > 1 && shapeKey !== lastShapeKey.current) {
+      const latLngs = shapeCoordinates.map(c => [c.lat, c.lng]);
+      map.fitBounds(latLngs, { padding: [40, 40] });
+      lastShapeKey.current = shapeKey;
       return;
     }
 
-    // only fit once per shape — don't re-fit when user switches route cards
-    if (hasFitted.current) return;
+    // Priority 2 — fit to show both pins (value-based change check)
+    const originChanged = origin?.lat !== lastOriginLat.current || origin?.lng !== lastOriginLng.current;
+    const destChanged   = destination?.lat !== lastDestLat.current || destination?.lng !== lastDestLng.current;
 
-    const latLngs = coordinates.map(c => [c.lat, c.lng]);
-    map.fitBounds(latLngs, { padding: [40, 40] });
-    hasFitted.current = true;
-  }, [coordinates]);
+    if (origin?.lat && destination?.lat && (originChanged || destChanged)) {
+      map.fitBounds(
+        L.latLngBounds([origin.lat, origin.lng], [destination.lat, destination.lng]),
+        { padding: [50, 50] }
+      );
+      lastOriginLat.current = origin.lat;
+      lastOriginLng.current = origin.lng;
+      lastDestLat.current   = destination.lat;
+      lastDestLng.current   = destination.lng;
+      return;
+    }
+
+    // Priority 3 — center on origin alone
+    if (origin?.lat && originChanged && !destination?.lat) {
+      map.setView([origin.lat, origin.lng], 13);
+      lastOriginLat.current = origin.lat;
+      lastOriginLng.current = origin.lng;
+    }
+  }, [shapeCoordinates, shapeKey, origin, destination]);
 
   return null;
 };
@@ -57,14 +79,17 @@ const MapView = ({
 }) => {
   const isValidCoord = (val) => typeof val === 'number' && !isNaN(val);
   const hasValidOrigin = origin && isValidCoord(origin.lat) && isValidCoord(origin.lng);
-  const hasValidDest = destination && isValidCoord(destination?.lat) && isValidCoord(destination?.lng);
+  const hasValidDest   = destination && isValidCoord(destination?.lat) && isValidCoord(destination?.lng);
 
   const center = hasValidOrigin
     ? [origin.lat, origin.lng]
     : [MAP_CONFIG.DEFAULT_CENTER.lat, MAP_CONFIG.DEFAULT_CENTER.lng];
 
   const routeColor = selectedRoute?.color || '#667eea';
-  const leg2Color = '#00c9a7';
+  const leg2Color  = '#00c9a7';
+
+  // shapeKey = busId of selected route — SmartBounds moves the map ONLY when this changes
+  const shapeKey = selectedRoute?.busId || null;
 
   const leg1Positions = shapeCoordinates?.length > 1
     ? shapeCoordinates.map(c => [c.lat, c.lng])
@@ -89,12 +114,13 @@ const MapView = ({
     >
       <TileLayer attribution={MAP_CONFIG.ATTRIBUTION} url={MAP_CONFIG.TILE_LAYER} />
 
-      {hasValidOrigin && (
-        <MapBoundsUpdater origin={origin} destination={destination} />
-      )}
-
-      {/* Fit map to shape — only on first load, not on every route switch */}
-      {leg1Positions && <FitBounds coordinates={shapeCoordinates} />}
+      {/* Unified map bounds controller — single source of truth for all map movement */}
+      <SmartBounds
+        origin={origin}
+        destination={destination}
+        shapeCoordinates={shapeCoordinates}
+        shapeKey={shapeKey}
+      />
 
       {/* User Location */}
       {userLocation && isValidCoord(userLocation.lat) && isValidCoord(userLocation.lng) && (
@@ -127,17 +153,23 @@ const MapView = ({
         </Marker>
       )}
 
-      {/* Leg 1 shape — real GTFS route */}
+      {/* Leg 1 — shadow then coloured line so it pops off the map */}
       {leg1Positions && (
-        <Polyline positions={leg1Positions} color={routeColor} weight={5} opacity={0.85} />
+        <>
+          <Polyline positions={leg1Positions} color="#000000" weight={7} opacity={0.15} />
+          <Polyline positions={leg1Positions} color={routeColor} weight={4} opacity={0.9} />
+        </>
       )}
 
-      {/* Leg 2 shape — transfer route */}
+      {/* Leg 2 — transfer route second leg in teal */}
       {leg2Positions && (
-        <Polyline positions={leg2Positions} color={leg2Color} weight={5} opacity={0.85} />
+        <>
+          <Polyline positions={leg2Positions} color="#000000" weight={7} opacity={0.15} />
+          <Polyline positions={leg2Positions} color={leg2Color} weight={4} opacity={0.9} />
+        </>
       )}
 
-      {/* Fallback dashed line */}
+      {/* Fallback dashed line when no shape data */}
       {fallbackPositions && (
         <Polyline positions={fallbackPositions} color="#667eea" weight={3} opacity={0.5} dashArray="8,12" />
       )}

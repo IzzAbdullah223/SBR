@@ -3,31 +3,42 @@ import styles from './SearchInput.module.css';
 
 const LOCATIONIQ_TOKEN = import.meta.env.VITE_LOCATIONIQ_TOKEN;
 
-const SearchInput = ({ value, onChange, placeholder, label }) => {
+// disableSuggestions: passed as true by Home when the field was filled
+// programmatically (e.g. saved-route chip click) — prevents the debounce
+// search from firing and the dropdown from opening.
+const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions = false }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [error, setError] = useState(null);
-  const dropdownRef = useRef(null);//useRef gives you a direct pointer to a real DOM element. Think of it as saying "I want to be able to grab this element later".
-  const inputRef = useRef(null);//dropdownRef will point to the dropdown div. inputRef will point to the text input. They start as null and get connected to the actual elements via the ref attribute in JSX later. We need these to detect clicks outside — we can't do that with just React state.
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
 
-
+  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current/* does the dropdown exist in DOM right now */ && !dropdownRef.current.contains(event.target) &&
-          inputRef.current && !inputRef.current.contains(event.target)) {//was the click OUTSIDE the dropdown?, was the click OUTSIDE the input too?
+      if (
+        dropdownRef.current && !dropdownRef.current.contains(event.target) &&
+        inputRef.current && !inputRef.current.contains(event.target)
+      ) {
         setShowDropdown(false);
       }
-    
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-
-// debounce
+  // Debounce search — skipped entirely when disableSuggestions is true
   useEffect(() => {
-    if (value.length < 2) { // if user typed < 2 char their no point of searching so  stop
+    // Parent set this value programmatically — don't search, close any open dropdown
+    if (disableSuggestions) {
+      setSuggestions([]);
+      setShowDropdown(false);
+      setError(null);
+      return;
+    }
+
+    if (value.length < 2) {
       setSuggestions([]);
       setShowDropdown(false);
       setError(null);
@@ -35,12 +46,10 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
     }
 
     const delayDebounce = setTimeout(async () => {
- 
       await searchLocations(value);
-    }, 300);//Sets a 300ms timer. If the user keeps typing, this effect runs again which cancels the previous timer and starts a new one. The API call only fires when the user stops typing for 300ms. This is called debouncing — prevents sending a request on every single keystroke.
+    }, 300);
     return () => clearTimeout(delayDebounce);
-  }, [value]);
-
+  }, [value, disableSuggestions]);
 
   const searchLocations = async (query) => {
     if (!LOCATIONIQ_TOKEN || LOCATIONIQ_TOKEN === 'undefined') {
@@ -54,7 +63,6 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
     setError(null);
 
     try {
-      
       const response = await fetch(
         `https://api.locationiq.com/v1/autocomplete?` +
         `key=${LOCATIONIQ_TOKEN}` +
@@ -72,22 +80,21 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
 
       const data = await response.json();
 
-      // Filter for Dubai results bec sometimes the data come not filtered well
-      const dubaiResults = data.filter(item => { 
+      // Filter for Dubai results
+      const dubaiResults = data.filter(item => {
         const displayName = item.display_name?.toLowerCase() || '';
         return displayName.includes('dubai') || displayName.includes('دبي');
       });
-   
-      // tranform the data into our format.
+
       const formattedResults = dubaiResults.map(item => ({
         place_id: item.place_id,
         display_name: item.display_name,
         name: item.display_name.split(',')[0].trim(),
-        lat: parseFloat(item.lat),// convert string to numbers.
+        lat: parseFloat(item.lat),
         lng: parseFloat(item.lon),
         type: item.type || 'place',
         address: item.address || {},
-        isLocationIQ: true
+        isLocationIQ: true,
       }));
 
       setSuggestions(formattedResults);
@@ -108,7 +115,7 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
   };
 
   const handleSelectSuggestion = (suggestion) => {
-    onChange( // on change here is props from Home.
+    onChange(
       { target: { value: suggestion.name } },
       { lat: suggestion.lat, lng: suggestion.lng, fullAddress: suggestion.display_name }
     );
@@ -132,7 +139,7 @@ const SearchInput = ({ value, onChange, placeholder, label }) => {
           placeholder={placeholder}
           value={value}
           onChange={handleInputChange}
-          onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
+          onFocus={() => !disableSuggestions && suggestions.length > 0 && setShowDropdown(true)}
           className={styles.searchInput}
           autoComplete="off"
         />

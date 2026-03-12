@@ -307,3 +307,29 @@
 .savedRoutesPinned {
   margin-bottom: 14px;
 }
+
+/* ── Change Route button — compact link-style, shown instead of sliders when results exist ── */
+.changeRouteButton {
+  width: calc(100% - 48px);
+  margin: 0 24px 16px;
+  padding: 10px 16px;
+  background: transparent;
+  color: var(--gray-600);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.changeRouteButton:hover {
+  background: var(--gray-200);
+  color: var(--navy);
+  border-color: var(--gray-400);
+}
