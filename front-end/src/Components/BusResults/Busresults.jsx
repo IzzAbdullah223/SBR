@@ -3,11 +3,23 @@
  * Displays ranked buses from TOPSIS algorithm
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Clock, DollarSign, MapPin, GitMerge, Star, Award, Navigation, ArrowRight, Bookmark, BookmarkCheck } from 'lucide-react';
 import styles from './BusResults.module.css';
 
 const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, isSavingJourney, journeyAlreadySaved, user }) => {
+  // Refs for each card — keyed by busId
+  const cardRefs = useRef({});
+
+  // Scroll the selected card into view whenever selectedBus changes
+  useEffect(() => {
+    if (!selectedBus?.busId) return;
+    const el = cardRefs.current[selectedBus.busId];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [selectedBus?.busId]);
+
   if (loading) {
     return (
       <div className={styles.loading}>
@@ -80,6 +92,7 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
           return (
             <div
               key={bus.busId}
+              ref={(el) => { cardRefs.current[bus.busId] = el; }}
               className={`${styles.busCard} ${isSelected ? styles.selected : ''}`}
               onClick={() => onSelectBus(bus)}
             >

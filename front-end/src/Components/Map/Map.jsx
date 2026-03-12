@@ -12,57 +12,76 @@ import {
 import { MAP_CONFIG } from '../../utils/constants';
 import styles from './Map.module.css';
 
-// ✅ FIXED: Single unified component for all map movement.
-// Replaces both FitBounds and MapBoundsUpdater which were fighting each other —
-// both fired independently and caused the map to jump unexpectedly.
+// SmartBounds — single source of truth for all map movement.
 //
 // Priority order:
-//   1. shape loaded + shapeKey changed → fit to route shape
-//   2. both origin + destination set → fit to show both pins
-//   3. only origin set → center on it
-//
-// Refs track the PREVIOUS values so we only move the map when something
-// genuinely changed, not just when React re-rendered with the same values.
-const SmartBounds = ({ origin, destination, shapeCoordinates, shapeKey }) => {
+//   1. Bus selected + shape(s) loaded → fit to ALL shape coordinates (both legs)
+//   2. Bus selected but no shape yet → fit to origin+dest pins as placeholder
+//   3. Origin/destination changed (new search) → fit to both pins
+//   4. Only origin set → center on it
+const SmartBounds = ({ origin, destination, shapeCoordinates, shapeCoordinatesLeg2, shapeKey }) => {
   const map = useMap();
-  const lastShapeKey   = useRef(null);
-  const lastOriginLat  = useRef(null);
-  const lastOriginLng  = useRef(null);
-  const lastDestLat    = useRef(null);
-  const lastDestLng    = useRef(null);
+  const lastShapeKey    = useRef(null);
+  const lastFittedKey   = useRef(null);
+  const lastOriginLat   = useRef(null);
+  const lastOriginLng   = useRef(null);
+  const lastDestLat     = useRef(null);
+  const lastDestLng     = useRef(null);
+
+  const fitToOriginDest = () => {
+    if (!origin?.lat || !destination?.lat) return;
+    map.fitBounds(
+      L.latLngBounds([origin.lat, origin.lng], [destination.lat, destination.lng]),
+      { padding: [60, 60] }
+    );
+    lastOriginLat.current = origin.lat;
+    lastOriginLng.current = origin.lng;
+    lastDestLat.current   = destination.lat;
+    lastDestLng.current   = destination.lng;
+  };
 
   useEffect(() => {
-    // Priority 1 — fit to shape when user selects a different route
-    if (shapeCoordinates?.length > 1 && shapeKey !== lastShapeKey.current) {
-      const latLngs = shapeCoordinates.map(c => [c.lat, c.lng]);
-      map.fitBounds(latLngs, { padding: [40, 40] });
-      lastShapeKey.current = shapeKey;
+    const leg1 = shapeCoordinates?.length > 1 ? shapeCoordinates : null;
+    const leg2 = shapeCoordinatesLeg2?.length > 1 ? shapeCoordinatesLeg2 : null;
+    const hasShape = leg1 || leg2;
+
+    // Priority 1 — shape loaded (or updated) for the current bus
+    // Fit to ALL coordinates across both legs so the whole route is visible
+    if (hasShape && shapeKey !== lastShapeKey.current) {
+      const allPoints = [
+        ...(leg1 ? leg1.map(c => [c.lat, c.lng]) : []),
+        ...(leg2 ? leg2.map(c => [c.lat, c.lng]) : []),
+      ];
+      map.fitBounds(allPoints, { padding: [50, 50] });
+      lastShapeKey.current  = shapeKey;
+      lastFittedKey.current = shapeKey;
       return;
     }
 
-    // Priority 2 — fit to show both pins (value-based change check)
+    // Priority 2 — bus just changed but shape hasn't loaded yet
+    // Show origin+dest immediately as a placeholder while shape loads
+    if (shapeKey && shapeKey !== lastFittedKey.current) {
+      fitToOriginDest();
+      lastFittedKey.current = shapeKey;
+      return;
+    }
+
+    // Priority 3 — origin or destination changed (new search, no bus selected yet)
     const originChanged = origin?.lat !== lastOriginLat.current || origin?.lng !== lastOriginLng.current;
     const destChanged   = destination?.lat !== lastDestLat.current || destination?.lng !== lastDestLng.current;
 
     if (origin?.lat && destination?.lat && (originChanged || destChanged)) {
-      map.fitBounds(
-        L.latLngBounds([origin.lat, origin.lng], [destination.lat, destination.lng]),
-        { padding: [50, 50] }
-      );
-      lastOriginLat.current = origin.lat;
-      lastOriginLng.current = origin.lng;
-      lastDestLat.current   = destination.lat;
-      lastDestLng.current   = destination.lng;
+      fitToOriginDest();
       return;
     }
 
-    // Priority 3 — center on origin alone
+    // Priority 4 — only origin set
     if (origin?.lat && originChanged && !destination?.lat) {
       map.setView([origin.lat, origin.lng], 13);
       lastOriginLat.current = origin.lat;
       lastOriginLng.current = origin.lng;
     }
-  }, [shapeCoordinates, shapeKey, origin, destination]);
+  }, [shapeCoordinates, shapeCoordinatesLeg2, shapeKey, origin, destination]);
 
   return null;
 };
@@ -119,6 +138,7 @@ const MapView = ({
         origin={origin}
         destination={destination}
         shapeCoordinates={shapeCoordinates}
+        shapeCoordinatesLeg2={shapeCoordinatesLeg2}
         shapeKey={shapeKey}
       />
 

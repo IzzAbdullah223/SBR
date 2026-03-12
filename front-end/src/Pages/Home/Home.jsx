@@ -220,41 +220,20 @@ const Home = () => {
             />
           </div>
 
-          {/* ── WEIGHT SLIDERS + FIND BUTTON — hidden while results are shown ── */}
-          {buses.length === 0 && !loading && (
-            <>
-              <div className={styles.section}>
-                <WeightSliders onWeightChange={handleWeightChange} />
-              </div>
+          {/* ── WEIGHT SLIDERS ── */}
+          <div className={styles.section}>
+            <WeightSliders onWeightChange={handleWeightChange} />
+          </div>
 
-              <button
-                className={`${styles.findButton} ${loading ? styles.loading : ''}`}
-                onClick={handleFindBuses}
-                disabled={!origin || !destination || loading}
-              >
-                <Search size={20} />
-                <span>Find Best Bus Routes</span>
-              </button>
-            </>
-          )}
-
-          {/* Loading state — show button as Searching... */}
-          {loading && (
-            <button className={`${styles.findButton} ${styles.loading}`} disabled>
-              <Search size={20} />
-              <span>Searching...</span>
-            </button>
-          )}
-
-          {/* Change route button — replaces sliders when results are shown */}
-          {buses.length > 0 && !loading && (
-            <button
-              className={styles.changeRouteButton}
-              onClick={() => { clearResults(); setSelectedBus(null); }}
-            >
-              ← Change Route
-            </button>
-          )}
+          {/* ── FIND BUSES BUTTON ── */}
+          <button
+            className={`${styles.findButton} ${loading ? styles.loading : ''}`}
+            onClick={handleFindBuses}
+            disabled={!origin || !destination || loading}
+          >
+            <Search size={20} />
+            <span>{loading ? 'Searching...' : 'Find Best Bus Routes'}</span>
+          </button>
 
           {/* search error */}
           {error && (
