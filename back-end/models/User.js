@@ -60,6 +60,13 @@ const userSchema = new mongoose.Schema({
       email: { type: Boolean, default: true },
       push: { type: Boolean, default: true },
       busArrival: { type: Boolean, default: true }
+    },
+    // TOPSIS weights saved from Settings page (raw 0-100 integers)
+    weights: {
+      time:            { type: Number, default: 25, min: 0, max: 100 },
+      cost:            { type: Number, default: 25, min: 0, max: 100 },
+      walkingDistance: { type: Number, default: 25, min: 0, max: 100 },
+      transfers:       { type: Number, default: 25, min: 0, max: 100 },
     }
   },
 

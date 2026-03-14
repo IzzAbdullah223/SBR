@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
 
-// useAuth centralizes everything auth-related so Home.jsx doesn't have to.
-// it manages: user state, token restore on refresh, login/logout,
-// modal visibility, and switching between login ↔ signup modals.
 const useAuth = () => {
 
   const [user, setUser] = useState(null);
@@ -10,30 +7,43 @@ const useAuth = () => {
   const [showSignUp, setShowSignUp] = useState(false);
 
   // ── RESTORE USER ON PAGE REFRESH ──────────────────────────────────────────
-  // ✅ FIXED: previously decoded user from JWT payload which only has { id, email }
-  // so user.name was always undefined → navbar showed "Hello," with no name.
-  // Fix: store the full user object in localStorage on login/signup,
-  // restore from there on refresh (token still verified for expiry).
+  // Step 1: immediately restore from localStorage so UI doesn't flash
+  // Step 2: fetch fresh profile from backend to get latest preferences.weights
+  //         (localStorage was saved at login time — may not have latest prefs)
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
 
     try {
-      // verify token isn't expired — decode the payload middle section
       const payload = JSON.parse(atob(token.split('.')[1]));
 
       if (payload.exp * 1000 > Date.now()) {
-        // ✅ restore from stored user object (has name, email, phone etc.)
-        // not from JWT payload (which only has id + email)
+        // Step 1 — restore immediately from localStorage (fast, no flicker)
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
           setUser(JSON.parse(storedUser));
         } else {
-          // fallback: use whatever is in the token payload
           setUser(payload.user);
         }
+
+        // Step 2 — fetch fresh profile from backend in background
+        // This ensures preferences.weights and any other updates are loaded
+        fetch('/api/settings/profile', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data?.success && data?.user) {
+              // update state and localStorage with fresh data
+              setUser(data.user);
+              localStorage.setItem('user', JSON.stringify(data.user));
+            }
+          })
+          .catch(() => {
+            // silently ignore — localStorage version is still fine
+          });
+
       } else {
-        // token expired — clean up everything
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
@@ -46,7 +56,6 @@ const useAuth = () => {
   // ── AUTH HANDLERS ──────────────────────────────────────────────────────────
 
   const handleLoginSuccess = (loggedInUser) => {
-    // ✅ save full user object to localStorage so refresh restores the name
     localStorage.setItem('user', JSON.stringify(loggedInUser));
     setUser(loggedInUser);
     setShowLogin(false);
@@ -55,7 +64,7 @@ const useAuth = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('user'); // ✅ also clear stored user object
+    localStorage.removeItem('user');
     setUser(null);
   };
 

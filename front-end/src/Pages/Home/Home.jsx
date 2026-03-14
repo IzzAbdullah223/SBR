@@ -1,8 +1,7 @@
 // Home.jsx
-// Main page — left sidebar (saved routes panel, search, sliders, results) + right map
-// Saved Routes panel now sits at the TOP of the left sidebar, collapsible
-// "Add to Favourites" saves the journey (origin+destination) not the specific bus
-// Clicking a saved journey auto-fills origin + destination fields
+// Receives all auth state as props from App.jsx — does NOT call useAuth itself.
+// This is critical: useAuth must live in ONE place (App.jsx) so that
+// logging out in Settings instantly updates Home without a page reload.
 
 import React, { useState, useMemo, useEffect } from 'react';
 import MapComponent from '../../Components/Map/Map';
@@ -15,7 +14,6 @@ import { MAP_CONFIG } from '../../utils/constants';
 import useFindBuses from '../../hooks/useFindBuses';
 import useShape from '../../hooks/useShape';
 import useNearbyStops from '../../hooks/useNearbyStops';
-import useAuth from '../../hooks/useAuth';
 import useSavedRoutes from '../../hooks/useSavedRoutes';
 import Navbar from '../../Components/NavBar/Navbar';
 import Modal from '../../Components/Modal/Modal';
@@ -23,21 +21,19 @@ import { SignUp } from '../Authentication/SignUp/SignUp';
 import { Login } from '../Authentication/Login/Login';
 import styles from './Home.module.css';
 
-const Home = () => {
-
-  const {
-    user,
-    showLogin,
-    showSignUp,
-    handleLoginSuccess,
-    handleLogout,
-    handleSwitchToSignUp,
-    handleSwitchToLogin,
-    openLogin,
-    openSignUp,
-    closeLogin,
-    closeSignUp,
-  } = useAuth();
+const Home = ({
+  // all auth state and handlers come from App.jsx via props
+  user,
+  showLogin,
+  showSignUp,
+  handleLoginSuccess,
+  handleSwitchToSignUp,
+  handleSwitchToLogin,
+  openLogin,
+  openSignUp,
+  closeLogin,
+  closeSignUp,
+}) => {
 
   const [originInput, setOriginInput] = useState('');
   const [destinationInput, setDestinationInput] = useState('');
@@ -68,13 +64,11 @@ const Home = () => {
     isJourneySaved,
   } = useSavedRoutes(user);
 
-  // true while the current origin+destination journey save is in flight
   const isSavingJourney = !!(
     origin && destination &&
     savingKey === `${origin.name}__${destination.name}`
   );
 
-  // true if the current origin+destination journey is already saved
   const journeyAlreadySaved = !!(
     origin && destination && isJourneySaved(origin.lat, origin.lng, destination.lat, destination.lng)
   );
@@ -82,7 +76,7 @@ const Home = () => {
   // ── SEARCH HANDLERS ────────────────────────────────────────────────────────
 
   const handleOriginChange = (e, locationData) => {
-    if (programmaticFill) setProgrammaticFill(false); // user is typing — re-enable suggestions
+    if (programmaticFill) setProgrammaticFill(false);
     setOriginInput(e.target.value);
     if (locationData?.lat && locationData?.lng) {
       setOrigin({ lat: locationData.lat, lng: locationData.lng, name: e.target.value });
@@ -92,7 +86,7 @@ const Home = () => {
   };
 
   const handleDestinationChange = (e, locationData) => {
-    if (programmaticFill) setProgrammaticFill(false); // user is typing — re-enable suggestions
+    if (programmaticFill) setProgrammaticFill(false);
     setDestinationInput(e.target.value);
     if (locationData?.lat && locationData?.lng) {
       setDestination({ lat: locationData.lat, lng: locationData.lng, name: e.target.value });
@@ -118,7 +112,7 @@ const Home = () => {
     );
   };
 
-  // auto-select first bus result when results arrive
+  // auto-select first bus when results arrive
   useEffect(() => {
     if (buses?.length > 0 && !selectedBus) {
       setSelectedBus(buses[0]);
@@ -127,23 +121,14 @@ const Home = () => {
 
   const handleSelectBus = (bus) => setSelectedBus(bus);
 
-  // ── SAVE JOURNEY HANDLER ───────────────────────────────────────────────────
-  // Called when user clicks "Add to Favourites" in BusResults header
-  // Saves origin + destination only — no specific bus
   const handleSaveJourney = async () => {
     if (!origin || !destination) return;
     await saveRoute(origin, destination);
   };
 
-  // ── SELECT SAVED JOURNEY ───────────────────────────────────────────────────
-  // Called when user clicks a saved route card in the SavedRoutes panel
-  // Auto-fills the origin and destination search fields
-  // User then presses "Find Best Bus Routes" themselves
   const handleSelectSavedJourney = (route) => {
-    // Suppress LocationIQ suggestion dropdown — user didn't type these values
     setProgrammaticFill(true);
 
-    // fill origin
     setOriginInput(route.origin.name);
     setOrigin({
       name: route.origin.name,
@@ -151,7 +136,6 @@ const Home = () => {
       lng: route.origin.position.lng,
     });
 
-    // fill destination
     setDestinationInput(route.destination.name);
     setDestination({
       name: route.destination.name,
@@ -159,7 +143,6 @@ const Home = () => {
       lng: route.destination.position.lng,
     });
 
-    // close the saved routes panel so the user can see the search fields
     if (showSaved) toggleSavedPanel();
   };
 
@@ -169,9 +152,9 @@ const Home = () => {
       stopMap.set(stop.stopId, stop);
     }
     if (selectedBus) {
-      if (selectedBus.originStop) stopMap.set(selectedBus.originStop.stopId, selectedBus.originStop);
+      if (selectedBus.originStop)      stopMap.set(selectedBus.originStop.stopId,      selectedBus.originStop);
       if (selectedBus.destinationStop) stopMap.set(selectedBus.destinationStop.stopId, selectedBus.destinationStop);
-      if (selectedBus.transferStop) stopMap.set(selectedBus.transferStop.stopId, selectedBus.transferStop);
+      if (selectedBus.transferStop)    stopMap.set(selectedBus.transferStop.stopId,    selectedBus.transferStop);
     }
     return Array.from(stopMap.values());
   }, [nearbyStops, selectedBus]);
@@ -183,7 +166,6 @@ const Home = () => {
         onSignUpClick={openSignUp}
         onLoginClick={openLogin}
         user={user}
-        onLogout={handleLogout}
       />
 
       <div className={styles.content}>
@@ -191,7 +173,6 @@ const Home = () => {
 
           {/* ── SEARCH FIELDS + SAVED ROUTES ── */}
           <div className={styles.section}>
-            {/* Saved routes chip row sits right above the search title, same padding */}
             <div className={styles.savedRoutesPinned}>
               <SavedRoutes
                 savedRoutes={savedRoutes}
@@ -222,7 +203,10 @@ const Home = () => {
 
           {/* ── WEIGHT SLIDERS ── */}
           <div className={styles.section}>
-            <WeightSliders onWeightChange={handleWeightChange} />
+            <WeightSliders
+              onWeightChange={handleWeightChange}
+              initialWeights={user?.preferences?.weights}
+            />
           </div>
 
           {/* ── FIND BUSES BUTTON ── */}

@@ -96,12 +96,22 @@ export const shapesAPI = {
     fetchAPI(`/shapes/route/${encodeURIComponent(routeNumber)}`),
 };
 
+export const settingsAPI = {
+  getProfile:       ()              => fetchAPI('/settings/profile'),
+  updateProfile:    (data)          => fetchAPI('/settings/profile',     { method: 'PUT',    body: JSON.stringify(data) }),
+  changePassword:   (data)          => fetchAPI('/settings/password',    { method: 'PUT',    body: JSON.stringify(data) }),
+  updatePreferences:(data)          => fetchAPI('/settings/preferences', { method: 'PUT',    body: JSON.stringify(data) }),
+  clearSavedRoutes: ()              => fetchAPI('/settings/saved-routes',{ method: 'DELETE' }),
+  deleteAccount:    (password)      => fetchAPI('/settings/account',     { method: 'DELETE', body: JSON.stringify({ password }) }),
+};
+ 
 const api = {
   auth: authAPI,
   busStops: busStopsAPI,
   routes: routesAPI,
   topsis: topsisAPI,
   shapes: shapesAPI,
+  settings: settingsAPI,
 };
-
+ 
 export default api;

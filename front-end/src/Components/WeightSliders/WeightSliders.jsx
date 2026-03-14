@@ -9,7 +9,7 @@
  * This prevents the slider from jumping to near-zero when parent stores 0.25.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Clock, DollarSign, MapPin, GitMerge } from 'lucide-react';
 import styles from './WeightSliders.module.css';
 
@@ -44,14 +44,34 @@ const criteria = [
   },
 ];
 
-const WeightSliders = ({ onWeightChange }) => {
-  // ✅ Internal raw state (0–100) — completely independent from parent
+const WeightSliders = ({ onWeightChange, initialWeights }) => {
+  // Internal raw state (0–100)
+  // Seeded from initialWeights if provided (saved from Settings)
+  // Falls back to 25/25/25/25 if nothing saved yet
   const [rawWeights, setRawWeights] = useState({
-    time: 25,
-    cost: 25,
-    walkingDistance: 25,
-    transfers: 25,
+    time:            initialWeights?.time            ?? 25,
+    cost:            initialWeights?.cost            ?? 25,
+    walkingDistance: initialWeights?.walkingDistance ?? 25,
+    transfers:       initialWeights?.transfers       ?? 25,
   });
+
+  // Re-sync sliders when saved preferences arrive from backend
+  // Depends on individual values not the object reference — avoids stale comparisons
+  useEffect(() => {
+    if (!initialWeights) return;
+    const synced = {
+      time:            initialWeights.time            ?? 25,
+      cost:            initialWeights.cost            ?? 25,
+      walkingDistance: initialWeights.walkingDistance ?? 25,
+      transfers:       initialWeights.transfers       ?? 25,
+    };
+    setRawWeights(synced);
+  }, [
+    initialWeights?.time,
+    initialWeights?.cost,
+    initialWeights?.walkingDistance,
+    initialWeights?.transfers,
+  ]);
 
   // Normalize raw weights (0–100 integers) → (0–1 floats) summing to 1.0
   const normalizeWeights = (raw) => {

@@ -9,7 +9,8 @@ import busRouteRoutes from './busRouteRoutes.js';
 import topsisRoutes from './topsisRoutes.js';
 import shapeRoutes from './shapeRoutes.js';
 import authRoutes from './authRoute.js';
-import savedRouteRoutes from './savedRoutes.js'; // ✅ ADDED — was missing, causing all /api/saved-routes calls to 404
+import savedRouteRoutes from './savedRoutes.js'; 
+import settingsRoutes from './settingsRoutes.js';
 
 const router = express.Router();
 
@@ -19,5 +20,6 @@ router.use('/find-buses', topsisRoutes);
 router.use('/shapes', shapeRoutes);
 router.use('/auth', authRoutes);
 router.use('/saved-routes', savedRouteRoutes); // ✅ ADDED
+router.use('/settings', settingsRoutes)
 
 export default router;

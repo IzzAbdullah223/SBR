@@ -1,7 +1,10 @@
-import { Bus, Settings, LogIn, UserPlus, LogOut } from 'lucide-react';
+import { Bus, Settings, LogIn, UserPlus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import styles from './Navbar.module.css';
 
-const Navbar = ({ onSignUpClick, onLoginClick, user, onLogout }) => {
+const Navbar = ({ onSignUpClick, onLoginClick, user }) => {
+  const navigate = useNavigate();
+
   return (
     <nav className={styles.navbar}>
       <div className={styles.logo}>
@@ -15,28 +18,18 @@ const Navbar = ({ onSignUpClick, onLoginClick, user, onLogout }) => {
       </div>
 
       <div className={styles.actions}>
-
-        {/* ✅ FIXED: Settings had no onClick — clicking it did nothing and looked broken.
-            Added disabled + title so it's clear it's coming soon, not just broken. */}
-        <button
-          className={styles.settingsBtn}
-          disabled
-          title="Settings — coming soon"
-        >
-          <Settings size={15} />
-          <span>Settings</span>
-        </button>
+        {/* Settings — only visible when logged in, navigates to /settings page */}
+        {user && (
+          <button className={styles.settingsBtn} onClick={() => navigate('/settings')}>
+            <Settings size={15} />
+            <span>Settings</span>
+          </button>
+        )}
 
         <div className={styles.divider} />
 
         {user ? (
-          <>
-            <span className={styles.greeting}>Hello, <strong>{user.name}</strong></span>
-            <button className={styles.logoutBtn} onClick={onLogout}>
-              <LogOut size={15} />
-              <span>Logout</span>
-            </button>
-          </>
+          <span className={styles.greeting}>Hello, <strong>{user.name}</strong></span>
         ) : (
           <>
             <button className={styles.loginBtn} onClick={onLoginClick}>
