@@ -65,7 +65,7 @@ const ConfirmModal = ({ title, message, onConfirm, onCancel, requirePassword }) 
 };
 
 // ── Main ──────────────────────────────────────────────────────────────────
-const Settings = ({ user, onUserUpdate, onLogout }) => {
+const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
   const navigate = useNavigate();
 
   const {
@@ -216,16 +216,16 @@ const Settings = ({ user, onUserUpdate, onLogout }) => {
           <form onSubmit={handlePasswordSave} className={styles.form}>
             <div className={styles.formRow}>
               <label className={styles.label}>Current Password</label>
-              <input className={styles.input} type="password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} placeholder="••••••••" />
+              <input className={styles.input} type="password" autoComplete="current-password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} placeholder="••••••••" />
             </div>
             <div className={styles.formGrid}>
               <div className={styles.formRow}>
                 <label className={styles.label}>New Password</label>
-                <input className={styles.input} type="password" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="••••••••" />
+                <input className={styles.input} type="password" autoComplete="new-password" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="••••••••" />
               </div>
               <div className={styles.formRow}>
                 <label className={styles.label}>Confirm Password</label>
-                <input className={styles.input} type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} placeholder="••••••••" />
+                <input className={styles.input} type="password" autoComplete="new-password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} placeholder="••••••••" />
               </div>
             </div>
             {pwError && <p className={styles.fieldError}><AlertCircle size={12} /> {pwError}</p>}
@@ -278,22 +278,17 @@ const Settings = ({ user, onUserUpdate, onLogout }) => {
 
         {/* ── 4. Display ── */}
         <Accordion icon={Monitor} title="Display" hint="Map style and appearance">
-          <label className={styles.label}>Map Style</label>
-          <div className={styles.mapStylePicker}>
-            {[
-              { id: 'standard',  label: 'Standard',  emoji: '🗺️' },
-              { id: 'dark',      label: 'Dark',       emoji: '🌑' },
-              { id: 'satellite', label: 'Satellite',  emoji: '🛰️' },
-            ].map(s => (
-              <button
-                key={s.id}
-                className={`${styles.mapStyleBtn} ${mapStyle === s.id ? styles.mapStyleActive : ''}`}
-                onClick={() => setMapStyle(s.id)}
-              >
-                <span className={styles.mapStyleEmoji}>{s.emoji}</span>
-                {s.label}
-              </button>
-            ))}
+          <div className={styles.toggleRow}>
+            <div>
+              <p className={styles.toggleLabel}>Dark Mode</p>
+              <p className={styles.toggleHint}>Switch between light and dark appearance</p>
+            </div>
+            <button
+              className={`${styles.toggle} ${theme === 'dark' ? styles.toggleOn : ''}`}
+              onClick={toggleTheme}
+            >
+              <div className={styles.toggleThumb} />
+            </button>
           </div>
         </Accordion>
 

@@ -1,7 +1,3 @@
-// App.jsx — single owner of auth state
-// useAuth lives HERE only — both Home and Settings receive user/handlers as props
-// This ensures logout in Settings immediately updates Home (shared state, not two instances)
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Home from './Pages/Home/Home';
@@ -11,6 +7,8 @@ import useAuth from './hooks/useAuth';
 function App() {
   const {
     user,
+    theme,
+    toggleTheme,
     showLogin,
     showSignUp,
     handleLoginSuccess,
@@ -24,42 +22,48 @@ function App() {
   } = useAuth();
 
   return (
-    <BrowserRouter>
-      <Routes>
+    // data-theme on the root div — all CSS variables switch instantly
+    <div className="App" data-theme={theme}>
+      <BrowserRouter>
+        <Routes>
 
-        <Route
-          path="/"
-          element={
-            <Home
-              user={user}
-              showLogin={showLogin}
-              showSignUp={showSignUp}
-              handleLoginSuccess={handleLoginSuccess}
-              handleSwitchToSignUp={handleSwitchToSignUp}
-              handleSwitchToLogin={handleSwitchToLogin}
-              openLogin={openLogin}
-              openSignUp={openSignUp}
-              closeLogin={closeLogin}
-              closeSignUp={closeSignUp}
-            />
-          }
-        />
+          <Route
+            path="/"
+            element={
+              <Home
+                user={user}
+                theme={theme}
+                showLogin={showLogin}
+                showSignUp={showSignUp}
+                handleLoginSuccess={handleLoginSuccess}
+                handleSwitchToSignUp={handleSwitchToSignUp}
+                handleSwitchToLogin={handleSwitchToLogin}
+                openLogin={openLogin}
+                openSignUp={openSignUp}
+                closeLogin={closeLogin}
+                closeSignUp={closeSignUp}
+              />
+            }
+          />
 
-        <Route
-          path="/settings"
-          element={
-            user
-              ? <Settings
-                  user={user}
-                  onUserUpdate={handleLoginSuccess}
-                  onLogout={handleLogout}
-                />
-              : <Navigate to="/" replace />
-          }
-        />
+          <Route
+            path="/settings"
+            element={
+              user
+                ? <Settings
+                    user={user}
+                    onUserUpdate={handleLoginSuccess}
+                    onLogout={handleLogout}
+                    theme={theme}
+                    toggleTheme={toggleTheme}
+                  />
+                : <Navigate to="/" replace />
+            }
+          />
 
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </div>
   );
 }
 

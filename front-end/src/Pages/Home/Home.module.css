@@ -44,12 +44,12 @@
 .leftPanel {
   width: 460px;
   min-width: 460px;
-  background: var(--gray-100);
+  background: var(--bg-page);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   flex-shrink: 0;
-  border-right: 1px solid var(--gray-200);
+  border-right: 1px solid var(--border);
   scrollbar-width: thin;
   scrollbar-color: var(--gray-200) transparent;
 }
@@ -165,7 +165,7 @@
   font-family: 'Syne', sans-serif;
   font-size: 15px;
   font-weight: 700;
-  color: var(--navy);
+  color: var(--text-primary);
   letter-spacing: 0.2px;
   margin: 0 0 16px 0;
   display: flex;
@@ -177,7 +177,7 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--gray-200);
+  background: var(--border);
 }
 
 /* ─── Find Button ─── */
@@ -242,8 +242,8 @@
 }
 
 .findButton:disabled {
-  background: var(--gray-200);
-  color: var(--gray-400);
+  background: var(--btn-disabled-bg);
+  color: var(--btn-disabled-text);
   cursor: not-allowed;
   box-shadow: none;
 }
@@ -280,7 +280,7 @@
   background: rgba(240, 165, 0, 0.08);
   border: 1px solid rgba(240, 165, 0, 0.25);
   border-left: 4px solid var(--gold);
-  color: #a07000;
+  color: #b07800;
 }
 
 @keyframes slideIn {
@@ -299,7 +299,7 @@
 /* ─── Responsive ─── */
 @media (max-width: 968px) {
   .container { flex-direction: column; }
-  .leftPanel { width: 100%; min-width: 100%; height: 65vh; border-right: none; border-bottom: 1px solid var(--gray-200); }
+  .leftPanel { width: 100%; min-width: 100%; height: 65vh; border-right: none; border-bottom: 1px solid var(--border); }
   .rightPanel { height: 35vh; }
 }
 /* ── Saved Routes panel — sticky at top of sidebar ── */
@@ -314,8 +314,8 @@
   margin: 0 24px 16px;
   padding: 10px 16px;
   background: transparent;
-  color: var(--gray-600);
-  border: 1px solid var(--gray-200);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   font-family: 'DM Sans', sans-serif;
   font-size: 13px;
@@ -329,7 +329,7 @@
 }
 
 .changeRouteButton:hover {
-  background: var(--gray-200);
-  color: var(--navy);
-  border-color: var(--gray-400);
+  background: var(--border);
+  color: var(--text-primary);
+  border-color: var(--border-dark);
 }

@@ -24,6 +24,7 @@ import styles from './Home.module.css';
 const Home = ({
   // all auth state and handlers come from App.jsx via props
   user,
+  theme = 'light',
   showLogin,
   showSignUp,
   handleLoginSuccess,
@@ -260,6 +261,7 @@ const Home = ({
             shapeCoordinates={shapeCoordinates}
             shapeCoordinatesLeg2={shapeCoordinatesLeg2}
             onStopClick={() => {}}
+            theme={theme}
           />
         </div>
       </div>

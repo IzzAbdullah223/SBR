@@ -95,6 +95,7 @@ const MapView = ({
   shapeCoordinates = null,
   shapeCoordinatesLeg2 = null,
   onStopClick,
+  theme = 'light',
 }) => {
   const isValidCoord = (val) => typeof val === 'number' && !isNaN(val);
   const hasValidOrigin = origin && isValidCoord(origin.lat) && isValidCoord(origin.lng);
@@ -131,7 +132,10 @@ const MapView = ({
       minZoom={MAP_CONFIG.MIN_ZOOM}
       maxZoom={MAP_CONFIG.MAX_ZOOM}
     >
-      <TileLayer attribution={MAP_CONFIG.ATTRIBUTION} url={MAP_CONFIG.TILE_LAYER} />
+      <TileLayer
+        attribution={MAP_CONFIG.ATTRIBUTION}
+        url={MAP_CONFIG.TILE_LAYER}
+      />
 
       {/* Unified map bounds controller — single source of truth for all map movement */}
       <SmartBounds

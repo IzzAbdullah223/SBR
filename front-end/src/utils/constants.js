@@ -3,16 +3,24 @@
  * All app-wide constants in one place
  */
 
-
+// API Configuration
+export const API_CONFIG = {
+  BASE_URL: import.meta.env.VITE_API_URL || '/api',
+  TIMEOUT: 10000, // 10 seconds
+};
 
 // Map Configuration
 export const MAP_CONFIG = {
-  DEFAULT_CENTER: { lat: 25.2048, lng: 55.2708 },
+ DEFAULT_CENTER:
+  { lat: 25.2048, 
+    lng: 55.2708 },
+
   DEFAULT_ZOOM: 11,
   MIN_ZOOM: 10,
   MAX_ZOOM: 18,
   TILE_LAYER: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  ATTRIBUTION: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  TILE_LAYER_DARK: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  ATTRIBUTION: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
 };
 
 // Icon Colors
@@ -43,7 +51,7 @@ export const ROUTE_TYPE_COLORS = {
 
 // Search Configuration
 export const SEARCH_CONFIG = {
-  DEBOUNCE_DELAY: 300,
+  DEBOUNCE_DELAY: 300, // ms
   MIN_SEARCH_LENGTH: 2,
   MAX_RESULTS: 10,
 };
@@ -71,6 +79,7 @@ export const SUCCESS_MESSAGES = {
 };
 
 export default {
+  API_CONFIG,
   MAP_CONFIG,
   ICON_COLORS,
   ROUTE_TYPES,

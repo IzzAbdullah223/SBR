@@ -1,8 +1,8 @@
 .navbar {
   width: 100%;
   height: 52px;
-  background: #0a1628;
-  border-bottom: 1px solid rgba(90, 76, 45, 0.15);
+  background: var(--navbar-bg);
+  border-bottom: 1px solid var(--navbar-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -11,23 +11,19 @@
   z-index: 100;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.logo { display: flex; align-items: center; gap: 10px; }
 
 .logoIcon {
   width: 32px;
   height: 32px;
-  background: #f0a500;
+  background: var(--gold);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #0a1628;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(240, 165, 0, 0.35);
+  box-shadow: 0 2px 8px rgba(240,165,0,0.35);
 }
 
 .logoText {
@@ -38,14 +34,12 @@
   letter-spacing: -0.3px;
 }
 
-.logoAccent {
-  color: #f0a500;
-}
+.logoAccent { color: var(--gold); }
 
 .logoBadge {
-  background: rgba(240, 165, 0, 0.12);
-  border: 1px solid rgba(240, 165, 0, 0.25);
-  color: #ffc740;
+  background: rgba(240,165,0,0.12);
+  border: 1px solid rgba(240,165,0,0.25);
+  color: var(--gold-light);
   font-size: 10px;
   font-weight: 600;
   padding: 2px 8px;
@@ -54,16 +48,12 @@
   font-family: 'DM Sans', sans-serif;
 }
 
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.actions { display: flex; align-items: center; gap: 8px; }
 
 .divider {
   width: 1px;
   height: 20px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255,255,255,0.1);
   margin: 0 2px;
 }
 
@@ -72,22 +62,20 @@
   align-items: center;
   gap: 6px;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #9ba3c2;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.6);
   padding: 6px 12px;
   border-radius: 8px;
   font-family: 'DM Sans', sans-serif;
   font-size: 13px;
   font-weight: 500;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
-
-/* ✅ FIXED: was cursor:pointer with a hover effect — made it look fully functional.
-   Now disabled so cursor becomes not-allowed and hover does nothing.
-   The title attribute shows "coming soon" tooltip on hover. */
-.settingsBtn:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
+.settingsBtn:hover {
+  background: rgba(255,255,255,0.06);
+  color: #ffffff;
+  border-color: rgba(255,255,255,0.2);
 }
 
 .loginBtn {
@@ -95,7 +83,7 @@
   align-items: center;
   gap: 6px;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255,255,255,0.15);
   color: #ffffff;
   padding: 6px 14px;
   border-radius: 8px;
@@ -105,17 +93,13 @@
   cursor: pointer;
   transition: all 0.2s ease;
 }
-
-.loginBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.25);
-}
+.loginBtn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
 
 .signupBtn {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #f0a500;
+  background: var(--gold);
   border: none;
   color: #0a1628;
   padding: 6px 14px;
@@ -126,11 +110,10 @@
   cursor: pointer;
   transition: all 0.2s ease;
 }
-
 .signupBtn:hover {
-  background: #ffc740;
+  background: var(--gold-light);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(240, 165, 0, 0.35);
+  box-shadow: 0 4px 12px rgba(240,165,0,0.35);
 }
 
 .greeting {
@@ -138,29 +121,4 @@
   font-family: 'DM Sans', sans-serif;
   font-size: 13px;
 }
-
-.greeting strong {
-  color: #f0a500;
-}
-
-.logoutBtn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.logoutBtn:hover {
-  background: rgba(255, 77, 109, 0.15);
-  border-color: rgba(255, 77, 109, 0.4);
-  color: #ff4d6d;
-}
+.greeting strong { color: var(--gold); }

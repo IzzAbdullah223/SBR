@@ -1,21 +1,95 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
 
+/* ══════════════════════════════════════════════════════
+   LIGHT THEME (default)
+   These are the base CSS variables the whole app uses.
+   Every component reads from these — never hardcode colors.
+══════════════════════════════════════════════════════ */
 :root {
-  --navy: #0a1628;
-  --gold: #f0a500;
-  --gold-light: #ffc740;
-  --gold-pale: #fff8e7;
-  --teal: #00c9a7;
-  --error: #ff4d6d;
-  --white: #ffffff;
-  --gray-100: #f7f8fc;
-  --gray-200: #eef0f6;
-  --gray-400: #9ba3c2;
-  --gray-600: #5a6384;
-  --radius: 16px;
+  /* Brand colors — never change between themes */
+  --gold:        #f0a500;
+  --gold-light:  #ffc740;
+  --gold-pale:   #fff8e7;
+  --teal:        #00c9a7;
+  --error:       #ff4d6d;
+
+  /* Light theme surfaces */
+  --bg-page:     #f7f8fc;   /* page background */
+  --bg-card:     #ffffff;   /* card / panel background */
+  --bg-input:    #f7f8fc;   /* input field background */
+
+  /* Light theme navbar — always dark regardless of theme */
+  --navbar-bg:   #0a1628;
+  --navbar-border: rgba(90,76,45,0.15);
+
+  /* Light theme text */
+  --text-primary:   #0a1628;
+  --text-secondary: #5a6384;
+  --text-muted:     #9ba3c2;
+  --text-inverse:   #ffffff;
+
+  /* Light theme borders */
+  --border:      #eef0f6;
+  --border-dark: #d8dcec;
+
+  /* Light theme button */
+  --btn-primary-bg:    #0a1628;
+  --btn-primary-text:  #ffffff;
+  --btn-disabled-bg:   #eef0f6;
+  --btn-disabled-text: #9ba3c2;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(10,22,40,0.08);
+  --shadow-md: 0 8px 24px rgba(10,22,40,0.12);
+  --shadow-lg: 0 16px 48px rgba(10,22,40,0.18);
+
+  /* Kept for backward compat with components using them directly */
+  --navy:      #0a1628;
+  --navy-mid:  #112240;
+  --navy-light:#1d3461;
+  --white:     #ffffff;
+  --gray-100:  #f7f8fc;
+  --gray-200:  #eef0f6;
+  --gray-400:  #9ba3c2;
+  --gray-600:  #5a6384;
+  --success:   #00c9a7;
+  --radius:    16px;
   --radius-sm: 10px;
-  --shadow-md: 0 4px 16px rgba(10, 22, 40, 0.12);
-  --shadow-lg: 0 8px 32px rgba(10, 22, 40, 0.2);
+}
+
+/* ══════════════════════════════════════════════════════
+   DARK THEME
+   Only override the variables that change.
+   Brand colors (gold, teal, error) stay the same.
+══════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  --bg-page:     #0d1117;
+  --bg-card:     #161b22;
+  --bg-input:    #21262d;
+
+  --text-primary:   #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted:     #6e7681;
+  --text-inverse:   #0d1117;
+
+  --border:      #30363d;
+  --border-dark: #484f58;
+
+  --btn-primary-bg:    #f0a500;
+  --btn-primary-text:  #0d1117;
+  --btn-disabled-bg:   #21262d;
+  --btn-disabled-text: #6e7681;
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,0.5);
+
+  /* backward compat overrides */
+  --gray-100:  #161b22;
+  --gray-200:  #21262d;
+  --gray-400:  #6e7681;
+  --gray-600:  #8b949e;
+  --white:     #e6edf3;
 }
 
 * {
@@ -28,10 +102,45 @@ body {
   font-family: 'DM Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #0a1628;
+  background: var(--navy);
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .App {
   height: 100vh;
   overflow: hidden;
+}
+
+/* ── Dark mode map ── */
+/* Invert OSM tiles + hue-rotate so colors stay natural but background goes dark */
+/* Labels stay perfectly readable — Arabic + English both work correctly */
+[data-theme="dark"] .leaflet-tile-pane {
+  filter: invert(100%) hue-rotate(180deg);
+}
+
+/* ── Dark mode Leaflet zoom controls ── */
+[data-theme="dark"] .leaflet-control-zoom a {
+  background-color: #1e2a3a !important;
+  color: #e6edf3 !important;
+  border-color: #30363d !important;
+}
+
+[data-theme="dark"] .leaflet-control-zoom a:hover {
+  background-color: #2d3f55 !important;
+  color: #f0a500 !important;
+}
+
+[data-theme="dark"] .leaflet-control-zoom {
+  border: 1px solid #30363d !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important;
+}
+
+/* ── Dark mode Leaflet attribution ── */
+[data-theme="dark"] .leaflet-control-attribution {
+  background: rgba(13, 17, 23, 0.8) !important;
+  color: #6e7681 !important;
+}
+
+[data-theme="dark"] .leaflet-control-attribution a {
+  color: #9ba3c2 !important;
 }

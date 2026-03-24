@@ -2,14 +2,26 @@ import { useState, useEffect } from 'react';
 
 const useAuth = () => {
 
-  const [user, setUser] = useState(null);
-  const [showLogin, setShowLogin] = useState(false);
+  const [user, setUser]         = useState(null);
+  const [showLogin, setShowLogin]   = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
 
+  // Theme — read from localStorage first, fall back to 'light'
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem('theme') || 'light'
+  );
+
+  // Apply theme to root element whenever it changes
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
   // ── RESTORE USER ON PAGE REFRESH ──────────────────────────────────────────
-  // Step 1: immediately restore from localStorage so UI doesn't flash
-  // Step 2: fetch fresh profile from backend to get latest preferences.weights
-  //         (localStorage was saved at login time — may not have latest prefs)
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -27,21 +39,17 @@ const useAuth = () => {
         }
 
         // Step 2 — fetch fresh profile from backend in background
-        // This ensures preferences.weights and any other updates are loaded
         fetch('/api/settings/profile', {
           headers: { Authorization: `Bearer ${token}` },
         })
           .then(res => res.json())
           .then(data => {
             if (data?.success && data?.user) {
-              // update state and localStorage with fresh data
               setUser(data.user);
               localStorage.setItem('user', JSON.stringify(data.user));
             }
           })
-          .catch(() => {
-            // silently ignore — localStorage version is still fine
-          });
+          .catch(() => {});
 
       } else {
         localStorage.removeItem('token');
@@ -68,11 +76,13 @@ const useAuth = () => {
     setUser(null);
   };
 
-  const handleSwitchToSignUp = () => { setShowLogin(false); setShowSignUp(true); };
-  const handleSwitchToLogin  = () => { setShowSignUp(false); setShowLogin(true); };
+  const handleSwitchToSignUp = () => { setShowLogin(false);  setShowSignUp(true);  };
+  const handleSwitchToLogin  = () => { setShowSignUp(false); setShowLogin(true);   };
 
   return {
     user,
+    theme,
+    toggleTheme,
     showLogin,
     showSignUp,
     handleLoginSuccess,

@@ -3,9 +3,6 @@ import styles from './SearchInput.module.css';
 
 const LOCATIONIQ_TOKEN = import.meta.env.VITE_LOCATIONIQ_TOKEN;
 
-// disableSuggestions: passed as true by Home when the field was filled
-// programmatically (e.g. saved-route chip click) — prevents the debounce
-// search from firing and the dropdown from opening.
 const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions = false }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -13,6 +10,9 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
   const [error, setError] = useState(null);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
+  // After user selects a suggestion we block the next debounce search
+  // so the dropdown doesn't immediately reopen with results for the selected name
+  const justSelectedRef = useRef(false);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -28,13 +28,19 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Debounce search — skipped entirely when disableSuggestions is true
+  // Debounce search
   useEffect(() => {
-    // Parent set this value programmatically — don't search, close any open dropdown
+    // Programmatic fill (saved route chip) — suppress entirely
     if (disableSuggestions) {
       setSuggestions([]);
       setShowDropdown(false);
       setError(null);
+      return;
+    }
+
+    // User just selected a suggestion — skip this one search cycle
+    if (justSelectedRef.current) {
+      justSelectedRef.current = false;
       return;
     }
 
@@ -80,7 +86,6 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
 
       const data = await response.json();
 
-      // Filter for Dubai results
       const dubaiResults = data.filter(item => {
         const displayName = item.display_name?.toLowerCase() || '';
         return displayName.includes('dubai') || displayName.includes('دبي');
@@ -115,6 +120,8 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
   };
 
   const handleSelectSuggestion = (suggestion) => {
+    // Block the next debounce cycle so dropdown doesn't reopen
+    justSelectedRef.current = true;
     onChange(
       { target: { value: suggestion.name } },
       { lat: suggestion.lat, lng: suggestion.lng, fullAddress: suggestion.display_name }
@@ -126,7 +133,12 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
 
   const handleInputChange = (e) => {
     onChange(e);
-    if (e.target.value.length >= 2) setShowDropdown(true);
+    // Only show dropdown if user is actively typing — not on programmatic fill
+    if (!disableSuggestions && e.target.value.length >= 2) {
+      setShowDropdown(true);
+    } else if (e.target.value.length < 2) {
+      setShowDropdown(false);
+    }
   };
 
   return (
@@ -139,7 +151,12 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
           placeholder={placeholder}
           value={value}
           onChange={handleInputChange}
-          onFocus={() => !disableSuggestions && suggestions.length > 0 && setShowDropdown(true)}
+          onFocus={() => {
+            // Only reopen on focus if user hasn't just selected something
+            if (!disableSuggestions && !justSelectedRef.current && suggestions.length > 0) {
+              setShowDropdown(true);
+            }
+          }}
           className={styles.searchInput}
           autoComplete="off"
         />

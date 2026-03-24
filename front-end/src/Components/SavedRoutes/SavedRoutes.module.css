@@ -72,8 +72,8 @@
   align-items: center;
   gap: 5px;
   padding: 7px 12px;
-  background: var(--white);
-  border: 1.5px solid var(--gray-200);
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
   border-radius: 99px;
   cursor: pointer;
   white-space: nowrap;
@@ -82,13 +82,13 @@
   font-family: 'DM Sans', sans-serif;
   font-size: 12px;
   font-weight: 600;
-  color: var(--navy);
+  color: var(--text-primary);
 }
 
 .chip:hover {
   border-color: var(--gold);
   background: rgba(240,165,0,0.06);
-  color: var(--navy);
+  color: var(--text-primary);
   transform: translateY(-1px);
   box-shadow: 0 3px 8px rgba(240,165,0,0.15);
 }
@@ -106,8 +106,8 @@
 ═══════════════════════════════════════════════════════ */
 
 .panel {
-  background: var(--white);
-  border: 1.5px solid var(--gray-200);
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
   border-radius: 16px;
   overflow: hidden;
   animation: panelOpen 0.22s ease;
@@ -125,7 +125,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px 10px;
-  border-bottom: 1.5px solid var(--gray-200);
+  border-bottom: 1.5px solid var(--border);
 }
 
 .panelTitleRow {
@@ -150,12 +150,12 @@
   font-family: 'Syne', sans-serif;
   font-size: 14px;
   font-weight: 700;
-  color: var(--navy);
+  color: var(--text-primary);
 }
 
 .panelCount {
-  background: var(--gray-100);
-  color: var(--gray-600);
+  background: var(--bg-page);
+  color: var(--text-secondary);
   font-size: 11px;
   font-weight: 700;
   padding: 2px 8px;
@@ -167,17 +167,17 @@
 .closeBtn {
   width: 28px;
   height: 28px;
-  background: var(--gray-100);
+  background: var(--bg-page);
   border: none;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   transition: all 0.15s;
 }
-.closeBtn:hover { background: var(--gray-200); color: var(--navy); }
+.closeBtn:hover { background: var(--border); color: var(--text-primary); }
 
 /* ── Scrollable list ── */
 .list {
@@ -190,7 +190,7 @@
 }
 .list::-webkit-scrollbar { width: 3px; }
 .list::-webkit-scrollbar-track { background: transparent; }
-.list::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 99px; }
+.list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 
 /* ── Route card ── */
 .card {
@@ -206,8 +206,8 @@
 }
 
 .card:hover {
-  background: #f7f8fc;
-  border-color: var(--gray-200);
+  background: var(--bg-page);
+  border-color: var(--border);
 }
 
 .card:hover .deleteBtn { opacity: 1; transform: scale(1); }
@@ -256,7 +256,7 @@
 .routeFrom {
   font-size: 12px;
   font-weight: 600;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -266,7 +266,7 @@
 .routeTo {
   font-size: 13px;
   font-weight: 700;
-  color: var(--navy);
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -326,7 +326,7 @@
   font-family: 'Syne', sans-serif;
   font-size: 13px;
   font-weight: 700;
-  color: var(--navy);
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -349,8 +349,8 @@
 .spinner {
   width: 15px;
   height: 15px;
-  border: 2px solid var(--gray-200);
-  border-top: 2px solid var(--navy);
+  border: 2px solid var(--border);
+  border-top: 2px solid var(--text-primary);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   flex-shrink: 0;
