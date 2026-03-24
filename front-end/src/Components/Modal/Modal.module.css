@@ -15,7 +15,7 @@
 }
 
 .modal {
-  background: var(--white);
+  background: var(--bg-card);
   border-radius: var(--radius);
   padding: 32px;
   width: 100%;
@@ -35,7 +35,7 @@
   position: absolute;
   top: 16px;
   right: 16px;
-  background: var(--gray-100);
+  background: var(--bg-page);
   border: none;
   cursor: pointer;
   width: 32px;
@@ -45,11 +45,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   transition: all 0.2s ease;
 }
 
 .closeBtn:hover {
-  background: var(--navy);
-  color: var(--white);
+  background: var(--text-primary);
+  color: var(--bg-card);
 }

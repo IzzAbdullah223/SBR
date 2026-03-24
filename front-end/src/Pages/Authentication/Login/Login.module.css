@@ -6,7 +6,7 @@
   font-family: 'Syne', sans-serif;
   font-size: 24px;
   font-weight: 800;
-  color: var(--navy);
+  color: var(--text-primary);
   margin: 0 0 6px 0;
 }
 
@@ -58,17 +58,18 @@
 
 .field input {
   padding: 12px 14px;
-  border: 2px solid var(--gray-200);
+  border: 2px solid var(--border);
   border-radius: var(--radius-sm);
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
-  color: var(--navy);
+  color: var(--text-primary);
+  background: var(--bg-input);
   outline: none;
   transition: border-color 0.2s ease;
 }
 
 .field input:focus {
-  border-color: var(--navy);
+  border-color: var(--text-primary);
 }
 
 /* ✅ FIX #5: red border on the input itself when it has an error —
@@ -125,7 +126,7 @@
 .switchBtn {
   background: none;
   border: none;
-  color: var(--navy);
+  color: var(--text-primary);
   font-family: 'DM Sans', sans-serif;
   font-size: 13px;
   font-weight: 700;
