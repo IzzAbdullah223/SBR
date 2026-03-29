@@ -32,7 +32,7 @@ const SmartBounds = ({ origin, destination, shapeCoordinates, shapeCoordinatesLe
     if (!origin?.lat || !destination?.lat) return;
     map.fitBounds(
       L.latLngBounds([origin.lat, origin.lng], [destination.lat, destination.lng]),
-      { padding: [60, 60] }
+      { paddingTopLeft: [80, 80], paddingBottomRight: [80, 80] }
     );
     lastOriginLat.current = origin.lat;
     lastOriginLng.current = origin.lng;
@@ -52,7 +52,7 @@ const SmartBounds = ({ origin, destination, shapeCoordinates, shapeCoordinatesLe
         ...(leg1 ? leg1.map(c => [c.lat, c.lng]) : []),
         ...(leg2 ? leg2.map(c => [c.lat, c.lng]) : []),
       ];
-      map.fitBounds(allPoints, { padding: [50, 50] });
+      map.fitBounds(allPoints, { paddingTopLeft: [80, 80], paddingBottomRight: [80, 80] });
       lastShapeKey.current  = shapeKey;
       lastFittedKey.current = shapeKey;
       return;
@@ -153,8 +153,8 @@ const MapView = ({
         </Marker>
       )}
 
-      {/* Origin */}
-      {hasValidOrigin && (
+      {/* Origin — hidden when a route is selected (route shape + stop pins replace it) */}
+      {hasValidOrigin && !selectedRoute && (
         <Marker position={[origin.lat, origin.lng]} icon={originIcon}>
           <Popup>
             <div className={styles.popup}>
@@ -165,8 +165,8 @@ const MapView = ({
         </Marker>
       )}
 
-      {/* Destination */}
-      {hasValidDest && (
+      {/* Destination — hidden when a route is selected */}
+      {hasValidDest && !selectedRoute && (
         <Marker position={[destination.lat, destination.lng]} icon={destinationIcon}>
           <Popup>
             <div className={styles.popup}>

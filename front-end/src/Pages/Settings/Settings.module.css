@@ -248,8 +248,8 @@
   border-bottom: 1px solid #f0f2f8;
 }
 .toggleRow:last-child { border-bottom: none; }
-.toggleLabel { font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 0 0 2px; }
-.toggleHint  { font-size: 12px; color: var(--text-muted); margin: 0; }
+.toggleLabel { font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--text-primary); margin: 0 0 2px; }
+.toggleHint  { font-size: 12px; line-height: 1.4; color: var(--text-muted); margin: 0; }
 
 .toggle {
   width: 42px;

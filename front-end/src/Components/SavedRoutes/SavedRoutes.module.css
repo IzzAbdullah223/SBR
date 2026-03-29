@@ -260,7 +260,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1;
+  line-height: 1.4;
 }
 
 .routeTo {
@@ -270,7 +270,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1;
+  line-height: 1.4;
 }
 
 /* go arrow */

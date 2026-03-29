@@ -8,7 +8,7 @@ import MapComponent from '../../Components/Map/Map';
 import SearchInput from '../../Components/SearchInput/SearchInput';
 import BusResults from '../../Components/BusResults/BusResults';
 import SavedRoutes from '../../Components/SavedRoutes/SavedRoutes';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { MAP_CONFIG } from '../../utils/constants';
 import useFindBuses from '../../hooks/useFindBuses';
 import useShape from '../../hooks/useShape';
@@ -130,6 +130,16 @@ const Home = ({
     );
   };
 
+  const handleReset = () => {
+    setOriginInput('');
+    setDestinationInput('');
+    setOrigin(null);
+    setDestination(null);
+    setSelectedBus(null);
+    setSaveError(null);
+    clearResults();
+  };
+
   // auto-select first bus when results arrive
   useEffect(() => {
     if (buses?.length > 0 && !selectedBus) {
@@ -244,15 +254,26 @@ const Home = ({
             )}
           </div>
 
-          {/* ── FIND BUSES BUTTON ── */}
-          <button
-            className={`${styles.findButton} ${loading ? styles.loading : ''}`}
-            onClick={handleFindBuses}
-            disabled={!origin || !destination || loading}
-          >
-            <Search size={20} />
-            <span>{loading ? 'Searching...' : 'Find Best Bus Routes'}</span>
-          </button>
+          {/* ── FIND BUSES BUTTON + RESET ── */}
+          <div className={styles.findRow}>
+            <button
+              className={`${styles.findButton} ${loading ? styles.loading : ''}`}
+              onClick={handleFindBuses}
+              disabled={!origin || !destination || loading}
+            >
+              <Search size={20} />
+              <span>{loading ? 'Searching...' : 'Find Best Bus Routes'}</span>
+            </button>
+            {(originInput || destinationInput || buses.length > 0) && (
+              <button
+                className={styles.resetBtn}
+                onClick={handleReset}
+                title="Clear all"
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
 
           {/* search error */}
           {error && (
