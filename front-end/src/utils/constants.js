@@ -19,8 +19,9 @@ export const MAP_CONFIG = {
   MIN_ZOOM: 10,
   MAX_ZOOM: 18,
   TILE_LAYER: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  TILE_LAYER_DARK: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-  ATTRIBUTION: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  // Dark mode uses CSS filter (invert + hue-rotate) on the same OSM tiles
+  // No separate dark tile URL needed — no external API or API key required
+  ATTRIBUTION: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 };
 
 // Icon Colors

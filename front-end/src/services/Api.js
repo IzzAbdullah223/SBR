@@ -71,10 +71,10 @@ export const routesAPI = {
 };
 
 export const topsisAPI = {
-  findBuses: (origin, destination, weights) =>
+  findBuses: (origin, destination, optimizationMode) =>
     fetchAPI('/find-buses', {
       method: 'POST',
-      body: JSON.stringify({ origin, destination, weights }),
+      body: JSON.stringify({ origin, destination, optimizationMode }),
       // don't throw on 404/400 — return the body so useFindBuses can read
       // response.errorCode and show the correct message (no stops, no routes etc.)
       allowErrorResponse: true,
@@ -100,11 +100,11 @@ export const settingsAPI = {
   getProfile:       ()              => fetchAPI('/settings/profile'),
   updateProfile:    (data)          => fetchAPI('/settings/profile',     { method: 'PUT',    body: JSON.stringify(data) }),
   changePassword:   (data)          => fetchAPI('/settings/password',    { method: 'PUT',    body: JSON.stringify(data) }),
-  updatePreferences:(data)          => fetchAPI('/settings/preferences', { method: 'PUT',    body: JSON.stringify(data) }),
+  updatePreferences:(optimizationMode) => fetchAPI('/settings/preferences', { method: 'PUT', body: JSON.stringify({ optimizationMode }) }),
   clearSavedRoutes: ()              => fetchAPI('/settings/saved-routes',{ method: 'DELETE' }),
   deleteAccount:    (password)      => fetchAPI('/settings/account',     { method: 'DELETE', body: JSON.stringify({ password }) }),
 };
- 
+
 const api = {
   auth: authAPI,
   busStops: busStopsAPI,
@@ -113,5 +113,5 @@ const api = {
   shapes: shapesAPI,
   settings: settingsAPI,
 };
- 
+
 export default api;

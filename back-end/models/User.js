@@ -61,12 +61,11 @@ const userSchema = new mongoose.Schema({
       push: { type: Boolean, default: true },
       busArrival: { type: Boolean, default: true }
     },
-    // TOPSIS weights saved from Settings page (raw 0-100 integers)
-    weights: {
-      time:            { type: Number, default: 25, min: 0, max: 100 },
-      cost:            { type: Number, default: 25, min: 0, max: 100 },
-      walkingDistance: { type: Number, default: 25, min: 0, max: 100 },
-      transfers:       { type: Number, default: 25, min: 0, max: 100 },
+    // TOPSIS optimization mode — user picks a goal, weights are applied internally
+    optimizationMode: {
+      type: String,
+      enum: ['fastest', 'cheapest', 'less_walking', 'fewest_transfers'],
+      default: 'fastest'
     }
   },
 
@@ -83,7 +82,7 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Indexes for efficient queries
-
+// email index is already created by unique:true on the field — no duplicate needed
 userSchema.index({ isActive: 1 });
 
 // Pre-save hook — hashes password before saving to MongoDB

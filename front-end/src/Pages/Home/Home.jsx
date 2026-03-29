@@ -6,20 +6,19 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import MapComponent from '../../Components/Map/Map';
 import SearchInput from '../../Components/SearchInput/SearchInput';
-import WeightSliders from '../../Components/WeightSliders/WeightSliders';
 import BusResults from '../../Components/BusResults/BusResults';
 import SavedRoutes from '../../Components/SavedRoutes/SavedRoutes';
 import { Search } from 'lucide-react';
 import { MAP_CONFIG } from '../../utils/constants';
 import useFindBuses from '../../hooks/useFindBuses';
 import useShape from '../../hooks/useShape';
-import useNearbyStops from '../../hooks/useNearbyStops';
 import useSavedRoutes from '../../hooks/useSavedRoutes';
 import Navbar from '../../Components/NavBar/Navbar';
 import Modal from '../../Components/Modal/Modal';
 import { SignUp } from '../Authentication/SignUp/SignUp';
 import { Login } from '../Authentication/Login/Login';
 import styles from './Home.module.css';
+import { settingsAPI } from '../../services/Api';
 
 const Home = ({
   // all auth state and handlers come from App.jsx via props
@@ -43,13 +42,32 @@ const Home = ({
   const [selectedBus, setSelectedBus] = useState(null);
   // true while input was filled by a saved-route chip — suppresses LocationIQ dropdown
   const [programmaticFill, setProgrammaticFill] = useState(false);
-  const [weights, setWeights] = useState({
-    time: 0.25, cost: 0.25, walkingDistance: 0.25, transfers: 0.25,
-  });
+
+  // local optimization mode — seeded from user prefs, falls back to 'fastest'
+  const [optimizationMode, setOptimizationMode] = useState(
+    () => user?.preferences?.optimizationMode || 'fastest'
+  );
+
+  // sync when user logs in or their prefs change
+  useEffect(() => {
+    setOptimizationMode(user?.preferences?.optimizationMode || 'fastest');
+  }, [user?.preferences?.optimizationMode]);
+
+  // save mode to backend when user is logged in
+  const handleModeChange = async (mode) => {
+    setOptimizationMode(mode);
+    if (user) {
+      try {
+        await settingsAPI.updatePreferences(mode);
+      } catch {
+        // silently ignore — local state already updated
+      }
+    }
+  };
+
 
   const { buses, loading, error, errorType, findBuses, clearResults } = useFindBuses();
   const { shapeCoordinates, shapeCoordinatesLeg2 } = useShape(selectedBus);
-  const { nearbyStops } = useNearbyStops(origin, destination, 0.8);
 
   // ── SAVED ROUTES ──────────────────────────────────────────────────────────
   const {
@@ -96,7 +114,6 @@ const Home = ({
     }
   };
 
-  const handleWeightChange = (normalizedWeights) => setWeights(normalizedWeights);
 
   const handleFindBuses = async () => {
     if (!origin || !destination) {
@@ -109,7 +126,7 @@ const Home = ({
     await findBuses(
       { lat: origin.lat, lng: origin.lng },
       { lat: destination.lat, lng: destination.lng },
-      weights
+      optimizationMode
     );
   };
 
@@ -148,17 +165,15 @@ const Home = ({
   };
 
   const mapStops = useMemo(() => {
-    const stopMap = new Map();
-    for (const stop of nearbyStops) {
-      stopMap.set(stop.stopId, stop);
-    }
-    if (selectedBus) {
-      if (selectedBus.originStop)      stopMap.set(selectedBus.originStop.stopId,      selectedBus.originStop);
-      if (selectedBus.destinationStop) stopMap.set(selectedBus.destinationStop.stopId, selectedBus.destinationStop);
-      if (selectedBus.transferStop)    stopMap.set(selectedBus.transferStop.stopId,    selectedBus.transferStop);
-    }
-    return Array.from(stopMap.values());
-  }, [nearbyStops, selectedBus]);
+    // Only show the 3 stops relevant to the selected route
+    // Showing all nearby stops creates visual clutter on the map
+    if (!selectedBus) return [];
+    const stops = [];
+    if (selectedBus.originStop)      stops.push(selectedBus.originStop);
+    if (selectedBus.transferStop)    stops.push(selectedBus.transferStop);
+    if (selectedBus.destinationStop) stops.push(selectedBus.destinationStop);
+    return stops;
+  }, [selectedBus]);
 
   return (
     <div className={styles.container}>
@@ -202,12 +217,31 @@ const Home = ({
             />
           </div>
 
-          {/* ── WEIGHT SLIDERS ── */}
-          <div className={styles.section}>
-            <WeightSliders
-              onWeightChange={handleWeightChange}
-              initialWeights={user?.preferences?.weights}
-            />
+          {/* ── OPTIMIZATION MODE SELECTOR ── */}
+          <div className={styles.modeCard}>
+            <p className={styles.modeLabel}>What matters most to you?</p>
+            <div className={styles.modeButtons}>
+              {[
+                { value: 'fastest',          icon: '🚀', label: 'Fastest'    },
+                { value: 'cheapest',         icon: '💰', label: 'Cheapest'   },
+                { value: 'less_walking',     icon: '🚶', label: 'Less Walk'  },
+                { value: 'fewest_transfers', icon: '🔄', label: 'Direct'     },
+              ].map(({ value, icon, label }) => (
+                <button
+                  key={value}
+                  className={`${styles.modeBtn} ${optimizationMode === value ? styles.modeBtnActive : ''}`}
+                  onClick={() => handleModeChange(value)}
+                >
+                  <span className={styles.modeBtnIcon}>{icon}</span>
+                  <span className={styles.modeBtnLabel}>{label}</span>
+                </button>
+              ))}
+            </div>
+            {!user && (
+              <p className={styles.modeHint}>
+                <span className={styles.modeLoginLink} onClick={openLogin}>Log in</span> to save your preference
+              </p>
+            )}
           </div>
 
           {/* ── FIND BUSES BUTTON ── */}

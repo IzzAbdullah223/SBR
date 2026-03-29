@@ -333,3 +333,80 @@
   color: var(--text-primary);
   border-color: var(--border-dark);
 }
+
+/* ── Optimization Mode Selector ── */
+.modeCard {
+  margin: 0 24px 16px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.modeLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 10px 0;
+}
+
+.modeButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 6px;
+}
+
+.modeBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  background: var(--bg-page);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.modeBtn:hover {
+  border-color: var(--gold);
+  background: rgba(240, 165, 0, 0.06);
+}
+
+.modeBtnActive {
+  border-color: var(--gold) !important;
+  background: rgba(240, 165, 0, 0.12) !important;
+}
+
+.modeBtnIcon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.modeBtnLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.modeHint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 8px 0 0 0;
+}
+
+.modeLoginLink {
+  color: var(--gold);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.modeLoginLink:hover {
+  color: var(--gold-light);
+}

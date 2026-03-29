@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  User, Lock, SlidersHorizontal, Monitor, Eye,
+  User, Lock, Zap, Monitor, Eye,
   Shield, LogOut, ArrowLeft, ChevronDown,
   CheckCircle, AlertCircle, Trash2, X, Bus
 } from 'lucide-react';
@@ -85,54 +85,15 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
   const [confirmPw, setConfirmPw] = useState('');
   const [pwError,   setPwError]   = useState('');
 
-  // Preferences — seeded from saved user preferences if available
-  const [weights, setWeights] = useState({
-    time:            user?.preferences?.weights?.time            ?? 25,
-    cost:            user?.preferences?.weights?.cost            ?? 25,
-    walkingDistance: user?.preferences?.weights?.walkingDistance ?? 25,
-    transfers:       user?.preferences?.weights?.transfers       ?? 25,
-  });
+  // Preferences — optimization mode
+  const [optimizationMode, setOptimizationMode] = useState(
+    user?.preferences?.optimizationMode || 'fastest'
+  );
 
-  // Re-sync weights when user prop updates (e.g. after saving, or on remount)
-  // Depends on individual values so it only fires when actual numbers change
+  // Re-sync when user prop updates
   useEffect(() => {
-    setWeights({
-      time:            user?.preferences?.weights?.time            ?? 25,
-      cost:            user?.preferences?.weights?.cost            ?? 25,
-      walkingDistance: user?.preferences?.weights?.walkingDistance ?? 25,
-      transfers:       user?.preferences?.weights?.transfers       ?? 25,
-    });
-  }, [
-    user?.preferences?.weights?.time,
-    user?.preferences?.weights?.cost,
-    user?.preferences?.weights?.walkingDistance,
-    user?.preferences?.weights?.transfers,
-  ]);
-
-  // When one slider moves, rescale the others proportionally so total stays 100
-  const handleWeightChange = (key, newVal) => {
-    const clamped = Math.min(100, Math.max(0, Number(newVal)));
-    const remaining = 100 - clamped;
-    const otherKeys = Object.keys(weights).filter(k => k !== key);
-    const currentOtherTotal = otherKeys.reduce((sum, k) => sum + weights[k], 0);
-    const updated = { ...weights, [key]: clamped };
-    if (currentOtherTotal === 0) {
-      // distribute evenly if all others are 0
-      const share = Math.floor(remaining / otherKeys.length);
-      otherKeys.forEach((k, i) => {
-        updated[k] = i === otherKeys.length - 1 ? remaining - share * (otherKeys.length - 1) : share;
-      });
-    } else {
-      otherKeys.forEach(k => {
-        updated[k] = Math.round((weights[k] / currentOtherTotal) * remaining);
-      });
-      // fix rounding so total is exactly 100
-      const total = Object.values(updated).reduce((s, v) => s + v, 0);
-      const diff = 100 - total;
-      if (diff !== 0) updated[otherKeys[0]] += diff;
-    }
-    setWeights(updated);
-  };
+    setOptimizationMode(user?.preferences?.optimizationMode || 'fastest');
+  }, [user?.preferences?.optimizationMode]);
 
   // Display
   const [mapStyle, setMapStyle] = useState('standard');
@@ -236,29 +197,21 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
         </Accordion>
 
         {/* ── 3. Preferences ── */}
-        <Accordion icon={SlidersHorizontal} title="Preferences" hint="Default search weights">
+        <Accordion icon={Zap} title="Preferences" hint="Optimize routes for what matters to you">
           <div className={styles.form}>
-            {[
-              { key: 'time',            label: '⏱ Travel Time'         },
-              { key: 'cost',            label: '💰 Fare Cost'           },
-              { key: 'walkingDistance', label: '🚶 Walking Distance'    },
-              { key: 'transfers',       label: '🔄 Number of Transfers' },
-            ].map(({ key, label }) => (
-              <div key={key} className={styles.sliderRow}>
-                <div className={styles.sliderMeta}>
-                  <span className={styles.sliderLabel}>{label}</span>
-                  <span className={styles.sliderValue}>{weights[key]}%</span>
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={weights[key]}
-                  onChange={e => handleWeightChange(key, e.target.value)}
-                  className={styles.slider}
-                />
-              </div>
-            ))}
+            <div className={styles.formRow}>
+              <label className={styles.label}>Optimize routes for</label>
+              <select
+                className={styles.select}
+                value={optimizationMode}
+                onChange={e => setOptimizationMode(e.target.value)}
+              >
+                <option value="fastest">🚀 Fastest route</option>
+                <option value="cheapest">💰 Cheapest route</option>
+                <option value="less_walking">🚶 Less walking</option>
+                <option value="fewest_transfers">🔄 Fewest transfers</option>
+              </select>
+            </div>
             {(success || error) && (
               <div className={`${styles.inlineFeedback} ${error ? styles.inlineFeedbackError : styles.inlineFeedbackSuccess}`}>
                 {error ? <AlertCircle size={13} /> : <CheckCircle size={13} />}
@@ -268,7 +221,7 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
             <button
               className={styles.saveBtn}
               style={{ marginTop: 8 }}
-              onClick={() => updatePreferences(weights)}
+              onClick={() => updatePreferences(optimizationMode)}
               disabled={saving}
             >
               {saving ? 'Saving...' : 'Save Preferences'}

@@ -9,9 +9,9 @@ import { settingsAPI } from '../services/Api';
 
 const useSettings = (user, onUserUpdate, onLogout) => {
 
-  const [saving, setSaving]   = useState(false); // any save in flight
-  const [success, setSuccess] = useState(null);  // success message string
-  const [error, setError]     = useState(null);  // error message string
+  const [saving, setSaving]   = useState(false);
+  const [success, setSuccess] = useState(null);
+  const [error, setError]     = useState(null);
 
   const clear = () => { setSuccess(null); setError(null); };
 
@@ -37,7 +37,6 @@ const useSettings = (user, onUserUpdate, onLogout) => {
       'Profile updated successfully'
     );
     if (result?.success) {
-      // update stored user in localStorage + parent state
       const updated = result.user;
       localStorage.setItem('user', JSON.stringify(updated));
       onUserUpdate?.(updated);
@@ -52,12 +51,10 @@ const useSettings = (user, onUserUpdate, onLogout) => {
     );
   };
 
-  // ── PREFERENCES ───────────────────────────────────────────────────────────
-  const updatePreferences = async (preferences) => {
+  // ── PREFERENCES (optimization mode) ──────────────────────────────────────
+  const updatePreferences = async (optimizationMode) => {
     const result = await withFeedback(
-      // build the exact body shape the backend expects right here
-      // Api.js is just a transport — it sends whatever we give it as-is
-      () => settingsAPI.updatePreferences({ preferences }),
+      () => settingsAPI.updatePreferences(optimizationMode),
       'Preferences saved'
     );
     if (result?.success) {
@@ -82,7 +79,6 @@ const useSettings = (user, onUserUpdate, onLogout) => {
       'Account deleted'
     );
     if (result?.success) {
-      // clean up and log out
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       onLogout?.();

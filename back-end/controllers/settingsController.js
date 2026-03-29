@@ -76,25 +76,20 @@ export const changePassword = async (req, res) => {
   }
 };
 
-// ── UPDATE PREFERENCES (weights, map style etc.) ───────────────────────────
+// ── UPDATE PREFERENCES (optimizationMode) ────────────────────────────────
 export const updatePreferences = async (req, res) => {
   try {
-    const { preferences } = req.body;
-    if (!preferences) return res.status(400).json({ message: 'No preferences provided' });
+    const { optimizationMode } = req.body;
+    if (!optimizationMode) return res.status(400).json({ message: 'No optimization mode provided' });
 
-    // preferences = { time, cost, walkingDistance, transfers }
-    // Use dot-notation $set to only update weight fields without
-    // touching other preference fields (language, theme etc.)
-    const updateFields = {};
-    const { time, cost, walkingDistance, transfers } = preferences;
-    if (time            !== undefined) updateFields['preferences.weights.time']            = time;
-    if (cost            !== undefined) updateFields['preferences.weights.cost']            = cost;
-    if (walkingDistance !== undefined) updateFields['preferences.weights.walkingDistance'] = walkingDistance;
-    if (transfers       !== undefined) updateFields['preferences.weights.transfers']       = transfers;
+    const validModes = ['fastest', 'cheapest', 'less_walking', 'fewest_transfers'];
+    if (!validModes.includes(optimizationMode)) {
+      return res.status(400).json({ message: 'Invalid optimization mode' });
+    }
 
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { $set: updateFields },
+      { $set: { 'preferences.optimizationMode': optimizationMode } },
       { new: true, runValidators: true }
     );
 

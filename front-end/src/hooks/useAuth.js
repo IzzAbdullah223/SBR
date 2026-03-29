@@ -6,9 +6,10 @@ const useAuth = () => {
   const [showLogin, setShowLogin]   = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
 
-  // Theme — read from localStorage first, fall back to 'light'
+  // Theme — only restore from localStorage if a logged-in user exists
+  // If no token, always start with light mode
   const [theme, setTheme] = useState(
-    () => localStorage.getItem('theme') || 'light'
+    () => localStorage.getItem('token') ? (localStorage.getItem('theme') || 'light') : 'light'
   );
 
   // Apply theme to root element whenever it changes
@@ -73,7 +74,9 @@ const useAuth = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('theme');
     setUser(null);
+    setTheme('light');
   };
 
   const handleSwitchToSignUp = () => { setShowLogin(false);  setShowSignUp(true);  };

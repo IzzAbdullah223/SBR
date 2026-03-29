@@ -48,7 +48,7 @@ const useFindBuses = () => {
   const [errorType, setErrorType] = useState(null); // 'info' | 'error' | null
   const [stats, setStats] = useState(null);
 
-  const findBuses = useCallback(async (origin, destination, weights) => {
+  const findBuses = useCallback(async (origin, destination, optimizationMode) => {
     // useCallback saves a function in memory so React doesn't recreate it on every render.
     // Without it, every re-render creates a new function object — causing unnecessary re-renders in children.
     // Empty [] means create once and never recreate.
@@ -81,7 +81,7 @@ const useFindBuses = () => {
       // fetchData is used here (not fetchAPI) — it always returns the body
       // even on 404/400 so we can read the errorCode and show the right message.
       // see Api.js for why this distinction matters
-      const response = await api.topsis.findBuses(origin, destination, weights);
+      const response = await api.topsis.findBuses(origin, destination, optimizationMode);
 
       if (response.success) {
         // happy path — buses found and ranked

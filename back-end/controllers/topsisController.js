@@ -2,18 +2,30 @@ import * as routeFinder from '../services/routeFinder.service.js';
 import * as busGenerator from '../services/busGenerator.service.js';
 import * as topsisService from '../services/topsis.service.js';
 
+// Maps user's optimization goal to TOPSIS weight vector
+// Weights always sum to 1.0 — hidden from the user entirely
+const MODE_WEIGHTS = {
+  fastest:           { time: 0.55, cost: 0.20, walkingDistance: 0.15, transfers: 0.10 },
+  cheapest:          { time: 0.15, cost: 0.55, walkingDistance: 0.20, transfers: 0.10 },
+  less_walking:      { time: 0.15, cost: 0.15, walkingDistance: 0.55, transfers: 0.15 },
+  fewest_transfers:  { time: 0.15, cost: 0.15, walkingDistance: 0.15, transfers: 0.55 },
+};
+
 export const findBuses = async (req, res) => {
   try {
-    const { origin, destination, weights } = req.body;
+    const { origin, destination, optimizationMode } = req.body;
 
     // ── Input validation ────────────────────────────────────────────────────
-    if (!origin || !destination || !weights) {
+    if (!origin || !destination) {
       return res.status(400).json({
         success: false,
         errorCode: 'MISSING_FIELDS',
-        message: 'Origin, destination and weights are required.',
+        message: 'Origin and destination are required.',
       });
     }
+
+    // Resolve weights from mode — fall back to 'fastest' if mode not provided
+    const weights = MODE_WEIGHTS[optimizationMode] || MODE_WEIGHTS.fastest;
 
     if (!origin.lat || !origin.lng) {
       return res.status(400).json({
