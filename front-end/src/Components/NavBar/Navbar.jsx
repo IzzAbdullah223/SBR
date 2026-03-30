@@ -1,9 +1,17 @@
+/**
+ * Navbar.jsx — updated with i18n + LanguageToggle
+ * Replace your existing Navbar.jsx with this file.
+ */
+
 import { Bus, Settings, LogIn, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import LanguageToggle from '../LanguageToggle/LanguageToggle';
 import styles from './Navbar.module.css';
 
 const Navbar = ({ onSignUpClick, onLoginClick, user }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <nav className={styles.navbar}>
@@ -12,33 +20,42 @@ const Navbar = ({ onSignUpClick, onLoginClick, user }) => {
           <Bus size={18} />
         </div>
         <span className={styles.logoText}>
-          Smart <span className={styles.logoAccent}>Bus</span> Planner
+          {t('navbar.appName')}
         </span>
-        <div className={styles.logoBadge}>Dubai RTA</div>
+        <div className={styles.logoBadge}>{t('navbar.badge')}</div>
       </div>
 
       <div className={styles.actions}>
-        {/* Settings — only visible when logged in, navigates to /settings page */}
+        {/* Language Toggle — always visible */}
+        <LanguageToggle />
+
+        {/* Settings — only visible when logged in */}
         {user && (
           <button className={styles.settingsBtn} onClick={() => navigate('/settings')}>
             <Settings size={15} />
-            <span>Settings</span>
+            <span>{t('navbar.settings')}</span>
           </button>
         )}
 
         <div className={styles.divider} />
 
         {user ? (
-          <span className={styles.greeting}>Hello, <strong>{user.name}</strong></span>
+          <span className={styles.greeting}>
+            {t('navbar.greeting', { name: user.name }).split(user.name).map((part, i, arr) =>
+              i < arr.length - 1
+                ? [part, <strong key={i}>{user.name}</strong>]
+                : part
+            )}
+          </span>
         ) : (
           <>
             <button className={styles.loginBtn} onClick={onLoginClick}>
               <LogIn size={15} />
-              <span>Login</span>
+              <span>{t('navbar.login')}</span>
             </button>
             <button className={styles.signupBtn} onClick={onSignUpClick}>
               <UserPlus size={15} />
-              <span>Sign Up</span>
+              <span>{t('navbar.signUp')}</span>
             </button>
           </>
         )}

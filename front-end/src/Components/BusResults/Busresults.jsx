@@ -1,30 +1,28 @@
 /**
- * BUS RESULTS COMPONENT
- * Displays ranked buses from TOPSIS algorithm
+ * BusResults.jsx — updated with i18n
+ * Replace your existing BusResults.jsx with this file.
  */
 
 import React, { useEffect, useRef } from 'react';
 import { Clock, DollarSign, MapPin, GitMerge, Star, Award, Navigation, ArrowRight, Bookmark, BookmarkCheck } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import styles from './BusResults.module.css';
 
 const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, isSavingJourney, journeyAlreadySaved, user }) => {
-  // Refs for each card — keyed by busId
+  const { t } = useTranslation();
   const cardRefs = useRef({});
 
-  // Scroll the selected card into view whenever selectedBus changes
   useEffect(() => {
     if (!selectedBus?.busId) return;
     const el = cardRefs.current[selectedBus.busId];
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [selectedBus?.busId]);
 
   if (loading) {
     return (
       <div className={styles.loading}>
         <div className={styles.spinner}></div>
-        <p>Finding best bus routes...</p>
+        <p>{t('results.findingRoutes')}</p>
       </div>
     );
   }
@@ -32,7 +30,7 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
   if (!buses || buses.length === 0) {
     return (
       <div className={styles.empty}>
-        <p>📍 Enter origin and destination to find buses</p>
+        <p>{t('results.emptyState')}</p>
       </div>
     );
   }
@@ -45,9 +43,9 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
   };
 
   const getScoreColor = (score) => {
-    if (score >= 0.7) return '#4CAF50'; // Green
-    if (score >= 0.4) return '#FF9800'; // Orange
-    return '#F44336';                   // Red
+    if (score >= 0.7) return '#4CAF50';
+    if (score >= 0.4) return '#FF9800';
+    return '#F44336';
   };
 
   return (
@@ -56,17 +54,14 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
         <div className={styles.headerTop}>
           <h2>
             <Star size={24} color="#667eea" />
-            Recommended Routes
+            {t('results.title')}
           </h2>
-          {/* Add to Favourites button — only shown when user is logged in
-              isSavingJourney shows a spinner while POST is in flight
-              journeyAlreadySaved shows a checkmark when already saved */}
           {user && onSaveJourney && (
             <button
               className={`${styles.saveBtn} ${journeyAlreadySaved ? styles.saveBtnSaved : ''}`}
               onClick={onSaveJourney}
               disabled={isSavingJourney || journeyAlreadySaved}
-              title={journeyAlreadySaved ? 'Journey saved' : 'Save this journey'}
+              title={journeyAlreadySaved ? t('results.saved') : t('results.saveJourney')}
             >
               {isSavingJourney ? (
                 <span className={styles.saveBtnSpinner} />
@@ -75,12 +70,12 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
               ) : (
                 <Bookmark size={15} />
               )}
-              <span>{journeyAlreadySaved ? 'Saved ✓' : 'Save Journey'}</span>
+              <span>{journeyAlreadySaved ? t('results.saved') : t('results.saveJourney')}</span>
             </button>
           )}
         </div>
         <p className={styles.subtitle}>
-          {buses.length} routes ranked by your preferences using TOPSIS
+          {t('results.subtitle', { count: buses.length })}
         </p>
       </div>
 
@@ -96,127 +91,94 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
               className={`${styles.busCard} ${isSelected ? styles.selected : ''}`}
               onClick={() => onSelectBus(bus)}
             >
-              {/* Rank Medal */}
-              <div className={styles.medal}>
-                {getMedalIcon(index)}
-              </div>
+              <div className={styles.medal}>{getMedalIcon(index)}</div>
 
-              {/* Bus Header */}
               <div className={styles.busHeader}>
-                <div
-                  className={styles.busNumber}
-                  style={{ backgroundColor: bus.color || '#667eea' }}
-                >
+                <div className={styles.busNumber} style={{ backgroundColor: bus.color || '#667eea' }}>
                   {bus.routeNumber}
                 </div>
                 <div className={styles.busInfo}>
                   <h3>{bus.routeName}</h3>
                   <div className={styles.badges}>
                     <span className={styles.busType}>{bus.routeType}</span>
-                    {/* Show journey type badge */}
                     {bus.journeyType === 'transfer' ? (
-                      <span className={styles.transferBadge}>🔄 Transfer</span>
+                      <span className={styles.transferBadge}>{t('results.transfer')}</span>
                     ) : (
-                      <span className={styles.directBadge}>✅ Direct</span>
+                      <span className={styles.directBadge}>{t('results.direct')}</span>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* TOPSIS Score */}
               <div className={styles.scoreSection}>
-                <div className={styles.scoreLabel}>TOPSIS Score</div>
-                <div
-                  className={styles.score}
-                  style={{ color: scoreColor }}
-                >
+                <div className={styles.scoreLabel}>{t('results.topsisScore')}</div>
+                <div className={styles.score} style={{ color: scoreColor }}>
                   {(bus.score * 100).toFixed(1)}%
                 </div>
                 <div className={styles.scoreBar}>
                   <div
                     className={styles.scoreBarFill}
-                    style={{
-                      width: `${bus.score * 100}%`,
-                      backgroundColor: scoreColor
-                    }}
+                    style={{ width: `${bus.score * 100}%`, backgroundColor: scoreColor }}
                   />
                 </div>
               </div>
 
-              {/* Criteria Grid */}
               <div className={styles.criteria}>
-
-                {/* Departure Time */}
                 <div className={styles.criteriaItem}>
                   <Navigation size={16} color="#667eea" />
-                  <span className={styles.criteriaLabel}>Departs:</span>
+                  <span className={styles.criteriaLabel}>{t('results.departs')}</span>
                   <span className={styles.criteriaValue}>
-                    {bus.departureTime || `${bus.arrivalTime} min`}
+                    {bus.departureTime || `${bus.arrivalTime} ${t('results.minutes')}`}
                   </span>
                 </div>
 
-                {/* Wait time — FIXED: was bus.time, now bus.arrivalTime */}
                 <div className={styles.criteriaItem}>
                   <Clock size={16} color="#667eea" />
-                  <span className={styles.criteriaLabel}>Wait:</span>
-                  <span className={styles.criteriaValue}>
-                    {bus.arrivalTime} min
-                  </span>
+                  <span className={styles.criteriaLabel}>{t('results.wait')}</span>
+                  <span className={styles.criteriaValue}>{bus.arrivalTime} {t('results.minutes')}</span>
                 </div>
 
-                {/* Travel Time */}
                 <div className={styles.criteriaItem}>
                   <Clock size={16} color="#9C27B0" />
-                  <span className={styles.criteriaLabel}>Journey:</span>
-                  <span className={styles.criteriaValue}>
-                    {bus.travelTime} min
-                  </span>
+                  <span className={styles.criteriaLabel}>{t('results.journey')}</span>
+                  <span className={styles.criteriaValue}>{bus.travelTime} {t('results.minutes')}</span>
                 </div>
 
-                {/* Cost */}
                 <div className={styles.criteriaItem}>
                   <DollarSign size={16} color="#4CAF50" />
-                  <span className={styles.criteriaLabel}>Fare:</span>
-                  <span className={styles.criteriaValue}>{bus.cost} AED</span>
+                  <span className={styles.criteriaLabel}>{t('results.fare')}</span>
+                  <span className={styles.criteriaValue}>{bus.cost} {t('results.aed')}</span>
                 </div>
 
-                {/* Walking */}
                 <div className={styles.criteriaItem}>
                   <MapPin size={16} color="#FF9800" />
-                  <span className={styles.criteriaLabel}>Walk:</span>
+                  <span className={styles.criteriaLabel}>{t('results.walk')}</span>
                   <span className={styles.criteriaValue}>
-                    {bus.walkingDistance} km ({bus.walkingTime} min)
+                    {bus.walkingDistance} {t('results.km')} ({bus.walkingTime} {t('results.minutes')})
                   </span>
                 </div>
 
-                {/* Transfers */}
                 <div className={styles.criteriaItem}>
                   <GitMerge size={16} color="#F44336" />
-                  <span className={styles.criteriaLabel}>Transfers:</span>
+                  <span className={styles.criteriaLabel}>{t('results.transfers')}</span>
                   <span className={styles.criteriaValue}>{bus.transfers}</span>
                 </div>
-
               </div>
 
-              {/* Upcoming Departures — shows all departure times for this route
-                  topsisController groups buses by route and attaches upcomingDepartures
-                  so the user can see the full schedule, not just the next bus */}
               {bus.upcomingDepartures && bus.upcomingDepartures.length > 1 && (
                 <div className={styles.upcomingDepartures}>
-                  <span className={styles.upcomingLabel}>🕐 Also departs:</span>
+                  <span className={styles.upcomingLabel}>{t('results.alsoDeparts')}</span>
                   <div className={styles.upcomingTimes}>
-                    {/* skip the first one — it's already shown in the criteria grid above */}
                     {bus.upcomingDepartures.slice(1).map((dep, i) => (
                       <span key={i} className={styles.upcomingTime}>
                         {dep.departureTime}
-                        <span className={styles.upcomingWait}>+{dep.minutesFromNow} min</span>
+                        <span className={styles.upcomingWait}>+{dep.minutesFromNow} {t('results.minutes')}</span>
                       </span>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Transfer Details — Show legs for transfer routes */}
               {bus.journeyType === 'transfer' && bus.leg1 && bus.leg2 && (
                 <div className={styles.transferDetails}>
                   <div className={styles.leg}>
@@ -237,20 +199,14 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
                 </div>
               )}
 
-              {/* Stop Names */}
               <div className={styles.stopNames}>
-                <span className={styles.originStop}>
-                  📍 {bus.originStop?.name}
-                </span>
+                <span className={styles.originStop}>📍 {bus.originStop?.name}</span>
                 <ArrowRight size={14} />
-                <span className={styles.destStop}>
-                  🏁 {bus.destinationStop?.name}
-                </span>
+                <span className={styles.destStop}>🏁 {bus.destinationStop?.name}</span>
               </div>
 
-              {/* Action Button */}
               <button className={`${styles.selectButton} ${isSelected ? styles.selectedBtn : ''}`}>
-                {isSelected ? 'Selected ✓' : 'View on Map'}
+                {isSelected ? t('results.selected') : t('results.viewOnMap')}
               </button>
             </div>
           );

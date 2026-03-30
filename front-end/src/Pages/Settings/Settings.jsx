@@ -1,3 +1,8 @@
+/**
+ * Settings.jsx — updated with i18n
+ * Replace your existing Settings.jsx with this file.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -5,10 +10,10 @@ import {
   Shield, LogOut, ArrowLeft, ChevronDown,
   CheckCircle, AlertCircle, Trash2, X, Bus
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import useSettings from '../../hooks/useSettings';
 import styles from './Settings.module.css';
 
-// ── Accordion wrapper ──────────────────────────────────────────────────────
 const Accordion = ({ icon: Icon, title, hint, children }) => {
   const [open, setOpen] = useState(false);
   return (
@@ -22,16 +27,13 @@ const Accordion = ({ icon: Icon, title, hint, children }) => {
         <ChevronDown size={16} className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`} />
       </button>
       <div className={`${styles.accordionBody} ${open ? styles.accordionOpen : ''}`}>
-        <div className={styles.accordionInner}>
-          {children}
-        </div>
+        <div className={styles.accordionInner}>{children}</div>
       </div>
     </div>
   );
 };
 
-// ── Confirm modal ──────────────────────────────────────────────────────────
-const ConfirmModal = ({ title, message, onConfirm, onCancel, requirePassword }) => {
+const ConfirmModal = ({ title, message, onConfirm, onCancel, requirePassword, t }) => {
   const [password, setPassword] = useState('');
   return (
     <div className={styles.overlay}>
@@ -42,7 +44,7 @@ const ConfirmModal = ({ title, message, onConfirm, onCancel, requirePassword }) 
         {requirePassword && (
           <input
             type="password"
-            placeholder="Enter your password to confirm"
+            placeholder={t('settings.confirmPasswordPlaceholder')}
             value={password}
             onChange={e => setPassword(e.target.value)}
             className={styles.input}
@@ -50,13 +52,13 @@ const ConfirmModal = ({ title, message, onConfirm, onCancel, requirePassword }) 
           />
         )}
         <div className={styles.modalActions}>
-          <button className={styles.cancelBtn} onClick={onCancel}>Cancel</button>
+          <button className={styles.cancelBtn} onClick={onCancel}>{t('settings.cancel')}</button>
           <button
             className={styles.dangerBtn}
             onClick={() => onConfirm(password)}
             disabled={requirePassword && !password}
           >
-            Confirm
+            {t('settings.confirm')}
           </button>
         </div>
       </div>
@@ -64,9 +66,9 @@ const ConfirmModal = ({ title, message, onConfirm, onCancel, requirePassword }) 
   );
 };
 
-// ── Main ──────────────────────────────────────────────────────────────────
 const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const {
     saving, success, error, clearFeedback,
@@ -74,36 +76,21 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
     clearSavedRoutes, deleteAccount,
   } = useSettings(user, onUserUpdate, onLogout);
 
-  // Profile
   const [name,  setName]  = useState(user?.name  || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phone || '');
-
-  // Password
   const [currentPw, setCurrentPw] = useState('');
   const [newPw,     setNewPw]     = useState('');
   const [confirmPw, setConfirmPw] = useState('');
   const [pwError,   setPwError]   = useState('');
+  const [optimizationMode, setOptimizationMode] = useState(user?.preferences?.optimizationMode || 'fastest');
+  const [largeText,        setLargeText]        = useState(false);
+  const [reduceAnimations, setReduceAnimations] = useState(false);
+  const [confirm, setConfirm] = useState(null);
 
-  // Preferences — optimization mode
-  const [optimizationMode, setOptimizationMode] = useState(
-    user?.preferences?.optimizationMode || 'fastest'
-  );
-
-  // Re-sync when user prop updates
   useEffect(() => {
     setOptimizationMode(user?.preferences?.optimizationMode || 'fastest');
   }, [user?.preferences?.optimizationMode]);
-
-  // Display
-  const [mapStyle, setMapStyle] = useState('standard');
-
-  // Accessibility
-  const [largeText,        setLargeText]        = useState(false);
-  const [reduceAnimations, setReduceAnimations] = useState(false);
-
-  // Confirm modal
-  const [confirm, setConfirm] = useState(null);
 
   useEffect(() => {
     if (user) { setName(user.name || ''); setEmail(user.email || ''); setPhone(user.phone || ''); }
@@ -115,16 +102,13 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
     return () => clearTimeout(t);
   }, [success, error]);
 
-  const handleProfileSave = (e) => {
-    e.preventDefault();
-    updateProfile({ name, email, phone });
-  };
+  const handleProfileSave = (e) => { e.preventDefault(); updateProfile({ name, email, phone }); };
 
   const handlePasswordSave = (e) => {
     e.preventDefault();
     setPwError('');
-    if (newPw !== confirmPw) { setPwError('Passwords do not match'); return; }
-    if (newPw.length < 6)    { setPwError('Must be at least 6 characters'); return; }
+    if (newPw !== confirmPw) { setPwError(t('settings.passwordMismatch')); return; }
+    if (newPw.length < 6)    { setPwError(t('settings.passwordTooShort')); return; }
     changePassword({ currentPassword: currentPw, newPassword: newPw });
     setCurrentPw(''); setNewPw(''); setConfirmPw('');
   };
@@ -137,79 +121,73 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
 
   return (
     <div className={styles.page}>
-
-      {/* Top bar */}
       <div className={styles.topBar}>
         <button className={styles.backBtn} onClick={() => navigate(-1)}>
-          <ArrowLeft size={14} /> Back
+          <ArrowLeft size={14} /> {t('settings.back')}
         </button>
         <Bus size={15} color="#f0a500" />
-        <span className={styles.pageTitle}>Settings</span>
+        <span className={styles.pageTitle}>{t('settings.title')}</span>
       </div>
 
       <div className={styles.content}>
 
-        {/* ── 1. Profile ── */}
-        <Accordion icon={User} title="Profile" hint="Name, email and phone number">
+        {/* 1. Profile */}
+        <Accordion icon={User} title={t('settings.profile')} hint={t('settings.profileHint')}>
           <form onSubmit={handleProfileSave} className={styles.form}>
             <div className={styles.formGrid}>
               <div className={styles.formRow}>
-                <label className={styles.label}>Full Name</label>
-                <input className={styles.input} value={name} onChange={e => setName(e.target.value)} placeholder="Your name" />
+                <label className={styles.label}>{t('settings.fullName')}</label>
+                <input className={styles.input} value={name} onChange={e => setName(e.target.value)} placeholder={t('settings.namePlaceholder')} />
               </div>
               <div className={styles.formRow}>
-                <label className={styles.label}>Phone</label>
-                <input className={styles.input} value={phone} onChange={e => setPhone(e.target.value)} placeholder="+971 50 000 0000" />
+                <label className={styles.label}>{t('settings.phone')}</label>
+                <input className={styles.input} value={phone} onChange={e => setPhone(e.target.value)} placeholder={t('settings.phonePlaceholder')} />
               </div>
             </div>
             <div className={styles.formRow}>
-              <label className={styles.label}>Email Address</label>
-              <input className={styles.input} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" />
+              <label className={styles.label}>{t('settings.emailAddress')}</label>
+              <input className={styles.input} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t('settings.emailPlaceholder')} />
             </div>
             <button type="submit" className={styles.saveBtn} disabled={saving}>
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? t('settings.saving') : t('settings.saveChanges')}
             </button>
           </form>
         </Accordion>
 
-        {/* ── 2. Change Password ── */}
-        <Accordion icon={Lock} title="Change Password" hint="Update your account password">
+        {/* 2. Change Password */}
+        <Accordion icon={Lock} title={t('settings.changePassword')} hint={t('settings.changePasswordHint')}>
           <form onSubmit={handlePasswordSave} className={styles.form}>
             <div className={styles.formRow}>
-              <label className={styles.label}>Current Password</label>
+              <label className={styles.label}>{t('settings.currentPassword')}</label>
               <input className={styles.input} type="password" autoComplete="current-password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} placeholder="••••••••" />
             </div>
             <div className={styles.formGrid}>
               <div className={styles.formRow}>
-                <label className={styles.label}>New Password</label>
+                <label className={styles.label}>{t('settings.newPassword')}</label>
                 <input className={styles.input} type="password" autoComplete="new-password" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="••••••••" />
               </div>
               <div className={styles.formRow}>
-                <label className={styles.label}>Confirm Password</label>
+                <label className={styles.label}>{t('settings.confirmPassword')}</label>
                 <input className={styles.input} type="password" autoComplete="new-password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} placeholder="••••••••" />
               </div>
             </div>
             {pwError && <p className={styles.fieldError}><AlertCircle size={12} /> {pwError}</p>}
             <button type="submit" className={styles.saveBtn} disabled={saving || !currentPw || !newPw || !confirmPw}>
-              {saving ? 'Updating...' : 'Update Password'}
+              {saving ? t('settings.updating') : t('settings.updatePassword')}
             </button>
           </form>
         </Accordion>
 
-        {/* ── 3. Preferences ── */}
-        <Accordion icon={Zap} title="Preferences" hint="Optimize routes for what matters to you">
+        {/* 3. Preferences */}
+        <Accordion icon={Zap} title={t('settings.preferences')} hint={t('settings.preferencesHint')}>
           <div className={styles.form}>
             <div className={styles.formRow}>
-              <label className={styles.label}>Optimize routes for</label>
-              <select
-                className={styles.select}
-                value={optimizationMode}
-                onChange={e => setOptimizationMode(e.target.value)}
-              >
-                <option value="fastest">🚀 Fastest route</option>
-                <option value="cheapest">💰 Cheapest route</option>
-                <option value="less_walking">🚶 Less walking</option>
-                <option value="fewest_transfers">🔄 Fewest transfers</option>
+              <label className={styles.label}>{t('settings.optimizeFor')}</label>
+              <select className={styles.select} value={optimizationMode} onChange={e => setOptimizationMode(e.target.value)}>
+                <option value="fastest">{t('settings.optFastest')}</option>
+                <option value="cheapest">{t('settings.optCheapest')}</option>
+                <option value="less_walking">{t('settings.optLessWalking')}</option>
+                <option value="fewest_transfers">{t('settings.optFewestTransfers')}</option>
               </select>
             </div>
             {(success || error) && (
@@ -218,43 +196,35 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
                 <span>{error || success}</span>
               </div>
             )}
-            <button
-              className={styles.saveBtn}
-              style={{ marginTop: 8 }}
-              onClick={() => updatePreferences(optimizationMode)}
-              disabled={saving}
-            >
-              {saving ? 'Saving...' : 'Save Preferences'}
+            <button className={styles.saveBtn} style={{ marginTop: 8 }} onClick={() => updatePreferences(optimizationMode)} disabled={saving}>
+              {saving ? t('settings.saving') : t('settings.savePreferences')}
             </button>
           </div>
         </Accordion>
 
-        {/* ── 4. Display ── */}
-        <Accordion icon={Monitor} title="Display" hint="Map style and appearance">
+        {/* 4. Display */}
+        <Accordion icon={Monitor} title={t('settings.display')} hint={t('settings.displayHint')}>
           <div className={styles.toggleRow}>
             <div>
-              <p className={styles.toggleLabel}>Dark Mode</p>
-              <p className={styles.toggleHint}>Switch between light and dark appearance</p>
+              <p className={styles.toggleLabel}>{t('settings.darkMode')}</p>
+              <p className={styles.toggleHint}>{t('settings.darkModeHint')}</p>
             </div>
-            <button
-              className={`${styles.toggle} ${theme === 'dark' ? styles.toggleOn : ''}`}
-              onClick={toggleTheme}
-            >
+            <button className={`${styles.toggle} ${theme === 'dark' ? styles.toggleOn : ''}`} onClick={toggleTheme}>
               <div className={styles.toggleThumb} />
             </button>
           </div>
         </Accordion>
 
-        {/* ── 5. Accessibility ── */}
-        <Accordion icon={Eye} title="Accessibility" hint="Text size and motion settings">
+        {/* 5. Accessibility */}
+        <Accordion icon={Eye} title={t('settings.accessibility')} hint={t('settings.accessibilityHint')}>
           {[
-            { label: 'Larger Text',        hint: 'Increases font size across the app',             state: largeText,        set: setLargeText        },
-            { label: 'Reduce Animations',  hint: 'Disables map fly animations and transitions',    state: reduceAnimations, set: setReduceAnimations },
-          ].map(({ label, hint, state, set }) => (
-            <div key={label} className={styles.toggleRow}>
+            { labelKey: 'settings.largerText',       hintKey: 'settings.largerTextHint',       state: largeText,        set: setLargeText        },
+            { labelKey: 'settings.reduceAnimations',  hintKey: 'settings.reduceAnimationsHint', state: reduceAnimations, set: setReduceAnimations },
+          ].map(({ labelKey, hintKey, state, set }) => (
+            <div key={labelKey} className={styles.toggleRow}>
               <div>
-                <p className={styles.toggleLabel}>{label}</p>
-                <p className={styles.toggleHint}>{hint}</p>
+                <p className={styles.toggleLabel}>{t(labelKey)}</p>
+                <p className={styles.toggleHint}>{t(hintKey)}</p>
               </div>
               <button className={`${styles.toggle} ${state ? styles.toggleOn : ''}`} onClick={() => set(v => !v)}>
                 <div className={styles.toggleThumb} />
@@ -263,58 +233,51 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
           ))}
         </Accordion>
 
-        {/* ── 6. Privacy & Data ── */}
-        <Accordion icon={Shield} title="Privacy & Data" hint="Manage your data and account">
+        {/* 6. Privacy & Data */}
+        <Accordion icon={Shield} title={t('settings.privacy')} hint={t('settings.privacyHint')}>
           <div className={styles.dangerRow}>
             <div>
-              <p className={styles.dangerLabel}>Clear Saved Routes</p>
-              <p className={styles.dangerHint}>Permanently removes all your saved journeys</p>
+              <p className={styles.dangerLabel}>{t('settings.clearRoutes')}</p>
+              <p className={styles.dangerHint}>{t('settings.clearRoutesHint')}</p>
             </div>
             <button className={styles.dangerOutlineBtn} onClick={() => setConfirm({ type: 'clearRoutes' })}>
-              <Trash2 size={13} /> Clear All
+              <Trash2 size={13} /> {t('settings.clearAll')}
             </button>
           </div>
           <div className={styles.dangerRow}>
             <div>
-              <p className={styles.dangerLabel}>Delete Account</p>
-              <p className={styles.dangerHint}>Permanently deletes your account and all data</p>
+              <p className={styles.dangerLabel}>{t('settings.deleteAccount')}</p>
+              <p className={styles.dangerHint}>{t('settings.deleteAccountHint')}</p>
             </div>
-            <button
-              className={styles.dangerOutlineBtn}
-              onClick={() => setConfirm({ type: 'deleteAccount' })}
-            >
-              <Trash2 size={13} /> Delete
+            <button className={styles.dangerOutlineBtn} onClick={() => setConfirm({ type: 'deleteAccount' })}>
+              <Trash2 size={13} /> {t('settings.delete')}
             </button>
           </div>
         </Accordion>
 
-        {/* ── 7. Log Out ── */}
-        <Accordion icon={LogOut} title="Log Out" hint="Sign out of your account">
+        {/* 7. Log Out */}
+        <Accordion icon={LogOut} title={t('settings.logout')} hint={t('settings.logoutHint')}>
           <div className={styles.logoutRow}>
             <div>
-              <p className={styles.logoutLabel}>Log Out</p>
-              <p className={styles.logoutHint}>You can log back in at any time</p>
+              <p className={styles.logoutLabel}>{t('settings.logoutBtn')}</p>
+              <p className={styles.logoutHint}>{t('settings.logoutHintSub')}</p>
             </div>
             <button className={styles.logoutBtn} onClick={onLogout}>
-              <LogOut size={13} /> Log Out
+              <LogOut size={13} /> {t('settings.logoutBtn')}
             </button>
           </div>
         </Accordion>
 
       </div>
 
-      {/* Confirm modal */}
       {confirm && (
         <ConfirmModal
-          title={confirm.type === 'clearRoutes' ? 'Clear All Saved Routes?' : 'Delete Account?'}
-          message={
-            confirm.type === 'clearRoutes'
-              ? 'This will permanently remove all your saved journeys. This cannot be undone.'
-              : 'This will permanently delete your account and all data. This cannot be undone.'
-          }
+          title={confirm.type === 'clearRoutes' ? t('settings.clearRoutesTitle') : t('settings.deleteAccountTitle')}
+          message={confirm.type === 'clearRoutes' ? t('settings.clearRoutesMessage') : t('settings.deleteAccountMessage')}
           requirePassword={confirm.type === 'deleteAccount'}
           onConfirm={handleConfirm}
           onCancel={() => setConfirm(null)}
+          t={t}
         />
       )}
     </div>

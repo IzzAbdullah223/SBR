@@ -1,0 +1,369 @@
+/*
+ * rtl.css — Global RTL overrides for Arabic layout
+ *
+ * Import this ONCE in your main entry file (main.jsx or App.jsx):
+ *   import './rtl.css';
+ *
+ * All rules are scoped to [dir="rtl"] so they ONLY apply in Arabic mode.
+ * i18n.js sets this attribute on <html> automatically when language changes.
+ *
+ * Strategy:
+ *   - Flip all directional layout (flex rows, text-align, margins, padding)
+ *   - Use logical CSS properties where possible (margin-inline-start, etc.)
+ *   - Override specific component selectors that need manual fixes
+ *   - Arabic font stack is defined here so it auto-applies in RTL mode
+ */
+
+/* ═══════════════════════════════════════════════════════
+   1. ARABIC FONT STACK
+   Cairo — a clean, modern Arabic font that pairs well
+   with Syne's geometric weight. Add to your index.html:
+
+   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+═══════════════════════════════════════════════════════ */
+
+[dir="rtl"] {
+  font-family: 'Cairo', 'DM Sans', sans-serif;
+}
+
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] h4,
+[dir="rtl"] .syne,
+[dir="rtl"] [class*="logoText"],
+[dir="rtl"] [class*="pageTitle"],
+[dir="rtl"] [class*="panelTitle"],
+[dir="rtl"] [class*="triggerTitle"],
+[dir="rtl"] [class*="modeBtn"],
+[dir="rtl"] [class*="findButton"],
+[dir="rtl"] [class*="selectButton"],
+[dir="rtl"] [class*="saveBtn"],
+[dir="rtl"] [class*="toggleChipLabel"] {
+  font-family: 'Cairo', 'Syne', sans-serif;
+}
+
+/* ═══════════════════════════════════════════════════════
+   2. BASE TEXT DIRECTION
+═══════════════════════════════════════════════════════ */
+
+[dir="rtl"] * {
+  text-align: right;
+}
+
+/* Elements that should stay centered */
+[dir="rtl"] [class*="loading"],
+[dir="rtl"] [class*="empty"],
+[dir="rtl"] [class*="emptyState"],
+[dir="rtl"] [class*="spinner"] {
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════════════════
+   3. FLEX ROW DIRECTION FLIP
+   Reverses all horizontal flex layouts so they flow RTL
+═══════════════════════════════════════════════════════ */
+
+[dir="rtl"] [class*="navbar"],
+[dir="rtl"] [class*="logo"],
+[dir="rtl"] [class*="actions"],
+[dir="rtl"] [class*="headerTop"],
+[dir="rtl"] [class*="busHeader"],
+[dir="rtl"] [class*="badges"],
+[dir="rtl"] [class*="criteria"],
+[dir="rtl"] [class*="criteriaItem"],
+[dir="rtl"] [class*="stopNames"],
+[dir="rtl"] [class*="transferDetails"],
+[dir="rtl"] [class*="leg"],
+[dir="rtl"] [class*="upcomingTimes"],
+[dir="rtl"] [class*="collapsedRow"],
+[dir="rtl"] [class*="chipsRail"],
+[dir="rtl"] [class*="panelHeader"],
+[dir="rtl"] [class*="panelTitleRow"],
+[dir="rtl"] [class*="card"],
+[dir="rtl"] [class*="toggleRow"],
+[dir="rtl"] [class*="dangerRow"],
+[dir="rtl"] [class*="logoutRow"],
+[dir="rtl"] [class*="modalActions"],
+[dir="rtl"] [class*="topBar"],
+[dir="rtl"] [class*="findRow"],
+[dir="rtl"] [class*="modeButtons"],
+[dir="rtl"] [class*="loadingState"] {
+  flex-direction: row-reverse;
+}
+
+/* These are column layouts — keep column but align items to the right */
+[dir="rtl"] [class*="form"],
+[dir="rtl"] [class*="formRow"],
+[dir="rtl"] [class*="journey"],
+[dir="rtl"] [class*="connector"] {
+  align-items: flex-end;
+}
+
+/* ═══════════════════════════════════════════════════════
+   4. NAVBAR
+═══════════════════════════════════════════════════════ */
+
+[dir="rtl"] [class*="navbar"] {
+  padding: 0 24px;
+}
+
+[dir="rtl"] [class*="logoBadge"] {
+  font-size: 9px;  /* Arabic text is denser — slightly smaller */
+}
+
+/* ═══════════════════════════════════════════════════════
+   5. LEFT PANEL / HOME
+═══════════════════════════════════════════════════════ */
+
+[dir="rtl"] [class*="leftPanel"] {
+  border-right: none;
+  border-left: 1px solid var(--border);
+}
+
+[dir="rtl"] [class*="sectionTitle"]::after {
+  /* Line separator after title — flip to before in RTL */
+  display: none;
+}
+
+[dir="rtl"] [class*="sectionTitle"]::before {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ═══════════════════════════════════════════════════════
+   6. BUS RESULTS
+═══════════════════════════════════════════════════════ */
+
+/* Medal moves to left side in RTL */
+[dir="rtl"] [class*="medal"] {
+  right: auto;
+  left: 14px;
+}
+
+/* Bus number sits on the right in RTL */
+[dir="rtl"] [class*="criteria"] {
+  direction: rtl;
+}
+
+[dir="rtl"] [class*="criteriaValue"] {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] [class*="scoreBar"] {
+  direction: ltr; /* Keep score bar fill going left-to-right */
+}
+
+/* Upcoming departures */
+[dir="rtl"] [class*="upcomingLabel"] {
+  text-align: right;
+}
+
+/* Transfer arrow flips */
+[dir="rtl"] [class*="legArrow"] {
+  transform: scaleX(-1);
+}
+
+/* Stop names arrow flips */
+[dir="rtl"] [class*="stopNames"] svg {
+  transform: scaleX(-1);
+}
+
+/* ═══════════════════════════════════════════════════════
+   7. SEARCH INPUT
+═══════════════════════════════════════════════════════ */
+
+[dir="rtl"] [class*="searchInput"] {
+  padding: 13px 14px 13px 44px; /* flip spinner space to left side */
+  text-align: right;
+}
+
+[dir="rtl"] [class*="loadingSpinner"] {
+  right: auto;
+  left: 14px;
+}
+
+[dir="rtl"] [class*="dropdownItem"] {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] [class*="addressInfo"] {
+  text-align: right;
+}
+
+[dir="rtl"] [class*="dropdown"] {
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════════════════════
+   8. SAVED ROUTES
+═══════════════════════════════════════════════════════ */
+
+[dir="rtl"] [class*="chip"] {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] [class*="deleteBtn"] {
+  right: auto;
+  left: 8px;
+}
+
+[dir="rtl"] [class*="goArrow"] {
+  transform: scaleX(-1);
+}
+
+[dir="rtl"] [class*="card"]:hover [class*="goArrow"] {
+  transform: scaleX(-1) translateX(2px);
+}
+
+/* ═══════════════════════════════════════════════════════
+   9. SETTINGS
+═══════════════════════════════════════════════════════ */
+
+[dir="rtl"] [class*="backBtn"] {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] [class*="backBtn"] svg {
+  transform: scaleX(-1);
+}
+
+[dir="rtl"] [class*="accordionTrigger"] {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+[dir="rtl"] [class*="chevron"] {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] [class*="formGrid"] {
+  direction: rtl;
+}
+
+[dir="rtl"] [class*="label"] {
+  text-align: right;
+}
+
+[dir="rtl"] [class*="input"],
+[dir="rtl"] [class*="select"] {
+  text-align: right;
+  direction: rtl;
+}
+
+/* Keep email/password inputs LTR since the values are latin */
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="password"] {
+  direction: ltr;
+  text-align: left;
+}
+
+[dir="rtl"] [class*="saveBtn"] {
+  align-self: flex-start; /* keeps button right-aligned in RTL column */
+}
+
+[dir="rtl"] [class*="toggleLabel"],
+[dir="rtl"] [class*="toggleHint"],
+[dir="rtl"] [class*="dangerLabel"],
+[dir="rtl"] [class*="dangerHint"],
+[dir="rtl"] [class*="logoutLabel"],
+[dir="rtl"] [class*="logoutHint"] {
+  text-align: right;
+}
+
+[dir="rtl"] [class*="modalClose"] {
+  right: auto;
+  left: 14px;
+}
+
+[dir="rtl"] [class*="fieldError"] {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+/* ═══════════════════════════════════════════════════════
+   10. AUTH MODALS
+═══════════════════════════════════════════════════════ */
+
+[dir="rtl"] [class*="switchText"] {
+  text-align: center; /* stays centred */
+}
+
+[dir="rtl"] [class*="formError"] {
+  border-left: none;
+  border-right: 4px solid var(--error);
+  text-align: right;
+}
+
+[dir="rtl"] [class*="errorMessage"] {
+  border-left: none;
+  border-right: 4px solid currentColor;
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════════════════════
+   11. MAP POPUP
+═══════════════════════════════════════════════════════ */
+
+[dir="rtl"] :global(.leaflet-popup-content) {
+  direction: rtl;
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════════════════════
+   12. BUS STOP CARD (map overlay)
+═══════════════════════════════════════════════════════ */
+
+[dir="rtl"] [class*="card"][class*="BusStop"],
+[dir="rtl"] [class*="BusStopCard"] {
+  right: auto;
+  left: 20px;
+}
+
+[dir="rtl"] [class*="closeBtn"] {
+  right: auto;
+  left: 14px;
+}
+
+[dir="rtl"] [class*="header"][class*="BusStop"] {
+  flex-direction: row-reverse;
+  padding-right: 0;
+  padding-left: 32px;
+}
+
+[dir="rtl"] [class*="routeBadges"] {
+  direction: rtl;
+}
+
+/* ═══════════════════════════════════════════════════════
+   13. MODAL CLOSE BUTTON
+═══════════════════════════════════════════════════════ */
+
+[dir="rtl"] [class*="modal"] > [class*="closeBtn"] {
+  right: auto;
+  left: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   14. SCORE BAR (always fills left → right regardless of dir)
+═══════════════════════════════════════════════════════ */
+
+[dir="rtl"] [class*="scoreBarFill"] {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   15. RESPONSIVE — mobile RTL
+═══════════════════════════════════════════════════════ */
+
+@media (max-width: 968px) {
+  [dir="rtl"] [class*="leftPanel"] {
+    border-left: none;
+    border-bottom: 1px solid var(--border);
+  }
+}

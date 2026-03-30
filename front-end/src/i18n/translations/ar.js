@@ -1,0 +1,198 @@
+const ar = {
+  // ── Navbar ──────────────────────────────────────────────────────────────
+  navbar: {
+    appName: 'مخطط الحافلات الذكي',
+    badge: 'هيئة الطرق والمواصلات دبي',
+    settings: 'الإعدادات',
+    login: 'تسجيل الدخول',
+    signUp: 'إنشاء حساب',
+    greeting: 'مرحباً، {{name}}',
+  },
+
+  // ── Home ────────────────────────────────────────────────────────────────
+  home: {
+    whereGoing: '📍 إلى أين تريد الذهاب؟',
+    searchPlaceholderOrigin: 'مثال: دبي مول، سوق الذهب...',
+    searchPlaceholderDest: 'مثال: مول الإمارات، مرسى دبي...',
+    labelOrigin: 'نقطة الانطلاق',
+    labelDestination: 'الوجهة',
+    findButton: 'ابحث عن أفضل خطوط الحافلات',
+    searching: 'جارٍ البحث...',
+    clearAll: 'مسح الكل',
+    loginToSave: 'سجّل دخولك لحفظ تفضيلاتك',
+    logIn: 'تسجيل الدخول',
+  },
+
+  // ── Optimization modes ───────────────────────────────────────────────────
+  modes: {
+    label: 'ما الأهم بالنسبة لك؟',
+    fastest: 'الأسرع',
+    cheapest: 'الأرخص',
+    lessWalking: 'أقل مشياً',
+    direct: 'مباشر',
+  },
+
+  // ── Bus Results ─────────────────────────────────────────────────────────
+  results: {
+    title: 'المسارات الموصى بها',
+    subtitle: '{{count}} مسار مرتب وفق تفضيلاتك باستخدام TOPSIS',
+    topsisScore: 'نقاط TOPSIS',
+    departs: 'يغادر:',
+    wait: 'الانتظار:',
+    journey: 'مدة الرحلة:',
+    fare: 'التعرفة:',
+    walk: 'المشي:',
+    transfers: 'التحويلات:',
+    minutes: 'دقيقة',
+    km: 'كم',
+    aed: 'درهم',
+    alsoDeparts: '🕐 يغادر أيضاً:',
+    direct: '✅ مباشر',
+    transfer: '🔄 تحويل',
+    saveJourney: 'حفظ الرحلة',
+    saved: 'محفوظ ✓',
+    viewOnMap: 'عرض على الخريطة',
+    selected: 'تم الاختيار ✓',
+    findingRoutes: 'جارٍ البحث عن أفضل مسارات الحافلات...',
+    emptyState: '📍 أدخل نقطة الانطلاق والوجهة للعثور على الحافلات',
+  },
+
+  // ── Saved Routes ─────────────────────────────────────────────────────────
+  saved: {
+    title: 'المسارات المحفوظة',
+    savedCount: '{{count}} محفوظ',
+    loginToSave: 'سجّل دخولك لحفظ المسارات',
+    loginSubtitle: 'ستظهر رحلاتك المفضلة هنا بعد تسجيل الدخول.',
+    loading: 'جارٍ تحميل المسارات المحفوظة...',
+    empty: 'لا توجد مسارات محفوظة بعد',
+    emptySubtitle: 'ابحث عن مسار واضغط على "حفظ الرحلة" لتثبيته هنا للوصول السريع.',
+    buttonLabel: 'المحفوظات',
+    remove: 'حذف',
+    close: 'إغلاق',
+  },
+
+  // ── Search Input ─────────────────────────────────────────────────────────
+  search: {
+    noResults: 'لم يتم العثور على مواقع في دبي',
+    tokenError: '⚠️ لم يتم تكوين رمز LocationIQ',
+    invalidToken: 'رمز API غير صالح',
+    unavailable: 'البحث غير متاح مؤقتاً',
+  },
+
+  // ── Map popups ────────────────────────────────────────────────────────────
+  map: {
+    yourLocation: 'موقعك الحالي',
+    origin: 'نقطة الانطلاق',
+    startingPoint: 'نقطة البداية',
+    destination: 'الوجهة',
+    endPoint: 'نقطة النهاية',
+    routes: 'الخطوط:',
+    stopId: 'الرقم:',
+  },
+
+  // ── Bus Stop Card ─────────────────────────────────────────────────────────
+  stopCard: {
+    location: 'الموقع',
+    availableRoutes: 'الخطوط المتاحة ({{count}})',
+    amenities: 'المرافق',
+  },
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  auth: {
+    // Login
+    welcomeBack: 'مرحباً بعودتك',
+    loginSubtitle: 'تسجيل الدخول إلى حسابك',
+    emailLabel: 'البريد الإلكتروني',
+    passwordLabel: 'كلمة المرور',
+    emailPlaceholder: 'your@email.com',
+    passwordPlaceholder: '••••••••',
+    loginBtn: 'تسجيل الدخول',
+    loggingIn: 'جارٍ تسجيل الدخول...',
+    noAccount: 'ليس لديك حساب؟',
+    signUpLink: 'إنشاء حساب',
+    loginFailed: 'فشل تسجيل الدخول. حاول مرة أخرى.',
+
+    // Sign Up
+    createAccount: 'إنشاء حساب جديد',
+    nameLabel: 'الاسم',
+    namePlaceholder: 'اسمك الكامل',
+    phoneLabel: 'الهاتف (اختياري)',
+    phonePlaceholder: '+971XXXXXXXXX',
+    confirmPasswordLabel: 'تأكيد كلمة المرور',
+    signUpBtn: 'إنشاء الحساب',
+    creatingAccount: 'جارٍ إنشاء الحساب...',
+  },
+
+  // ── Settings ──────────────────────────────────────────────────────────────
+  settings: {
+    title: 'الإعدادات',
+    back: 'رجوع',
+
+    profile: 'الملف الشخصي',
+    profileHint: 'الاسم والبريد الإلكتروني ورقم الهاتف',
+    fullName: 'الاسم الكامل',
+    namePlaceholder: 'اسمك',
+    phone: 'الهاتف',
+    phonePlaceholder: '+971 50 000 0000',
+    emailAddress: 'البريد الإلكتروني',
+    emailPlaceholder: 'your@email.com',
+    saveChanges: 'حفظ التغييرات',
+    saving: 'جارٍ الحفظ...',
+
+    changePassword: 'تغيير كلمة المرور',
+    changePasswordHint: 'تحديث كلمة مرور حسابك',
+    currentPassword: 'كلمة المرور الحالية',
+    newPassword: 'كلمة المرور الجديدة',
+    confirmPassword: 'تأكيد كلمة المرور',
+    updatePassword: 'تحديث كلمة المرور',
+    updating: 'جارٍ التحديث...',
+    passwordMismatch: 'كلمتا المرور غير متطابقتين',
+    passwordTooShort: 'يجب أن تكون 6 أحرف على الأقل',
+
+    preferences: 'التفضيلات',
+    preferencesHint: 'تحسين المسارات وفق ما يهمك',
+    optimizeFor: 'تحسين المسارات وفق',
+    optFastest: '🚀 أسرع مسار',
+    optCheapest: '💰 أرخص مسار',
+    optLessWalking: '🚶 أقل مشياً',
+    optFewestTransfers: '🔄 أقل تحويلات',
+    savePreferences: 'حفظ التفضيلات',
+
+    display: 'العرض',
+    displayHint: 'نمط الخريطة والمظهر',
+    darkMode: 'الوضع الداكن',
+    darkModeHint: 'التبديل بين المظهر الفاتح والداكن',
+
+    accessibility: 'إمكانية الوصول',
+    accessibilityHint: 'حجم النص وإعدادات الحركة',
+    largerText: 'نص أكبر',
+    largerTextHint: 'يزيد حجم الخط في التطبيق',
+    reduceAnimations: 'تقليل الحركة',
+    reduceAnimationsHint: 'تعطيل تأثيرات الخريطة والانتقالات',
+
+    privacy: 'الخصوصية والبيانات',
+    privacyHint: 'إدارة بياناتك وحسابك',
+    clearRoutes: 'مسح المسارات المحفوظة',
+    clearRoutesHint: 'إزالة جميع رحلاتك المحفوظة نهائياً',
+    clearAll: 'مسح الكل',
+    deleteAccount: 'حذف الحساب',
+    deleteAccountHint: 'حذف حسابك وجميع بياناتك نهائياً',
+    delete: 'حذف',
+
+    logout: 'تسجيل الخروج',
+    logoutHint: 'تسجيل الخروج من حسابك',
+    logoutBtn: 'تسجيل الخروج',
+    logoutHintSub: 'يمكنك تسجيل الدخول مرة أخرى في أي وقت',
+
+    // Confirm modal
+    clearRoutesTitle: 'مسح جميع المسارات المحفوظة؟',
+    clearRoutesMessage: 'سيؤدي هذا إلى إزالة جميع رحلاتك المحفوظة بشكل دائم. لا يمكن التراجع عن هذا الإجراء.',
+    deleteAccountTitle: 'حذف الحساب؟',
+    deleteAccountMessage: 'سيؤدي هذا إلى حذف حسابك وجميع بياناتك بشكل دائم. لا يمكن التراجع عن هذا الإجراء.',
+    confirmPasswordPlaceholder: 'أدخل كلمة مرورك للتأكيد',
+    cancel: 'إلغاء',
+    confirm: 'تأكيد',
+  },
+};
+
+export default ar;

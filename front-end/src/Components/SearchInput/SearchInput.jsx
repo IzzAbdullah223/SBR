@@ -1,17 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './SearchInput.module.css';
 
 const LOCATIONIQ_TOKEN = import.meta.env.VITE_LOCATIONIQ_TOKEN;
 
 const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions = false }) => {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === 'ar';
+
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [error, setError] = useState(null);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
-  // After user selects a suggestion we block the next debounce search
-  // so the dropdown doesn't immediately reopen with results for the selected name
   const justSelectedRef = useRef(false);
 
   // Close dropdown on outside click
@@ -30,7 +32,6 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
 
   // Debounce search
   useEffect(() => {
-    // Programmatic fill (saved route chip) — suppress entirely
     if (disableSuggestions) {
       setSuggestions([]);
       setShowDropdown(false);
@@ -38,7 +39,6 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
       return;
     }
 
-    // User just selected a suggestion — skip this one search cycle
     if (justSelectedRef.current) {
       justSelectedRef.current = false;
       return;
@@ -59,7 +59,7 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
 
   const searchLocations = async (query) => {
     if (!LOCATIONIQ_TOKEN || LOCATIONIQ_TOKEN === 'undefined') {
-      setError('⚠️ LocationIQ token not configured');
+      setError(t('search.tokenError'));
       setSuggestions([]);
       setShowDropdown(false);
       return;
@@ -69,13 +69,16 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
     setError(null);
 
     try {
+      // Use Arabic language when app is in Arabic mode
+      const lang = isArabic ? 'ar' : 'en';
+
       const response = await fetch(
         `https://api.locationiq.com/v1/autocomplete?` +
         `key=${LOCATIONIQ_TOKEN}` +
         `&q=${encodeURIComponent(query)}` +
         `&countrycodes=ae` +
         `&limit=10` +
-        `&accept-language=en` +
+        `&accept-language=${lang}` +
         `&normalizecity=1`
       );
 
@@ -86,9 +89,12 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
 
       const data = await response.json();
 
+      // Filter to Dubai results — works for both English "dubai" and Arabic "دبي"
       const dubaiResults = data.filter(item => {
         const displayName = item.display_name?.toLowerCase() || '';
-        return displayName.includes('dubai') || displayName.includes('دبي');
+        return displayName.includes('dubai') ||
+               displayName.includes('دبي') ||
+               displayName.includes('إمارة دبي');
       });
 
       const formattedResults = dubaiResults.map(item => ({
@@ -108,9 +114,9 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
     } catch (err) {
       console.error('LocationIQ search error:', err);
       if (err.message === 'Invalid API token') {
-        setError('Invalid API token');
+        setError(t('search.invalidToken'));
       } else {
-        setError('Search temporarily unavailable');
+        setError(t('search.unavailable'));
       }
       setSuggestions([]);
       setShowDropdown(false);
@@ -120,7 +126,6 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
   };
 
   const handleSelectSuggestion = (suggestion) => {
-    // Block the next debounce cycle so dropdown doesn't reopen
     justSelectedRef.current = true;
     onChange(
       { target: { value: suggestion.name } },
@@ -133,7 +138,6 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
 
   const handleInputChange = (e) => {
     onChange(e);
-    // Only show dropdown if user is actively typing — not on programmatic fill
     if (!disableSuggestions && e.target.value.length >= 2) {
       setShowDropdown(true);
     } else if (e.target.value.length < 2) {
@@ -152,13 +156,13 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
           value={value}
           onChange={handleInputChange}
           onFocus={() => {
-            // Only reopen on focus if user hasn't just selected something
             if (!disableSuggestions && !justSelectedRef.current && suggestions.length > 0) {
               setShowDropdown(true);
             }
           }}
           className={styles.searchInput}
           autoComplete="off"
+          dir={isArabic ? 'rtl' : 'ltr'}
         />
 
         {isLoading && (
@@ -196,7 +200,7 @@ const SearchInput = ({ value, onChange, placeholder, label, disableSuggestions =
 
         {showDropdown && !isLoading && !error && suggestions.length === 0 && value.length >= 2 && (
           <div ref={dropdownRef} className={styles.dropdown}>
-            <div className={styles.noResults}>No locations found in Dubai</div>
+            <div className={styles.noResults}>{t('search.noResults')}</div>
           </div>
         )}
       </div>

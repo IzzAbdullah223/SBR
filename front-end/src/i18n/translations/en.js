@@ -1,0 +1,198 @@
+const en = {
+  // ── Navbar ──────────────────────────────────────────────────────────────
+  navbar: {
+    appName: 'Smart Bus Planner',
+    badge: 'Dubai RTA',
+    settings: 'Settings',
+    login: 'Login',
+    signUp: 'Sign Up',
+    greeting: 'Hello, {{name}}',
+  },
+
+  // ── Home ────────────────────────────────────────────────────────────────
+  home: {
+    whereGoing: '📍 Where are you going?',
+    searchPlaceholderOrigin: 'e.g., Dubai Mall, Gold Souk...',
+    searchPlaceholderDest: 'e.g., Mall of Emirates, Dubai Marina...',
+    labelOrigin: 'Origin',
+    labelDestination: 'Destination',
+    findButton: 'Find Best Bus Routes',
+    searching: 'Searching...',
+    clearAll: 'Clear all',
+    loginToSave: 'Log in to save your preference',
+    logIn: 'Log in',
+  },
+
+  // ── Optimization modes ───────────────────────────────────────────────────
+  modes: {
+    label: 'What matters most to you?',
+    fastest: 'Fastest',
+    cheapest: 'Cheapest',
+    lessWalking: 'Less Walk',
+    direct: 'Direct',
+  },
+
+  // ── Bus Results ─────────────────────────────────────────────────────────
+  results: {
+    title: 'Recommended Routes',
+    subtitle: '{{count}} routes ranked by your preferences using TOPSIS',
+    topsisScore: 'TOPSIS Score',
+    departs: 'Departs:',
+    wait: 'Wait:',
+    journey: 'Journey:',
+    fare: 'Fare:',
+    walk: 'Walk:',
+    transfers: 'Transfers:',
+    minutes: 'min',
+    km: 'km',
+    aed: 'AED',
+    alsoDeparts: '🕐 Also departs:',
+    direct: '✅ Direct',
+    transfer: '🔄 Transfer',
+    saveJourney: 'Save Journey',
+    saved: 'Saved ✓',
+    viewOnMap: 'View on Map',
+    selected: 'Selected ✓',
+    findingRoutes: 'Finding best bus routes...',
+    emptyState: '📍 Enter origin and destination to find buses',
+  },
+
+  // ── Saved Routes ─────────────────────────────────────────────────────────
+  saved: {
+    title: 'Saved Routes',
+    savedCount: '{{count}} saved',
+    loginToSave: 'Log in to save routes',
+    loginSubtitle: 'Your favourite journeys will appear here after you sign in.',
+    loading: 'Loading saved routes...',
+    empty: 'No saved routes yet',
+    emptySubtitle: 'Search for a route and tap "Save Journey" to pin it here for quick access.',
+    buttonLabel: 'Saved',
+    remove: 'Remove',
+    close: 'Close',
+  },
+
+  // ── Search Input ─────────────────────────────────────────────────────────
+  search: {
+    noResults: 'No locations found in Dubai',
+    tokenError: '⚠️ LocationIQ token not configured',
+    invalidToken: 'Invalid API token',
+    unavailable: 'Search temporarily unavailable',
+  },
+
+  // ── Map popups ────────────────────────────────────────────────────────────
+  map: {
+    yourLocation: 'Your Location',
+    origin: 'Origin',
+    startingPoint: 'Starting point',
+    destination: 'Destination',
+    endPoint: 'End point',
+    routes: 'Routes:',
+    stopId: 'ID:',
+  },
+
+  // ── Bus Stop Card ─────────────────────────────────────────────────────────
+  stopCard: {
+    location: 'Location',
+    availableRoutes: 'Available Routes ({{count}})',
+    amenities: 'Amenities',
+  },
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  auth: {
+    // Login
+    welcomeBack: 'Welcome Back',
+    loginSubtitle: 'Login to your account',
+    emailLabel: 'Email',
+    passwordLabel: 'Password',
+    emailPlaceholder: 'your@email.com',
+    passwordPlaceholder: '••••••••',
+    loginBtn: 'Login',
+    loggingIn: 'Logging in...',
+    noAccount: "Don't have an account?",
+    signUpLink: 'Sign Up',
+    loginFailed: 'Login failed. Please try again.',
+
+    // Sign Up
+    createAccount: 'Create Account',
+    nameLabel: 'Name',
+    namePlaceholder: 'Your full name',
+    phoneLabel: 'Phone (optional)',
+    phonePlaceholder: '+971XXXXXXXXX',
+    confirmPasswordLabel: 'Confirm Password',
+    signUpBtn: 'Sign Up',
+    creatingAccount: 'Creating account...',
+  },
+
+  // ── Settings ──────────────────────────────────────────────────────────────
+  settings: {
+    title: 'Settings',
+    back: 'Back',
+
+    profile: 'Profile',
+    profileHint: 'Name, email and phone number',
+    fullName: 'Full Name',
+    namePlaceholder: 'Your name',
+    phone: 'Phone',
+    phonePlaceholder: '+971 50 000 0000',
+    emailAddress: 'Email Address',
+    emailPlaceholder: 'your@email.com',
+    saveChanges: 'Save Changes',
+    saving: 'Saving...',
+
+    changePassword: 'Change Password',
+    changePasswordHint: 'Update your account password',
+    currentPassword: 'Current Password',
+    newPassword: 'New Password',
+    confirmPassword: 'Confirm Password',
+    updatePassword: 'Update Password',
+    updating: 'Updating...',
+    passwordMismatch: 'Passwords do not match',
+    passwordTooShort: 'Must be at least 6 characters',
+
+    preferences: 'Preferences',
+    preferencesHint: 'Optimize routes for what matters to you',
+    optimizeFor: 'Optimize routes for',
+    optFastest: '🚀 Fastest route',
+    optCheapest: '💰 Cheapest route',
+    optLessWalking: '🚶 Less walking',
+    optFewestTransfers: '🔄 Fewest transfers',
+    savePreferences: 'Save Preferences',
+
+    display: 'Display',
+    displayHint: 'Map style and appearance',
+    darkMode: 'Dark Mode',
+    darkModeHint: 'Switch between light and dark appearance',
+
+    accessibility: 'Accessibility',
+    accessibilityHint: 'Text size and motion settings',
+    largerText: 'Larger Text',
+    largerTextHint: 'Increases font size across the app',
+    reduceAnimations: 'Reduce Animations',
+    reduceAnimationsHint: 'Disables map fly animations and transitions',
+
+    privacy: 'Privacy & Data',
+    privacyHint: 'Manage your data and account',
+    clearRoutes: 'Clear Saved Routes',
+    clearRoutesHint: 'Permanently removes all your saved journeys',
+    clearAll: 'Clear All',
+    deleteAccount: 'Delete Account',
+    deleteAccountHint: 'Permanently deletes your account and all data',
+    delete: 'Delete',
+
+    logout: 'Log Out',
+    logoutHint: 'Sign out of your account',
+    logoutBtn: 'Log Out',
+    logoutHintSub: 'You can log back in at any time',
+
+    // Confirm modal
+    clearRoutesTitle: 'Clear All Saved Routes?',
+    clearRoutesMessage: 'This will permanently remove all your saved journeys. This cannot be undone.',
+    deleteAccountTitle: 'Delete Account?',
+    deleteAccountMessage: 'This will permanently delete your account and all data. This cannot be undone.',
+    confirmPasswordPlaceholder: 'Enter your password to confirm',
+    cancel: 'Cancel',
+    confirm: 'Confirm',
+  },
+};
+
+export default en;

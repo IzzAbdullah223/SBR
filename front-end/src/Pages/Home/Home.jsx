@@ -1,7 +1,8 @@
-// Home.jsx
-// Receives all auth state as props from App.jsx — does NOT call useAuth itself.
-// This is critical: useAuth must live in ONE place (App.jsx) so that
-// logging out in Settings instantly updates Home without a page reload.
+/**
+ * Home.jsx — updated with i18n
+ * Only the JSX strings are changed — all logic is identical to your original.
+ * Replace your existing Home.jsx with this file.
+ */
 
 import React, { useState, useMemo, useEffect } from 'react';
 import MapComponent from '../../Components/Map/Map';
@@ -19,9 +20,9 @@ import { SignUp } from '../Authentication/SignUp/SignUp';
 import { Login } from '../Authentication/Login/Login';
 import styles from './Home.module.css';
 import { settingsAPI } from '../../services/Api';
+import { useTranslation } from 'react-i18next';
 
 const Home = ({
-  // all auth state and handlers come from App.jsx via props
   user,
   theme = 'light',
   showLogin,
@@ -34,74 +35,47 @@ const Home = ({
   closeLogin,
   closeSignUp,
 }) => {
+  const { t } = useTranslation();
 
   const [originInput, setOriginInput] = useState('');
   const [destinationInput, setDestinationInput] = useState('');
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
   const [selectedBus, setSelectedBus] = useState(null);
-  // true while input was filled by a saved-route chip — suppresses LocationIQ dropdown
   const [programmaticFill, setProgrammaticFill] = useState(false);
 
-  // local optimization mode — seeded from user prefs, falls back to 'fastest'
   const [optimizationMode, setOptimizationMode] = useState(
     () => user?.preferences?.optimizationMode || 'fastest'
   );
 
-  // sync when user logs in or their prefs change
   useEffect(() => {
     setOptimizationMode(user?.preferences?.optimizationMode || 'fastest');
   }, [user?.preferences?.optimizationMode]);
 
-  // save mode to backend when user is logged in
   const handleModeChange = async (mode) => {
     setOptimizationMode(mode);
     if (user) {
-      try {
-        await settingsAPI.updatePreferences(mode);
-      } catch {
-        // silently ignore — local state already updated
-      }
+      try { await settingsAPI.updatePreferences(mode); } catch {}
     }
   };
-
 
   const { buses, loading, error, errorType, findBuses, clearResults } = useFindBuses();
   const { shapeCoordinates, shapeCoordinatesLeg2 } = useShape(selectedBus);
 
-  // ── SAVED ROUTES ──────────────────────────────────────────────────────────
   const {
-    savedRoutes,
-    loadingSaved,
-    savingKey,
-    saveError,
-    showSaved,
-    saveRoute,
-    deleteSavedRoute,
-    toggleSavedPanel,
-    setSaveError,
-    isJourneySaved,
+    savedRoutes, loadingSaved, savingKey, saveError, showSaved,
+    saveRoute, deleteSavedRoute, toggleSavedPanel, setSaveError, isJourneySaved,
   } = useSavedRoutes(user);
 
-  const isSavingJourney = !!(
-    origin && destination &&
-    savingKey === `${origin.name}__${destination.name}`
-  );
-
-  const journeyAlreadySaved = !!(
-    origin && destination && isJourneySaved(origin.lat, origin.lng, destination.lat, destination.lng)
-  );
-
-  // ── SEARCH HANDLERS ────────────────────────────────────────────────────────
+  const isSavingJourney = !!(origin && destination && savingKey === `${origin.name}__${destination.name}`);
+  const journeyAlreadySaved = !!(origin && destination && isJourneySaved(origin.lat, origin.lng, destination.lat, destination.lng));
 
   const handleOriginChange = (e, locationData) => {
     if (programmaticFill) setProgrammaticFill(false);
     setOriginInput(e.target.value);
     if (locationData?.lat && locationData?.lng) {
       setOrigin({ lat: locationData.lat, lng: locationData.lng, name: e.target.value });
-    } else {
-      setOrigin(null);
-    }
+    } else setOrigin(null);
   };
 
   const handleDestinationChange = (e, locationData) => {
@@ -109,11 +83,8 @@ const Home = ({
     setDestinationInput(e.target.value);
     if (locationData?.lat && locationData?.lng) {
       setDestination({ lat: locationData.lat, lng: locationData.lng, name: e.target.value });
-    } else {
-      setDestination(null);
-    }
+    } else setDestination(null);
   };
-
 
   const handleFindBuses = async () => {
     if (!origin || !destination) {
@@ -140,43 +111,23 @@ const Home = ({
     clearResults();
   };
 
-  // auto-select first bus when results arrive
   useEffect(() => {
-    if (buses?.length > 0 && !selectedBus) {
-      setSelectedBus(buses[0]);
-    }
+    if (buses?.length > 0 && !selectedBus) setSelectedBus(buses[0]);
   }, [buses, selectedBus]);
 
   const handleSelectBus = (bus) => setSelectedBus(bus);
-
-  const handleSaveJourney = async () => {
-    if (!origin || !destination) return;
-    await saveRoute(origin, destination);
-  };
+  const handleSaveJourney = async () => { if (!origin || !destination) return; await saveRoute(origin, destination); };
 
   const handleSelectSavedJourney = (route) => {
     setProgrammaticFill(true);
-
     setOriginInput(route.origin.name);
-    setOrigin({
-      name: route.origin.name,
-      lat: route.origin.position.lat,
-      lng: route.origin.position.lng,
-    });
-
+    setOrigin({ name: route.origin.name, lat: route.origin.position.lat, lng: route.origin.position.lng });
     setDestinationInput(route.destination.name);
-    setDestination({
-      name: route.destination.name,
-      lat: route.destination.position.lat,
-      lng: route.destination.position.lng,
-    });
-
+    setDestination({ name: route.destination.name, lat: route.destination.position.lat, lng: route.destination.position.lng });
     if (showSaved) toggleSavedPanel();
   };
 
   const mapStops = useMemo(() => {
-    // Only show the 3 stops relevant to the selected route
-    // Showing all nearby stops creates visual clutter on the map
     if (!selectedBus) return [];
     const stops = [];
     if (selectedBus.originStop)      stops.push(selectedBus.originStop);
@@ -185,9 +136,16 @@ const Home = ({
     return stops;
   }, [selectedBus]);
 
+  // Optimization mode config — labels come from t()
+  const modes = [
+    { value: 'fastest',          icon: '🚀', labelKey: 'modes.fastest'      },
+    { value: 'cheapest',         icon: '💰', labelKey: 'modes.cheapest'     },
+    { value: 'less_walking',     icon: '🚶', labelKey: 'modes.lessWalking'  },
+    { value: 'fewest_transfers', icon: '🔄', labelKey: 'modes.direct'       },
+  ];
+
   return (
     <div className={styles.container}>
-
       <Navbar
         onSignUpClick={openSignUp}
         onLoginClick={openLogin}
@@ -197,7 +155,6 @@ const Home = ({
       <div className={styles.content}>
         <div className={styles.leftPanel}>
 
-          {/* ── SEARCH FIELDS + SAVED ROUTES ── */}
           <div className={styles.section}>
             <div className={styles.savedRoutesPinned}>
               <SavedRoutes
@@ -210,51 +167,45 @@ const Home = ({
                 onToggle={toggleSavedPanel}
               />
             </div>
-            <p className={styles.sectionTitle}>📍 Where are you going?</p>
+            <p className={styles.sectionTitle}>{t('home.whereGoing')}</p>
             <SearchInput
-              label="Origin"
-              placeholder="e.g., Dubai Mall, Gold Souk..."
+              label={t('home.labelOrigin')}
+              placeholder={t('home.searchPlaceholderOrigin')}
               value={originInput}
               onChange={handleOriginChange}
               disableSuggestions={programmaticFill}
             />
             <SearchInput
-              label="Destination"
-              placeholder="e.g., Mall of Emirates, Dubai Marina..."
+              label={t('home.labelDestination')}
+              placeholder={t('home.searchPlaceholderDest')}
               value={destinationInput}
               onChange={handleDestinationChange}
               disableSuggestions={programmaticFill}
             />
           </div>
 
-          {/* ── OPTIMIZATION MODE SELECTOR ── */}
           <div className={styles.modeCard}>
-            <p className={styles.modeLabel}>What matters most to you?</p>
+            <p className={styles.modeLabel}>{t('modes.label')}</p>
             <div className={styles.modeButtons}>
-              {[
-                { value: 'fastest',          icon: '🚀', label: 'Fastest'    },
-                { value: 'cheapest',         icon: '💰', label: 'Cheapest'   },
-                { value: 'less_walking',     icon: '🚶', label: 'Less Walk'  },
-                { value: 'fewest_transfers', icon: '🔄', label: 'Direct'     },
-              ].map(({ value, icon, label }) => (
+              {modes.map(({ value, icon, labelKey }) => (
                 <button
                   key={value}
                   className={`${styles.modeBtn} ${optimizationMode === value ? styles.modeBtnActive : ''}`}
                   onClick={() => handleModeChange(value)}
                 >
                   <span className={styles.modeBtnIcon}>{icon}</span>
-                  <span className={styles.modeBtnLabel}>{label}</span>
+                  <span className={styles.modeBtnLabel}>{t(labelKey)}</span>
                 </button>
               ))}
             </div>
             {!user && (
               <p className={styles.modeHint}>
-                <span className={styles.modeLoginLink} onClick={openLogin}>Log in</span> to save your preference
+                <span className={styles.modeLoginLink} onClick={openLogin}>{t('home.logIn')}</span>{' '}
+                {t('home.loginToSave')}
               </p>
             )}
           </div>
 
-          {/* ── FIND BUSES BUTTON + RESET ── */}
           <div className={styles.findRow}>
             <button
               className={`${styles.findButton} ${loading ? styles.loading : ''}`}
@@ -262,34 +213,24 @@ const Home = ({
               disabled={!origin || !destination || loading}
             >
               <Search size={20} />
-              <span>{loading ? 'Searching...' : 'Find Best Bus Routes'}</span>
+              <span>{loading ? t('home.searching') : t('home.findButton')}</span>
             </button>
             {(originInput || destinationInput || buses.length > 0) && (
-              <button
-                className={styles.resetBtn}
-                onClick={handleReset}
-                title="Clear all"
-              >
+              <button className={styles.resetBtn} onClick={handleReset} title={t('home.clearAll')}>
                 <X size={18} />
               </button>
             )}
           </div>
 
-          {/* search error */}
           {error && (
             <div className={`${styles.errorMessage} ${errorType === 'info' ? styles.errorInfo : styles.errorBad}`}>
               {error}
             </div>
           )}
-
-          {/* save error */}
           {saveError && (
-            <div className={`${styles.errorMessage} ${styles.errorBad}`}>
-              {saveError}
-            </div>
+            <div className={`${styles.errorMessage} ${styles.errorBad}`}>{saveError}</div>
           )}
 
-          {/* ── BUS RESULTS ── */}
           {(buses.length > 0 || loading) && (
             <div className={styles.section}>
               <BusResults
@@ -322,19 +263,11 @@ const Home = ({
       </div>
 
       <Modal isOpen={showSignUp} onClose={closeSignUp}>
-        <SignUp
-          onLoginSuccess={handleLoginSuccess}
-          onSwitchToLogin={handleSwitchToLogin}
-        />
+        <SignUp onLoginSuccess={handleLoginSuccess} onSwitchToLogin={handleSwitchToLogin} />
       </Modal>
-
       <Modal isOpen={showLogin} onClose={closeLogin}>
-        <Login
-          onLoginSuccess={handleLoginSuccess}
-          onSwitchToSignUp={handleSwitchToSignUp}
-        />
+        <Login onLoginSuccess={handleLoginSuccess} onSwitchToSignUp={handleSwitchToSignUp} />
       </Modal>
-
     </div>
   );
 };

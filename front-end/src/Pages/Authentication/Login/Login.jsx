@@ -1,12 +1,17 @@
+/**
+ * Login.jsx — updated with i18n
+ * Replace your existing Login.jsx with this file.
+ */
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '../../../lib/schemas';
 import { authAPI } from '../../../services/Api';
+import { useTranslation } from 'react-i18next';
 import styles from './Login.module.css';
 
-// onLoginSuccess — called on successful login, closes modal and sets user in Home
-// onSwitchToSignUp — called when user clicks "Don't have an account?" link
 export function Login({ onLoginSuccess, onSwitchToSignUp }) {
+  const { t } = useTranslation();
 
   const {
     register,
@@ -14,38 +19,24 @@ export function Login({ onLoginSuccess, onSwitchToSignUp }) {
     formState: { errors, isSubmitting },
     setError,
     reset,
-  } = useForm({
-    resolver: zodResolver(loginSchema),
-  });
+  } = useForm({ resolver: zodResolver(loginSchema) });
 
   const onSubmit = async (data) => {
     try {
       const result = await authAPI.login(data.email, data.password);
-
-      // ✅ FIX #3: guard before using result — if token or user is missing
-      // for any reason, show an error instead of calling onLoginSuccess(undefined)
-      // which would silently break the navbar and user state in Home.jsx
       if (!result.token || !result.user) {
-        setError('root', { message: 'Login failed. Please try again.' });
+        setError('root', { message: t('auth.loginFailed') });
         return;
       }
-
       localStorage.setItem('token', result.token);
       onLoginSuccess(result.user);
       reset();
-
     } catch (err) {
-      // ✅ FIX #1: catch now actually fires because fetchAPI throws on non-ok responses
-      // ✅ FIX #7: split errors by type — auth errors (wrong password) go on the
-      // password field where they make sense. Server/unknown errors go on root
-      // (a general form-level error) so the email field doesn't look broken
-      // when the database is down or JWT secret is missing.
       const message = err.message || 'Invalid email or password';
       const isAuthError = message.toLowerCase().includes('email') ||
                           message.toLowerCase().includes('password') ||
                           message.toLowerCase().includes('incorrect') ||
                           message.toLowerCase().includes('invalid');
-
       if (isAuthError) {
         setError('password', { type: 'server', message });
       } else {
@@ -56,51 +47,44 @@ export function Login({ onLoginSuccess, onSwitchToSignUp }) {
 
   return (
     <div className={styles.container}>
-      <h1>Welcome Back</h1>
-      <p className={styles.subtitle}>Login to your account</p>
+      <h1>{t('auth.welcomeBack')}</h1>
+      <p className={styles.subtitle}>{t('auth.loginSubtitle')}</p>
 
-      {/* ✅ FIX #7: root error shown at top of form for server/unknown errors */}
       {errors.root && (
         <div className={styles.formError}>{errors.root.message}</div>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-
         <div className={styles.field}>
-          <label>Email</label>
+          <label>{t('auth.emailLabel')}</label>
           <input
             {...register('email')}
             type="email"
-            placeholder="your@email.com"
-            // ✅ FIX #5: red border on input when that field has an error
+            placeholder={t('auth.emailPlaceholder')}
             className={errors.email ? styles.inputError : ''}
           />
           {errors.email && <p className={styles.error}>{errors.email.message}</p>}
         </div>
-
         <div className={styles.field}>
-          <label>Password</label>
+          <label>{t('auth.passwordLabel')}</label>
           <input
             {...register('password')}
             type="password"
-            placeholder="••••••••"
+            placeholder={t('auth.passwordPlaceholder')}
             className={errors.password ? styles.inputError : ''}
           />
           {errors.password && <p className={styles.error}>{errors.password.message}</p>}
         </div>
-
         <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Logging in...' : 'Login'}
+          {isSubmitting ? t('auth.loggingIn') : t('auth.loginBtn')}
         </button>
-
       </form>
 
-      {/* ✅ FIX #9: switch link so user doesn't have to close modal and reopen */}
       {onSwitchToSignUp && (
         <p className={styles.switchText}>
-          Don't have an account?{' '}
+          {t('auth.noAccount')}{' '}
           <button className={styles.switchBtn} onClick={onSwitchToSignUp} type="button">
-            Sign Up
+            {t('auth.signUpLink')}
           </button>
         </p>
       )}
