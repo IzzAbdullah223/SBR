@@ -1,13 +1,5 @@
-/**
- * GEO CALCULATOR SERVICE
- * Handles all geographic calculations
- */
-
 import BusStop from '../models/BusStop.js';
 
-/**
- * Calculate distance between two points using Haversine formula
- */
 export const calculateDistance = (lat1, lng1, lat2, lng2) => {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -19,38 +11,30 @@ export const calculateDistance = (lat1, lng1, lat2, lng2) => {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-
 export const findNearbyStops = async (lat, lng, radiusKm = 1.0) => {
   try {
     const nearbyStops = await BusStop.findNearby(lat, lng, radiusKm);
 
-    // attach distance to each stop so routeFinder can sort by it and always
-    // pick the closest matching stop to the user for each route — instead of
-    // just taking the first match which is arbitrary
     return nearbyStops.map(stop => ({
       ...stop.toObject(),
-      distance: calculateDistance(lat, lng, stop.position.lat, stop.position.lng)
+      distance: calculateDistance(lat, lng, stop.position.lat, stop.position.lng),
     }));
 
   } catch (error) {
-    // If $near fails (e.g. index not ready), fall back to in-memory filter
-    console.warn('⚠️  $near query failed, falling back to in-memory filter:', error.message);
+    console.warn('$near query failed, falling back to in-memory filter:', error.message);
     const allStops = await BusStop.find({ status: 'active' });
-    return allStops
-      .filter(stop => {
-        const distance = calculateDistance(lat, lng, stop.position.lat, stop.position.lng);
-        return distance <= radiusKm;
-      })
-      .map(stop => ({
-        ...stop.toObject(),
-        distance: calculateDistance(lat, lng, stop.position.lat, stop.position.lng)
-      }));
+
+    const results = [];
+    for (const stop of allStops) {
+      const distance = calculateDistance(lat, lng, stop.position.lat, stop.position.lng);
+      if (distance <= radiusKm) {
+        results.push({ ...stop.toObject(), distance });
+      }
+    }
+    return results;
   }
 };
 
-/**
- * Calculate walking distance from user coordinates to a bus stop
- */
 export const calculateWalkingDistance = (coords, busStop) => {
   const distance = calculateDistance(
     coords.lat,

@@ -101,6 +101,7 @@ export const settingsAPI = {
   updateProfile:    (data)          => fetchAPI('/settings/profile',     { method: 'PUT',    body: JSON.stringify(data) }),
   changePassword:   (data)          => fetchAPI('/settings/password',    { method: 'PUT',    body: JSON.stringify(data) }),
   updatePreferences:(optimizationMode) => fetchAPI('/settings/preferences', { method: 'PUT', body: JSON.stringify({ optimizationMode }) }),
+  updateLanguage:   (language)          => fetchAPI('/settings/language',    { method: 'PUT', body: JSON.stringify({ language }) }),
   clearSavedRoutes: ()              => fetchAPI('/settings/saved-routes',{ method: 'DELETE' }),
   deleteAccount:    (password)      => fetchAPI('/settings/account',     { method: 'DELETE', body: JSON.stringify({ password }) }),
 };

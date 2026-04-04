@@ -1,13 +1,7 @@
-// useSavedRoutes.js
-// Manages the user's saved journeys (origin + destination pairs)
-// Uses Api.js fetchAPI for consistent token injection + error handling
-// instead of raw fetch() calls
-
 import { useState, useCallback, useEffect } from 'react';
 
 const API_BASE = '/api';
 
-// helper — same token-injecting fetch used everywhere else
 const authFetch = async (url, options = {}) => {
   const token = localStorage.getItem('token');
   const response = await fetch(url, {
@@ -21,6 +15,10 @@ const authFetch = async (url, options = {}) => {
   return response.json();
 };
 
+// Truncate a location name so the combined routeName never exceeds the schema maxlength.
+// LocationIQ display names can be very long — e.g. "Zayed University – Knowledge Village Campus"
+const truncate = (str, max) => str.length > max ? str.slice(0, max - 1) + '…' : str;
+
 const useSavedRoutes = (user) => {
   const [savedRoutes, setSavedRoutes]   = useState([]);
   const [loadingSaved, setLoadingSaved] = useState(false);
@@ -28,7 +26,6 @@ const useSavedRoutes = (user) => {
   const [saveError, setSaveError]       = useState(null);
   const [showSaved, setShowSaved]       = useState(false);
 
-  // ── FETCH SAVED ROUTES ─────────────────────────────────────────────────────
   const fetchSavedRoutes = useCallback(async () => {
     if (!user) return;
     setLoadingSaved(true);
@@ -36,17 +33,14 @@ const useSavedRoutes = (user) => {
       const data = await authFetch(`${API_BASE}/saved-routes`);
       if (data.success) {
         setSavedRoutes(data.data);
-      } else {
-        console.error('Failed to fetch saved routes:', data.message);
       }
-    } catch (err) {
-      console.error('Error fetching saved routes:', err);
+    } catch {
+      // silent — panel will just show empty state
     } finally {
       setLoadingSaved(false);
     }
   }, [user]);
 
-  // fetch when user logs in, clear when user logs out
   useEffect(() => {
     if (user) {
       fetchSavedRoutes();
@@ -55,7 +49,6 @@ const useSavedRoutes = (user) => {
     }
   }, [user]);
 
-  // ── SAVE A JOURNEY ─────────────────────────────────────────────────────────
   const saveRoute = useCallback(async (origin, destination) => {
     if (!user) {
       setSaveError('Please log in to save routes.');
@@ -67,8 +60,12 @@ const useSavedRoutes = (user) => {
     setSaveError(null);
 
     try {
+      // Truncate each leg to 48 chars so "A → B" always fits within 100 chars
+      const originLabel      = truncate(origin.name,      48);
+      const destinationLabel = truncate(destination.name, 48);
+
       const payload = {
-        routeName: `${origin.name} → ${destination.name}`,
+        routeName: `${originLabel} → ${destinationLabel}`,
         origin: {
           name: origin.name,
           position: { lat: origin.lat, lng: origin.lng },
@@ -85,17 +82,13 @@ const useSavedRoutes = (user) => {
       });
 
       if (data.success) {
-        // add to local state immediately — no refetch needed
         setSavedRoutes((prev) => [data.data, ...prev]);
         return true;
       } else {
-        // 409 = already saved — show friendly message not a hard error
-        const msg = data.message || 'Could not save this route.';
-        setSaveError(msg);
+        setSaveError(data.message || 'Could not save this route.');
         return false;
       }
-    } catch (err) {
-      console.error('Error saving route:', err);
+    } catch {
       setSaveError('Could not save this route. Please try again.');
       return false;
     } finally {
@@ -103,7 +96,6 @@ const useSavedRoutes = (user) => {
     }
   }, [user]);
 
-  // ── DELETE A SAVED ROUTE ───────────────────────────────────────────────────
   const deleteSavedRoute = useCallback(async (routeId) => {
     if (!user) return;
     try {
@@ -111,27 +103,21 @@ const useSavedRoutes = (user) => {
         method: 'DELETE',
       });
       if (data.success) {
-        // remove from local state — no refetch needed
         setSavedRoutes((prev) => prev.filter((r) => r._id !== routeId));
       }
-    } catch (err) {
-      console.error('Error deleting saved route:', err);
+    } catch {
+      // silent
     }
   }, [user]);
 
-  // ── TOGGLE PANEL ───────────────────────────────────────────────────────────
   const toggleSavedPanel = useCallback(() => {
     setShowSaved((prev) => {
       const next = !prev;
-      if (next) fetchSavedRoutes(); // refresh every time panel opens
+      if (next) fetchSavedRoutes();
       return next;
     });
   }, [fetchSavedRoutes]);
 
-  // ── CHECK IF JOURNEY IS ALREADY SAVED ──────────────────────────────────────
-  // ✅ FIXED: match by lat/lng coordinates not name strings
-  // Name strings from LocationIQ can have slight variations ("Dubai Mall" vs
-  // "Dubai Mall, Dubai") causing false negatives. Coordinates are exact.
   const isJourneySaved = useCallback((originLat, originLng, destLat, destLng) => {
     return savedRoutes.some(
       (r) =>

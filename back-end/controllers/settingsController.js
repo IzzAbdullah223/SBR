@@ -132,3 +132,22 @@ export const deleteAccount = async (req, res) => {
     res.status(500).json({ message: 'Failed to delete account', error: err.message });
   }
 };
+
+// ── UPDATE LANGUAGE ───────────────────────────────────────────────────────
+export const updateLanguage = async (req, res) => {
+  try {
+    const { language } = req.body;
+    if (!['en', 'ar'].includes(language)) {
+      return res.status(400).json({ message: 'Invalid language' });
+    }
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: { 'preferences.language': language } },
+      { new: true }
+    );
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ success: true, user: user.getPublicProfile() });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update language', error: err.message });
+  }
+};

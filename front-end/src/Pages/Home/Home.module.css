@@ -1,43 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-:root {
-  --navy: #0a1628;
-  --navy-mid: #112240;
-  --navy-light: #1d3461;
-  --gold: #f0a500;
-  --gold-light: #ffc740;
-  --gold-pale: #fff8e7;
-  --teal: #00c9a7;
-  --white: #ffffff;
-  --gray-100: #f7f8fc;
-  --gray-200: #eef0f6;
-  --gray-400: #9ba3c2;
-  --gray-600: #5a6384;
-  --error: #ff4d6d;
-  --success: #00c9a7;
-  --shadow-sm: 0 2px 8px rgba(10, 22, 40, 0.08);
-  --shadow-md: 0 8px 24px rgba(10, 22, 40, 0.12);
-  --shadow-lg: 0 16px 48px rgba(10, 22, 40, 0.18);
-  --radius: 16px;
-  --radius-sm: 10px;
-}
-
 /* ─── Layout ─── */
 .container {
   display: flex;
-  flex-direction: column;  /* navbar on top, content below */
+  flex-direction: column;
   height: 100vh;
   overflow: hidden;
   font-family: 'DM Sans', sans-serif;
   background: var(--navy);
 }
 
-/* ─── Content area below navbar ─── */
 .content {
   display: flex;
-  flex: 1;               /* fills all remaining height below navbar */
+  flex: 1;
   overflow: hidden;
-  min-height: 0;         /* important — prevents flex children from overflowing */
+  min-height: 0;
 }
 
 /* ─── Left Panel ─── */
@@ -58,106 +33,16 @@
 .leftPanel::-webkit-scrollbar-track { background: transparent; }
 .leftPanel::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 99px; }
 
-/* ─── Header ─── */
-.header {
-  background: var(--navy);
-  color: var(--white);
-  padding: 28px 28px 24px;
-  flex-shrink: 0;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Animated background dots */
-.header::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, rgba(240,165,0,0.12) 1px, transparent 1px);
-  background-size: 24px 24px;
-  animation: bgDrift 20s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes bgDrift {
-  from { background-position: 0 0; }
-  to { background-position: 24px 24px; }
-}
-
-.headerTop {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 10px;
-  position: relative;
-}
-
-.headerIcon {
-  width: 48px;
-  height: 48px;
-  background: var(--gold);
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--navy);
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(240, 165, 0, 0.4);
-  animation: iconPulse 3s ease-in-out infinite;
-}
-
-@keyframes iconPulse {
-  0%, 100% { box-shadow: 0 4px 12px rgba(240, 165, 0, 0.4); }
-  50% { box-shadow: 0 4px 24px rgba(240, 165, 0, 0.7); }
-}
-
-.header h1 {
-  margin: 0;
-  font-family: 'Syne', sans-serif;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  line-height: 1.2;
-  position: relative;
-}
-
-.header h1 span {
-  color: var(--gold);
-}
-
-.headerBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(240, 165, 0, 0.15);
-  border: 1px solid rgba(240, 165, 0, 0.3);
-  color: var(--gold-light);
-  padding: 5px 12px;
-  border-radius: 99px;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.3px;
-  margin-top: 8px;
-  position: relative;
-}
-
-.headerBadge::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--teal);
-  border-radius: 50%;
-  animation: blink 2s ease-in-out infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
 /* ─── Section ─── */
 .section {
   padding: 20px 24px;
+  flex-shrink: 0;
+}
+
+/* Top section holds saved routes chips + search inputs.
+   Less top padding so "Where are you going?" stays visible. */
+.sectionTop {
+  padding: 10px 24px 16px;
   flex-shrink: 0;
 }
 
@@ -168,7 +53,7 @@
   line-height: 1.5;
   color: var(--text-primary);
   letter-spacing: 0.2px;
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
   padding-bottom: 2px;
   display: flex;
   align-items: center;
@@ -182,8 +67,7 @@
   background: var(--border);
 }
 
-/* ─── Find Button ─── */
-/* ── Find + Reset row ── */
+/* ─── Find + Reset row ─── */
 .findRow {
   display: flex;
   gap: 8px;
@@ -248,9 +132,7 @@
   z-index: 0;
 }
 
-.findButton:hover:not(:disabled)::before {
-  width: 100%;
-}
+.findButton:hover:not(:disabled)::before { width: 100%; }
 
 .findButton span,
 .findButton svg {
@@ -260,18 +142,14 @@
 }
 
 .findButton:hover:not(:disabled) span,
-.findButton:hover:not(:disabled) svg {
-  color: var(--navy);
-}
+.findButton:hover:not(:disabled) svg { color: var(--navy); }
 
 .findButton:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(10, 22, 40, 0.25);
 }
 
-.findButton:active:not(:disabled) {
-  transform: translateY(0);
-}
+.findButton:active:not(:disabled) { transform: translateY(0); }
 
 .findButton:disabled {
   background: var(--btn-disabled-bg);
@@ -280,13 +158,9 @@
   box-shadow: none;
 }
 
-/* Loading state animation on button */
-.findButton.loading {
-  pointer-events: none;
-}
+.findButton.loading { pointer-events: none; }
 
-/* ─── Error Message ─── */
-/* base error box — shared layout for all error states */
+/* ─── Error Messages ─── */
 .errorMessage {
   margin: 0 24px 16px;
   padding: 14px 16px;
@@ -298,7 +172,6 @@
   line-height: 1.5;
 }
 
-/* errorBad — real problem: server down, network error, invalid input */
 .errorBad {
   background: rgba(255, 77, 109, 0.08);
   border: 1px solid rgba(255, 77, 109, 0.25);
@@ -306,8 +179,6 @@
   color: var(--error);
 }
 
-/* errorInfo — expected result: no routes, no stops, out of service hours
-   softer amber styling — not a crash, just an informational result */
 .errorInfo {
   background: rgba(240, 165, 0, 0.08);
   border: 1px solid rgba(240, 165, 0, 0.25);
@@ -317,7 +188,7 @@
 
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ─── Right Panel (Map) ─── */
@@ -330,43 +201,15 @@
 
 /* ─── Responsive ─── */
 @media (max-width: 968px) {
-  .container { flex-direction: column; }
-  .leftPanel { width: 100%; min-width: 100%; height: 65vh; border-right: none; border-bottom: 1px solid var(--border); }
+  .container  { flex-direction: column; }
+  .leftPanel  { width: 100%; min-width: 100%; height: 65vh; border-right: none; border-bottom: 1px solid var(--border); }
   .rightPanel { height: 35vh; }
 }
-/* ── Saved Routes panel — sticky at top of sidebar ── */
-/* Keeps the collapsible button always visible even when user scrolls down */
-.savedRoutesPinned {
-  margin-bottom: 14px;
-}
 
-/* ── Change Route button — compact link-style, shown instead of sliders when results exist ── */
-.changeRouteButton {
-  width: calc(100% - 48px);
-  margin: 0 24px 16px;
-  padding: 10px 16px;
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
+/* ─── Saved Routes panel ─── */
+.savedRoutesPinned { margin-bottom: 14px; }
 
-.changeRouteButton:hover {
-  background: var(--border);
-  color: var(--text-primary);
-  border-color: var(--border-dark);
-}
-
-/* ── Optimization Mode Selector ── */
+/* ─── Optimization Mode Selector ─── */
 .modeCard {
   margin: 0 24px 16px;
   padding: 14px 16px;
@@ -414,10 +257,7 @@
   background: rgba(240, 165, 0, 0.12) !important;
 }
 
-.modeBtnIcon {
-  font-size: 18px;
-  line-height: 1;
-}
+.modeBtnIcon  { font-size: 18px; line-height: 1; }
 
 .modeBtnLabel {
   font-size: 11px;
@@ -439,6 +279,4 @@
   text-decoration: underline;
 }
 
-.modeLoginLink:hover {
-  color: var(--gold-light);
-}
+.modeLoginLink:hover { color: var(--gold-light); }

@@ -37,6 +37,7 @@
   background: var(--bg-input);
   outline: none;
   transition: border-color 0.2s ease;
+  width: 100%;
 }
 
 .field input:focus {
@@ -65,7 +66,7 @@
 
 .form button[type='submit']:hover:not(:disabled) {
   background: var(--gold);
-  color: #0a1628;
+  color: var(--navy);
 }
 
 .form button[type='submit']:disabled {

@@ -1,9 +1,4 @@
-/**
- * BusResults.jsx — updated with i18n
- * Replace your existing BusResults.jsx with this file.
- */
-
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Clock, DollarSign, MapPin, GitMerge, Star, Award, Navigation, ArrowRight, Bookmark, BookmarkCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import styles from './BusResults.module.css';

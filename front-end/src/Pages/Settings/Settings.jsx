@@ -1,14 +1,9 @@
-/**
- * Settings.jsx — updated with i18n
- * Replace your existing Settings.jsx with this file.
- */
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  User, Lock, Zap, Monitor, Eye,
+  User, Lock, Zap, Monitor,
   Shield, LogOut, ArrowLeft, ChevronDown,
-  CheckCircle, AlertCircle, Trash2, X, Bus
+  CheckCircle, AlertCircle, Trash2, X, Bus,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import useSettings from '../../hooks/useSettings';
@@ -84,8 +79,6 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
   const [confirmPw, setConfirmPw] = useState('');
   const [pwError,   setPwError]   = useState('');
   const [optimizationMode, setOptimizationMode] = useState(user?.preferences?.optimizationMode || 'fastest');
-  const [largeText,        setLargeText]        = useState(false);
-  const [reduceAnimations, setReduceAnimations] = useState(false);
   const [confirm, setConfirm] = useState(null);
 
   useEffect(() => {
@@ -98,8 +91,8 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
 
   useEffect(() => {
     if (!success && !error) return;
-    const t = setTimeout(clearFeedback, 4000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(clearFeedback, 4000);
+    return () => clearTimeout(timer);
   }, [success, error]);
 
   const handleProfileSave = (e) => { e.preventDefault(); updateProfile({ name, email, phone }); };
@@ -131,7 +124,6 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
 
       <div className={styles.content}>
 
-        {/* 1. Profile */}
         <Accordion icon={User} title={t('settings.profile')} hint={t('settings.profileHint')}>
           <form onSubmit={handleProfileSave} className={styles.form}>
             <div className={styles.formGrid}>
@@ -154,7 +146,6 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
           </form>
         </Accordion>
 
-        {/* 2. Change Password */}
         <Accordion icon={Lock} title={t('settings.changePassword')} hint={t('settings.changePasswordHint')}>
           <form onSubmit={handlePasswordSave} className={styles.form}>
             <div className={styles.formRow}>
@@ -178,7 +169,6 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
           </form>
         </Accordion>
 
-        {/* 3. Preferences */}
         <Accordion icon={Zap} title={t('settings.preferences')} hint={t('settings.preferencesHint')}>
           <div className={styles.form}>
             <div className={styles.formRow}>
@@ -202,7 +192,6 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
           </div>
         </Accordion>
 
-        {/* 4. Display */}
         <Accordion icon={Monitor} title={t('settings.display')} hint={t('settings.displayHint')}>
           <div className={styles.toggleRow}>
             <div>
@@ -215,25 +204,6 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
           </div>
         </Accordion>
 
-        {/* 5. Accessibility */}
-        <Accordion icon={Eye} title={t('settings.accessibility')} hint={t('settings.accessibilityHint')}>
-          {[
-            { labelKey: 'settings.largerText',       hintKey: 'settings.largerTextHint',       state: largeText,        set: setLargeText        },
-            { labelKey: 'settings.reduceAnimations',  hintKey: 'settings.reduceAnimationsHint', state: reduceAnimations, set: setReduceAnimations },
-          ].map(({ labelKey, hintKey, state, set }) => (
-            <div key={labelKey} className={styles.toggleRow}>
-              <div>
-                <p className={styles.toggleLabel}>{t(labelKey)}</p>
-                <p className={styles.toggleHint}>{t(hintKey)}</p>
-              </div>
-              <button className={`${styles.toggle} ${state ? styles.toggleOn : ''}`} onClick={() => set(v => !v)}>
-                <div className={styles.toggleThumb} />
-              </button>
-            </div>
-          ))}
-        </Accordion>
-
-        {/* 6. Privacy & Data */}
         <Accordion icon={Shield} title={t('settings.privacy')} hint={t('settings.privacyHint')}>
           <div className={styles.dangerRow}>
             <div>
@@ -255,7 +225,6 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
           </div>
         </Accordion>
 
-        {/* 7. Log Out */}
         <Accordion icon={LogOut} title={t('settings.logout')} hint={t('settings.logoutHint')}>
           <div className={styles.logoutRow}>
             <div>

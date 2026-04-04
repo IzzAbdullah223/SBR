@@ -1,64 +1,69 @@
-/**
- * BUS STOP CARD COMPONENT
- * Displays bus stop details
- */
-
-import React from 'react';
 import { MapPin, Bus, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import styles from './BusStopCard.module.css';
 
-const BusStopCard = ({ stop, onClose }) => {
+const BusStopCard = ({ stop, loadingStop = false, onClose }) => {
+  const { t } = useTranslation();
+
   if (!stop) return null;
 
   return (
     <div className={styles.card}>
       <button className={styles.closeBtn} onClick={onClose}>
-        <X size={20} />
+        <X size={16} />
       </button>
 
       <div className={styles.header}>
-        <MapPin size={24} color="#667eea" />
+        <div className={styles.headerIcon}>
+          <MapPin size={16} />
+        </div>
         <div>
-          <h3>{stop.name}</h3>
-          <p className={styles.stopId}>ID: {stop.stopId}</p>
+          <h3 className={styles.stopName}>{stop.name}</h3>
+          <p className={styles.stopId}>{t('map.stopId')} {stop.stopId}</p>
         </div>
       </div>
 
-      <div className={styles.content}>
-        <div className={styles.section}>
-          <h4>Location</h4>
-          <p className={styles.coordinates}>
-            {stop.position.lat.toFixed(6)}, {stop.position.lng.toFixed(6)}
-          </p>
+      {loadingStop ? (
+        <div className={styles.loadingRow}>
+          <div className={styles.spinner} />
         </div>
-
-        {stop.routes && stop.routes.length > 0 && (
+      ) : (
+        <div className={styles.content}>
           <div className={styles.section}>
-            <h4>
-              <Bus size={16} />
-              Available Routes ({stop.routes.length})
-            </h4>
-            <div className={styles.routeBadges}>
-              {stop.routes.map((route) => (
-                <span key={route} className={styles.routeBadge}>
-                  {route}
-                </span>
-              ))}
+            <p className={styles.sectionLabel}>{t('stopCard.location')}</p>
+            <p className={styles.coordinates}>
+              {stop.position.lat.toFixed(6)}, {stop.position.lng.toFixed(6)}
+            </p>
+          </div>
+
+          {stop.routes && stop.routes.length > 0 && (
+            <div className={styles.section}>
+              <p className={styles.sectionLabel}>
+                <Bus size={12} />
+                {t('stopCard.availableRoutes', { count: stop.routes.length })}
+              </p>
+              <div className={styles.routeBadges}>
+                {stop.routes.map((route) => (
+                  <span key={route.routeNumber ?? route} className={styles.routeBadge}>
+                    {route.routeNumber ?? route}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {stop.amenities && stop.amenities.length > 0 && (
-          <div className={styles.section}>
-            <h4>Amenities</h4>
-            <ul className={styles.amenitiesList}>
-              {stop.amenities.map((amenity, index) => (
-                <li key={index}>{amenity}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
+          {stop.amenities && stop.amenities.length > 0 && (
+            <div className={styles.section}>
+              <p className={styles.sectionLabel}>{t('stopCard.amenities')}</p>
+              <ul className={styles.amenitiesList}>
+                {stop.amenities.map((amenity, i) => (
+                  <li key={i}>{amenity}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

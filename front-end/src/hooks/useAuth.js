@@ -1,28 +1,25 @@
 import { useState, useEffect } from 'react';
+import i18n, { skipDbSave } from '../i18n';
 
 const useAuth = () => {
-
-  const [user, setUser]         = useState(null);
-  const [showLogin, setShowLogin]   = useState(false);
+  const [user, setUser] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
 
-  // Theme — only restore from localStorage if a logged-in user exists
-  // If no token, always start with light mode
   const [theme, setTheme] = useState(
     () => localStorage.getItem('token') ? (localStorage.getItem('theme') || 'light') : 'light'
   );
 
-  // Apply theme to root element whenever it changes
+  // Persist theme to localStorage only — App.jsx div carries data-theme so
+  // CSS variables always target the correct root element
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
-  // ── RESTORE USER ON PAGE REFRESH ──────────────────────────────────────────
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -31,15 +28,19 @@ const useAuth = () => {
       const payload = JSON.parse(atob(token.split('.')[1]));
 
       if (payload.exp * 1000 > Date.now()) {
-        // Step 1 — restore immediately from localStorage (fast, no flicker)
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
-          setUser(JSON.parse(storedUser));
+          const parsed = JSON.parse(storedUser);
+          setUser(parsed);
+          const lang = parsed?.preferences?.language;
+          if (lang && lang !== i18n.language) {
+            skipDbSave();
+            i18n.changeLanguage(lang);
+          }
         } else {
           setUser(payload.user);
         }
 
-        // Step 2 — fetch fresh profile from backend in background
         fetch('/api/settings/profile', {
           headers: { Authorization: `Bearer ${token}` },
         })
@@ -48,10 +49,14 @@ const useAuth = () => {
             if (data?.success && data?.user) {
               setUser(data.user);
               localStorage.setItem('user', JSON.stringify(data.user));
+              const lang = data.user?.preferences?.language;
+              if (lang && lang !== i18n.language) {
+                skipDbSave();
+                i18n.changeLanguage(lang);
+              }
             }
           })
           .catch(() => {});
-
       } else {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -62,25 +67,29 @@ const useAuth = () => {
     }
   }, []);
 
-  // ── AUTH HANDLERS ──────────────────────────────────────────────────────────
-
   const handleLoginSuccess = (loggedInUser) => {
     localStorage.setItem('user', JSON.stringify(loggedInUser));
     setUser(loggedInUser);
+    const lang = loggedInUser?.preferences?.language || 'en';
+    skipDbSave();
+    i18n.changeLanguage(lang);
     setShowLogin(false);
     setShowSignUp(false);
   };
 
   const handleLogout = () => {
+    skipDbSave();
+    i18n.changeLanguage('en');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('theme');
+    localStorage.removeItem('sbr-lang');
     setUser(null);
     setTheme('light');
   };
 
-  const handleSwitchToSignUp = () => { setShowLogin(false);  setShowSignUp(true);  };
-  const handleSwitchToLogin  = () => { setShowSignUp(false); setShowLogin(true);   };
+  const handleSwitchToSignUp = () => { setShowLogin(false); setShowSignUp(true); };
+  const handleSwitchToLogin  = () => { setShowSignUp(false); setShowLogin(true); };
 
   return {
     user,

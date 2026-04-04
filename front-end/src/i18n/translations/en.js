@@ -1,5 +1,4 @@
 const en = {
-  // ── Navbar ──────────────────────────────────────────────────────────────
   navbar: {
     appName: 'Smart Bus Planner',
     badge: 'Dubai RTA',
@@ -9,9 +8,8 @@ const en = {
     greeting: 'Hello, {{name}}',
   },
 
-  // ── Home ────────────────────────────────────────────────────────────────
   home: {
-    whereGoing: '📍 Where are you going?',
+    whereGoing: 'Where are you going?',
     searchPlaceholderOrigin: 'e.g., Dubai Mall, Gold Souk...',
     searchPlaceholderDest: 'e.g., Mall of Emirates, Dubai Marina...',
     labelOrigin: 'Origin',
@@ -21,9 +19,9 @@ const en = {
     clearAll: 'Clear all',
     loginToSave: 'Log in to save your preference',
     logIn: 'Log in',
+    selectFromDropdown: 'Please select both origin and destination from the dropdown suggestions.',
   },
 
-  // ── Optimization modes ───────────────────────────────────────────────────
   modes: {
     label: 'What matters most to you?',
     fastest: 'Fastest',
@@ -32,7 +30,6 @@ const en = {
     direct: 'Direct',
   },
 
-  // ── Bus Results ─────────────────────────────────────────────────────────
   results: {
     title: 'Recommended Routes',
     subtitle: '{{count}} routes ranked by your preferences using TOPSIS',
@@ -46,7 +43,7 @@ const en = {
     minutes: 'min',
     km: 'km',
     aed: 'AED',
-    alsoDeparts: '🕐 Also departs:',
+    alsoDeparts: 'Also departs:',
     direct: '✅ Direct',
     transfer: '🔄 Transfer',
     saveJourney: 'Save Journey',
@@ -54,10 +51,9 @@ const en = {
     viewOnMap: 'View on Map',
     selected: 'Selected ✓',
     findingRoutes: 'Finding best bus routes...',
-    emptyState: '📍 Enter origin and destination to find buses',
+    emptyState: 'Enter origin and destination to find buses',
   },
 
-  // ── Saved Routes ─────────────────────────────────────────────────────────
   saved: {
     title: 'Saved Routes',
     savedCount: '{{count}} saved',
@@ -71,7 +67,6 @@ const en = {
     close: 'Close',
   },
 
-  // ── Search Input ─────────────────────────────────────────────────────────
   search: {
     noResults: 'No locations found in Dubai',
     tokenError: '⚠️ LocationIQ token not configured',
@@ -79,7 +74,6 @@ const en = {
     unavailable: 'Search temporarily unavailable',
   },
 
-  // ── Map popups ────────────────────────────────────────────────────────────
   map: {
     yourLocation: 'Your Location',
     origin: 'Origin',
@@ -90,16 +84,13 @@ const en = {
     stopId: 'ID:',
   },
 
-  // ── Bus Stop Card ─────────────────────────────────────────────────────────
   stopCard: {
     location: 'Location',
     availableRoutes: 'Available Routes ({{count}})',
     amenities: 'Amenities',
   },
 
-  // ── Auth ──────────────────────────────────────────────────────────────────
   auth: {
-    // Login
     welcomeBack: 'Welcome Back',
     loginSubtitle: 'Login to your account',
     emailLabel: 'Email',
@@ -112,7 +103,6 @@ const en = {
     signUpLink: 'Sign Up',
     loginFailed: 'Login failed. Please try again.',
 
-    // Sign Up
     createAccount: 'Create Account',
     nameLabel: 'Name',
     namePlaceholder: 'Your full name',
@@ -123,7 +113,6 @@ const en = {
     creatingAccount: 'Creating account...',
   },
 
-  // ── Settings ──────────────────────────────────────────────────────────────
   settings: {
     title: 'Settings',
     back: 'Back',
@@ -184,7 +173,6 @@ const en = {
     logoutBtn: 'Log Out',
     logoutHintSub: 'You can log back in at any time',
 
-    // Confirm modal
     clearRoutesTitle: 'Clear All Saved Routes?',
     clearRoutesMessage: 'This will permanently remove all your saved journeys. This cannot be undone.',
     deleteAccountTitle: 'Delete Account?',

@@ -10,6 +10,7 @@ import {
   updateProfile,
   changePassword,
   updatePreferences,
+  updateLanguage,
   clearSavedRoutes,
   deleteAccount,
 } from '../controllers/settingsController.js';
@@ -25,5 +26,6 @@ router.put('/password',        changePassword);
 router.put('/preferences',     updatePreferences);
 router.delete('/saved-routes', clearSavedRoutes);
 router.delete('/account',      deleteAccount);
+router.put('/language',        updateLanguage);
 
 export default router;

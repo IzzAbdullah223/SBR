@@ -1,10 +1,4 @@
-/**
- * Home.jsx — updated with i18n
- * Only the JSX strings are changed — all logic is identical to your original.
- * Replace your existing Home.jsx with this file.
- */
-
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import MapComponent from '../../Components/Map/Map';
 import SearchInput from '../../Components/SearchInput/SearchInput';
 import BusResults from '../../Components/BusResults/BusResults';
@@ -14,6 +8,7 @@ import { MAP_CONFIG } from '../../utils/constants';
 import useFindBuses from '../../hooks/useFindBuses';
 import useShape from '../../hooks/useShape';
 import useSavedRoutes from '../../hooks/useSavedRoutes';
+import useBusStop from '../../hooks/useBusStop';
 import Navbar from '../../Components/NavBar/Navbar';
 import Modal from '../../Components/Modal/Modal';
 import { SignUp } from '../Authentication/SignUp/SignUp';
@@ -43,6 +38,7 @@ const Home = ({
   const [destination, setDestination] = useState(null);
   const [selectedBus, setSelectedBus] = useState(null);
   const [programmaticFill, setProgrammaticFill] = useState(false);
+  const [inputError, setInputError] = useState(null);
 
   const [optimizationMode, setOptimizationMode] = useState(
     () => user?.preferences?.optimizationMode || 'fastest'
@@ -62,6 +58,10 @@ const Home = ({
   const { buses, loading, error, errorType, findBuses, clearResults } = useFindBuses();
   const { shapeCoordinates, shapeCoordinatesLeg2 } = useShape(selectedBus);
 
+  // useBusStop handles: immediate display of basic stop data,
+  // then fetches full stop from GET /api/bus-stops/:stopId for routes + amenities
+  const { selectedStop, loadingStop, selectStop, clearStop } = useBusStop();
+
   const {
     savedRoutes, loadingSaved, savingKey, saveError, showSaved,
     saveRoute, deleteSavedRoute, toggleSavedPanel, setSaveError, isJourneySaved,
@@ -73,6 +73,7 @@ const Home = ({
   const handleOriginChange = (e, locationData) => {
     if (programmaticFill) setProgrammaticFill(false);
     setOriginInput(e.target.value);
+    setInputError(null);
     if (locationData?.lat && locationData?.lng) {
       setOrigin({ lat: locationData.lat, lng: locationData.lng, name: e.target.value });
     } else setOrigin(null);
@@ -81,6 +82,7 @@ const Home = ({
   const handleDestinationChange = (e, locationData) => {
     if (programmaticFill) setProgrammaticFill(false);
     setDestinationInput(e.target.value);
+    setInputError(null);
     if (locationData?.lat && locationData?.lng) {
       setDestination({ lat: locationData.lat, lng: locationData.lng, name: e.target.value });
     } else setDestination(null);
@@ -88,10 +90,12 @@ const Home = ({
 
   const handleFindBuses = async () => {
     if (!origin || !destination) {
-      alert('Please select both origin and destination from the dropdown');
+      setInputError(t('home.selectFromDropdown'));
       return;
     }
+    setInputError(null);
     setSelectedBus(null);
+    clearStop();
     clearResults();
     setSaveError(null);
     await findBuses(
@@ -107,7 +111,9 @@ const Home = ({
     setOrigin(null);
     setDestination(null);
     setSelectedBus(null);
+    clearStop();
     setSaveError(null);
+    setInputError(null);
     clearResults();
   };
 
@@ -115,8 +121,15 @@ const Home = ({
     if (buses?.length > 0 && !selectedBus) setSelectedBus(buses[0]);
   }, [buses, selectedBus]);
 
-  const handleSelectBus = (bus) => setSelectedBus(bus);
-  const handleSaveJourney = async () => { if (!origin || !destination) return; await saveRoute(origin, destination); };
+  const handleSelectBus = (bus) => {
+    setSelectedBus(bus);
+    clearStop();
+  };
+
+  const handleSaveJourney = async () => {
+    if (!origin || !destination) return;
+    await saveRoute(origin, destination);
+  };
 
   const handleSelectSavedJourney = (route) => {
     setProgrammaticFill(true);
@@ -136,12 +149,11 @@ const Home = ({
     return stops;
   }, [selectedBus]);
 
-  // Optimization mode config — labels come from t()
   const modes = [
-    { value: 'fastest',          icon: '🚀', labelKey: 'modes.fastest'      },
-    { value: 'cheapest',         icon: '💰', labelKey: 'modes.cheapest'     },
-    { value: 'less_walking',     icon: '🚶', labelKey: 'modes.lessWalking'  },
-    { value: 'fewest_transfers', icon: '🔄', labelKey: 'modes.direct'       },
+    { value: 'fastest',          icon: '🚀', labelKey: 'modes.fastest'     },
+    { value: 'cheapest',         icon: '💰', labelKey: 'modes.cheapest'    },
+    { value: 'less_walking',     icon: '🚶', labelKey: 'modes.lessWalking' },
+    { value: 'fewest_transfers', icon: '🔄', labelKey: 'modes.direct'      },
   ];
 
   return (
@@ -222,11 +234,18 @@ const Home = ({
             )}
           </div>
 
+          {inputError && (
+            <div className={`${styles.errorMessage} ${styles.errorBad}`}>
+              {inputError}
+            </div>
+          )}
+
           {error && (
             <div className={`${styles.errorMessage} ${errorType === 'info' ? styles.errorInfo : styles.errorBad}`}>
               {error}
             </div>
           )}
+
           {saveError && (
             <div className={`${styles.errorMessage} ${styles.errorBad}`}>{saveError}</div>
           )}
@@ -256,7 +275,10 @@ const Home = ({
             selectedRoute={selectedBus}
             shapeCoordinates={shapeCoordinates}
             shapeCoordinatesLeg2={shapeCoordinatesLeg2}
-            onStopClick={() => {}}
+            selectedStop={selectedStop}
+            loadingStop={loadingStop}
+            onStopClick={selectStop}
+            onStopClose={clearStop}
             theme={theme}
           />
         </div>

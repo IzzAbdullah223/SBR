@@ -1,49 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
 
-/* ══════════════════════════════════════════════════════
-   LIGHT THEME (default)
-   These are the base CSS variables the whole app uses.
-   Every component reads from these — never hardcode colors.
-══════════════════════════════════════════════════════ */
 :root {
-  /* Brand colors — never change between themes */
   --gold:        #f0a500;
   --gold-light:  #ffc740;
   --gold-pale:   #fff8e7;
   --teal:        #00c9a7;
   --error:       #ff4d6d;
 
-  /* Light theme surfaces */
-  --bg-page:     #f7f8fc;   /* page background */
-  --bg-card:     #ffffff;   /* card / panel background */
-  --bg-input:    #f7f8fc;   /* input field background */
+  --bg-page:     #f7f8fc;
+  --bg-card:     #ffffff;
+  --bg-input:    #f7f8fc;
 
-  /* Light theme navbar — always dark regardless of theme */
-  --navbar-bg:   #0a1628;
+  --navbar-bg:     #0a1628;
   --navbar-border: rgba(90,76,45,0.15);
 
-  /* Light theme text */
   --text-primary:   #0a1628;
   --text-secondary: #5a6384;
   --text-muted:     #9ba3c2;
   --text-inverse:   #ffffff;
 
-  /* Light theme borders */
   --border:      #eef0f6;
   --border-dark: #d8dcec;
 
-  /* Light theme button */
   --btn-primary-bg:    #0a1628;
   --btn-primary-text:  #ffffff;
   --btn-disabled-bg:   #eef0f6;
   --btn-disabled-text: #9ba3c2;
 
-  /* Shadows */
   --shadow-sm: 0 2px 8px rgba(10,22,40,0.08);
   --shadow-md: 0 8px 24px rgba(10,22,40,0.12);
   --shadow-lg: 0 16px 48px rgba(10,22,40,0.18);
 
-  /* Kept for backward compat with components using them directly */
   --navy:      #0a1628;
   --navy-mid:  #112240;
   --navy-light:#1d3461;
@@ -57,11 +44,6 @@
   --radius-sm: 10px;
 }
 
-/* ══════════════════════════════════════════════════════
-   DARK THEME
-   Only override the variables that change.
-   Brand colors (gold, teal, error) stay the same.
-══════════════════════════════════════════════════════ */
 [data-theme="dark"] {
   --bg-page:     #0d1117;
   --bg-card:     #161b22;
@@ -84,7 +66,6 @@
   --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
   --shadow-lg: 0 16px 48px rgba(0,0,0,0.5);
 
-  /* backward compat overrides */
   --gray-100:  #161b22;
   --gray-200:  #21262d;
   --gray-400:  #6e7681;
@@ -112,14 +93,10 @@ body {
   overflow: hidden;
 }
 
-/* ── Dark mode map ── */
-/* Invert OSM tiles + hue-rotate so colors stay natural but background goes dark */
-/* Labels stay perfectly readable — Arabic + English both work correctly */
 [data-theme="dark"] .leaflet-tile-pane {
   filter: invert(100%) hue-rotate(180deg);
 }
 
-/* ── Dark mode Leaflet zoom controls ── */
 [data-theme="dark"] .leaflet-control-zoom a {
   background-color: #1e2a3a !important;
   color: #e6edf3 !important;
@@ -136,7 +113,6 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important;
 }
 
-/* ── Dark mode Leaflet attribution ── */
 [data-theme="dark"] .leaflet-control-attribution {
   background: rgba(13, 17, 23, 0.8) !important;
   color: #6e7681 !important;

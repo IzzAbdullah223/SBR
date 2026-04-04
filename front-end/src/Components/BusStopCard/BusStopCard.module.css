@@ -1,129 +1,181 @@
-/* ═══════════════════════════════════════════════════════
-   BUSSTOPCARD.MODULE.CSS
-═══════════════════════════════════════════════════════ */
-
 .card {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  background: var(--white);
+  top: 16px;
+  right: 16px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
-  padding: 20px;
-  max-width: 300px;
+  padding: 16px;
+  width: 280px;
   z-index: 1000;
-  border: 1px solid var(--gray-200);
-  animation: cardIn 0.3s ease;
+  animation: cardIn 0.25s ease;
 }
 
 @keyframes cardIn {
-  from { opacity: 0; transform: translateY(-12px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
 }
 
 .closeBtn {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  background: var(--gray-100);
+  top: 12px;
+  right: 12px;
+  background: var(--bg-page);
   border: none;
   cursor: pointer;
-  padding: 6px;
+  padding: 5px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: all 0.15s ease;
+}
+
+.closeBtn:hover {
+  background: var(--border);
+  color: var(--text-primary);
+}
+
+/* ─── Header ─── */
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-right: 28px;
+}
+
+.headerIcon {
+  width: 30px;
+  height: 30px;
+  background: var(--navbar-bg);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
-  color: var(--gray-600);
+  color: var(--gold);
+  flex-shrink: 0;
 }
 
-.closeBtn:hover {
-  background: var(--navy);
-  color: var(--white);
-  transform: scale(1.05);
-}
-
-.header {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding-right: 32px;
-}
-
-.header h3 {
-  margin: 0;
+.stopName {
+  margin: 0 0 3px 0;
   font-family: 'Syne', sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
-  color: var(--navy);
+  color: var(--text-primary);
   line-height: 1.3;
 }
 
 .stopId {
-  margin: 4px 0 0 0;
+  margin: 0;
   font-size: 11px;
-  color: var(--gray-400);
+  color: var(--text-muted);
   font-family: monospace;
 }
 
+/* ─── Loading ─── */
+.loadingRow {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0 4px;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-top: 2px solid var(--gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Content ─── */
 .content {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
-.section h4 {
-  margin: 0 0 8px 0;
-  font-size: 12px;
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sectionLabel {
+  margin: 0;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  color: var(--gray-400);
+  color: var(--text-muted);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .coordinates {
   margin: 0;
-  font-size: 12px;
-  color: var(--gray-600);
+  font-size: 11px;
+  color: var(--text-secondary);
   font-family: monospace;
-  background: var(--gray-100);
+  background: var(--bg-page);
   padding: 6px 10px;
   border-radius: 6px;
+  border: 1px solid var(--border);
 }
 
+/* ─── Route Badges ─── */
 .routeBadges {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
 }
 
 .routeBadge {
-  background: var(--navy);
-  color: white;
-  padding: 4px 10px;
+  background: var(--navbar-bg);
+  color: var(--gold);
+  padding: 3px 9px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   font-family: 'Syne', sans-serif;
-  transition: background 0.2s ease;
+  border: 1px solid rgba(240, 165, 0, 0.2);
+  transition: all 0.15s ease;
 }
 
 .routeBadge:hover {
   background: var(--gold);
-  color: var(--navy);
+  color: var(--navbar-bg);
+  border-color: var(--gold);
 }
 
+/* ─── Amenities ─── */
 .amenitiesList {
   margin: 0;
-  padding-left: 16px;
-  font-size: 13px;
-  color: var(--gray-600);
+  padding-left: 14px;
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
-.amenitiesList li {
-  margin-bottom: 4px;
+.amenitiesList li { margin-bottom: 3px; }
+
+/* ─── RTL ─── */
+[dir="rtl"] .card {
+  right: auto;
+  left: 16px;
+}
+
+[dir="rtl"] .closeBtn {
+  right: auto;
+  left: 12px;
+}
+
+[dir="rtl"] .header {
+  padding-right: 0;
+  padding-left: 28px;
 }

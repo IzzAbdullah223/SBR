@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { useTranslation } from 'react-i18next';
 import {
   originIcon,
   destinationIcon,
@@ -10,23 +11,17 @@ import {
   userLocationIcon,
 } from '../../utils/mapIcons';
 import { MAP_CONFIG } from '../../utils/constants';
+import BusStopCard from '../BusStopCard/BusStopCard';
 import styles from './Map.module.css';
 
-// SmartBounds — single source of truth for all map movement.
-//
-// Priority order:
-//   1. Bus selected + shape(s) loaded → fit to ALL shape coordinates (both legs)
-//   2. Bus selected but no shape yet → fit to origin+dest pins as placeholder
-//   3. Origin/destination changed (new search) → fit to both pins
-//   4. Only origin set → center on it
 const SmartBounds = ({ origin, destination, shapeCoordinates, shapeCoordinatesLeg2, shapeKey }) => {
   const map = useMap();
-  const lastShapeKey    = useRef(null);
-  const lastFittedKey   = useRef(null);
-  const lastOriginLat   = useRef(null);
-  const lastOriginLng   = useRef(null);
-  const lastDestLat     = useRef(null);
-  const lastDestLng     = useRef(null);
+  const lastShapeKey  = useRef(null);
+  const lastFittedKey = useRef(null);
+  const lastOriginLat = useRef(null);
+  const lastOriginLng = useRef(null);
+  const lastDestLat   = useRef(null);
+  const lastDestLng   = useRef(null);
 
   const fitToOriginDest = () => {
     if (!origin?.lat || !destination?.lat) return;
@@ -45,8 +40,6 @@ const SmartBounds = ({ origin, destination, shapeCoordinates, shapeCoordinatesLe
     const leg2 = shapeCoordinatesLeg2?.length > 1 ? shapeCoordinatesLeg2 : null;
     const hasShape = leg1 || leg2;
 
-    // Priority 1 — shape loaded (or updated) for the current bus
-    // Fit to ALL coordinates across both legs so the whole route is visible
     if (hasShape && shapeKey !== lastShapeKey.current) {
       const allPoints = [
         ...(leg1 ? leg1.map(c => [c.lat, c.lng]) : []),
@@ -58,15 +51,12 @@ const SmartBounds = ({ origin, destination, shapeCoordinates, shapeCoordinatesLe
       return;
     }
 
-    // Priority 2 — bus just changed but shape hasn't loaded yet
-    // Show origin+dest immediately as a placeholder while shape loads
     if (shapeKey && shapeKey !== lastFittedKey.current) {
       fitToOriginDest();
       lastFittedKey.current = shapeKey;
       return;
     }
 
-    // Priority 3 — origin or destination changed (new search, no bus selected yet)
     const originChanged = origin?.lat !== lastOriginLat.current || origin?.lng !== lastOriginLng.current;
     const destChanged   = destination?.lat !== lastDestLat.current || destination?.lng !== lastDestLng.current;
 
@@ -75,7 +65,6 @@ const SmartBounds = ({ origin, destination, shapeCoordinates, shapeCoordinatesLe
       return;
     }
 
-    // Priority 4 — only origin set
     if (origin?.lat && originChanged && !destination?.lat) {
       map.setView([origin.lat, origin.lng], 13);
       lastOriginLat.current = origin.lat;
@@ -94,9 +83,14 @@ const MapView = ({
   selectedRoute = null,
   shapeCoordinates = null,
   shapeCoordinatesLeg2 = null,
+  selectedStop = null,
+  loadingStop = false,
   onStopClick,
+  onStopClose,
   theme = 'light',
 }) => {
+  const { t } = useTranslation();
+
   const isValidCoord = (val) => typeof val === 'number' && !isNaN(val);
   const hasValidOrigin = origin && isValidCoord(origin.lat) && isValidCoord(origin.lng);
   const hasValidDest   = destination && isValidCoord(destination?.lat) && isValidCoord(destination?.lng);
@@ -107,9 +101,7 @@ const MapView = ({
 
   const routeColor = selectedRoute?.color || '#667eea';
   const leg2Color  = '#00c9a7';
-
-  // shapeKey = busId of selected route — SmartBounds moves the map ONLY when this changes
-  const shapeKey = selectedRoute?.busId || null;
+  const shapeKey   = selectedRoute?.busId || null;
 
   const leg1Positions = shapeCoordinates?.length > 1
     ? shapeCoordinates.map(c => [c.lat, c.lng])
@@ -124,116 +116,106 @@ const MapView = ({
     : null;
 
   return (
-    <MapContainer
-      center={center}
-      zoom={MAP_CONFIG.DEFAULT_ZOOM}
-      className={styles.mapContainer}
-      scrollWheelZoom={true}
-      minZoom={MAP_CONFIG.MIN_ZOOM}
-      maxZoom={MAP_CONFIG.MAX_ZOOM}
-    >
-      <TileLayer
-        attribution={MAP_CONFIG.ATTRIBUTION}
-        url={MAP_CONFIG.TILE_LAYER}
-      />
+    <div className={styles.mapWrapper}>
+      <MapContainer
+        center={center}
+        zoom={MAP_CONFIG.DEFAULT_ZOOM}
+        className={styles.mapContainer}
+        scrollWheelZoom={true}
+        minZoom={MAP_CONFIG.MIN_ZOOM}
+        maxZoom={MAP_CONFIG.MAX_ZOOM}
+      >
+        <TileLayer attribution={MAP_CONFIG.ATTRIBUTION} url={MAP_CONFIG.TILE_LAYER} />
 
-      {/* Unified map bounds controller — single source of truth for all map movement */}
-      <SmartBounds
-        origin={origin}
-        destination={destination}
-        shapeCoordinates={shapeCoordinates}
-        shapeCoordinatesLeg2={shapeCoordinatesLeg2}
-        shapeKey={shapeKey}
-      />
+        <SmartBounds
+          origin={origin}
+          destination={destination}
+          shapeCoordinates={shapeCoordinates}
+          shapeCoordinatesLeg2={shapeCoordinatesLeg2}
+          shapeKey={shapeKey}
+        />
 
-      {/* User Location */}
-      {userLocation && isValidCoord(userLocation.lat) && isValidCoord(userLocation.lng) && (
-        <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon}>
-          <Popup><div className={styles.popup}><strong>Your Location</strong></div></Popup>
-        </Marker>
-      )}
-
-      {/* Origin — hidden when a route is selected (route shape + stop pins replace it) */}
-      {hasValidOrigin && !selectedRoute && (
-        <Marker position={[origin.lat, origin.lng]} icon={originIcon}>
-          <Popup>
-            <div className={styles.popup}>
-              <strong>Origin</strong>
-              <p>{origin.name || 'Starting point'}</p>
-            </div>
-          </Popup>
-        </Marker>
-      )}
-
-      {/* Destination — hidden when a route is selected */}
-      {hasValidDest && !selectedRoute && (
-        <Marker position={[destination.lat, destination.lng]} icon={destinationIcon}>
-          <Popup>
-            <div className={styles.popup}>
-              <strong>Destination</strong>
-              <p>{destination.name || 'End point'}</p>
-            </div>
-          </Popup>
-        </Marker>
-      )}
-
-      {/* Leg 1 — shadow then coloured line so it pops off the map */}
-      {leg1Positions && (
-        <>
-          <Polyline positions={leg1Positions} color="#000000" weight={7} opacity={0.15} />
-          <Polyline positions={leg1Positions} color={routeColor} weight={4} opacity={0.9} />
-        </>
-      )}
-
-      {/* Leg 2 — transfer route second leg in teal */}
-      {leg2Positions && (
-        <>
-          <Polyline positions={leg2Positions} color="#000000" weight={7} opacity={0.15} />
-          <Polyline positions={leg2Positions} color={leg2Color} weight={4} opacity={0.9} />
-        </>
-      )}
-
-      {/* Fallback dashed line when no shape data */}
-      {fallbackPositions && (
-        <Polyline positions={fallbackPositions} color="#667eea" weight={3} opacity={0.5} dashArray="8,12" />
-      )}
-
-      {/* Bus Stop Markers */}
-      {busStops.map((stop) => {
-        if (!stop?.position || !isValidCoord(stop.position.lat) || !isValidCoord(stop.position.lng)) return null;
-
-        const isOnRoute = selectedRoute?.stops?.some(s => s.stopId === stop.stopId)
-          || selectedRoute?.originStop?.stopId === stop.stopId
-          || selectedRoute?.destinationStop?.stopId === stop.stopId
-          || selectedRoute?.transferStop?.stopId === stop.stopId;
-
-        return (
-          <Marker
-            key={stop.stopId}
-            position={[stop.position.lat, stop.position.lng]}
-            icon={isOnRoute ? selectedBusStopIcon : busStopIcon}
-            eventHandlers={{ click: () => onStopClick && onStopClick(stop) }}
-          >
+        {userLocation && isValidCoord(userLocation.lat) && isValidCoord(userLocation.lng) && (
+          <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon}>
             <Popup>
               <div className={styles.popup}>
-                <strong>{stop.name}</strong>
-                <p className={styles.stopId}>ID: {stop.stopId}</p>
-                {stop.routes?.length > 0 && (
-                  <div className={styles.routes}>
-                    <p><strong>Routes:</strong></p>
-                    <div className={styles.routeBadges}>
-                      {stop.routes.map(r => (
-                        <span key={r} className={styles.routeBadge}>{r}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <strong>{t('map.yourLocation')}</strong>
               </div>
             </Popup>
           </Marker>
-        );
-      })}
-    </MapContainer>
+        )}
+
+        {hasValidOrigin && !selectedRoute && (
+          <Marker position={[origin.lat, origin.lng]} icon={originIcon}>
+            <Popup>
+              <div className={styles.popup}>
+                <strong>{t('map.origin')}</strong>
+                <p>{origin.name || t('map.startingPoint')}</p>
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
+        {hasValidDest && !selectedRoute && (
+          <Marker position={[destination.lat, destination.lng]} icon={destinationIcon}>
+            <Popup>
+              <div className={styles.popup}>
+                <strong>{t('map.destination')}</strong>
+                <p>{destination.name || t('map.endPoint')}</p>
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
+        {leg1Positions && (
+          <>
+            <Polyline positions={leg1Positions} color="#000000" weight={7} opacity={0.15} />
+            <Polyline positions={leg1Positions} color={routeColor} weight={4} opacity={0.9} />
+          </>
+        )}
+
+        {leg2Positions && (
+          <>
+            <Polyline positions={leg2Positions} color="#000000" weight={7} opacity={0.15} />
+            <Polyline positions={leg2Positions} color={leg2Color} weight={4} opacity={0.9} />
+          </>
+        )}
+
+        {fallbackPositions && (
+          <Polyline positions={fallbackPositions} color="#667eea" weight={3} opacity={0.5} dashArray="8,12" />
+        )}
+
+        {busStops.map((stop) => {
+          if (!stop?.position || !isValidCoord(stop.position.lat) || !isValidCoord(stop.position.lng)) return null;
+
+          const isSelected = selectedStop?.stopId === stop.stopId;
+          const isOnRoute  =
+            selectedRoute?.stops?.some(s => s.stopId === stop.stopId) ||
+            selectedRoute?.originStop?.stopId      === stop.stopId ||
+            selectedRoute?.destinationStop?.stopId === stop.stopId ||
+            selectedRoute?.transferStop?.stopId    === stop.stopId;
+
+          return (
+            <Marker
+              key={stop.stopId}
+              position={[stop.position.lat, stop.position.lng]}
+              icon={isSelected || isOnRoute ? selectedBusStopIcon : busStopIcon}
+              eventHandlers={{
+                click: () => onStopClick && onStopClick(stop),
+              }}
+            />
+          );
+        })}
+      </MapContainer>
+
+      {selectedStop && (
+        <BusStopCard
+          stop={selectedStop}
+          loadingStop={loadingStop}
+          onClose={onStopClose}
+        />
+      )}
+    </div>
   );
 };
 

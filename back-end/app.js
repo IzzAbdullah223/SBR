@@ -1,63 +1,37 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
-import './config/passport.js';
 import cors from 'cors';
 import { db_connection } from './DB/dbConnection.js';
 import apiRoutes from './routes/index.js';
 import passport from './config/passport.js';
-// load passport strategy config — must be imported before any routes
-
 
 const app = express();
-await db_connection(); 
+await db_connection();
 
-/**
- * MIDDLEWARE
- */
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-
-// initialize passport — must come after express.json() so req.body is available
 app.use(passport.initialize());
 
-/**
- * API ROUTES
- */
 app.use('/api', apiRoutes);
 
-/**
- * HEALTH CHECK
- */
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     message: 'Smart Bus Route Planner API is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
-/**
- * 404 HANDLER
- */
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    error: 'Route not found'
-  });
+  res.status(404).json({ success: false, error: 'Route not found' });
 });
 
-/**
- * ERROR HANDLER
- */
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
-  res.status(500).json({
-    success: false,
-    error: 'Internal server error'
-  });
+  res.status(500).json({ success: false, error: 'Internal server error' });
 });
-
 
 const PORT = process.env.PORT || 5000;
 

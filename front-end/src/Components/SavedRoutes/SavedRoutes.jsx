@@ -1,9 +1,3 @@
-/**
- * SavedRoutes.jsx — updated with i18n
- * Replace your existing SavedRoutes.jsx with this file.
- */
-
-import React from 'react';
 import { Bookmark, Trash2, X, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import styles from './SavedRoutes.module.css';

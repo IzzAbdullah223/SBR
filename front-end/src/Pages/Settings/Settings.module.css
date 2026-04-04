@@ -1,15 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
-
 /* ── Page ── */
 .page {
-  min-height: 100vh;
+  height: 100vh;
   background: var(--bg-page);
   font-family: 'DM Sans', sans-serif;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
-/* ── Top bar — identical to navbar ── */
+/* ── Top bar ── */
 .topBar {
   height: 52px;
   background: var(--navbar-bg);
@@ -52,11 +51,13 @@
 .content {
   max-width: 600px;
   width: 100%;
-  margin: 36px auto;
-  padding: 0 20px 80px;
+  margin: 0 auto;
+  padding: 20px 20px 40px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 /* ── Feedback banner ── */
@@ -72,12 +73,12 @@
   animation: fadeIn 0.2s ease;
 }
 .bannerSuccess { background: rgba(0,201,167,0.12); border: 1px solid rgba(0,201,167,0.3); color: #00a882; }
-.bannerError   { background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.3); color: var(--error); }
+.bannerError   { background: rgba(255,77,109,0.1);  border: 1px solid rgba(255,77,109,0.3); color: var(--error); }
 .bannerClose   { margin-left: auto; background: transparent; border: none; cursor: pointer; color: inherit; display: flex; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ── Accordion item ── */
+/* ── Accordion ── */
 .accordion {
   background: var(--bg-card);
   border-radius: 14px;
@@ -90,7 +91,6 @@
   border-color: var(--border-dark);
 }
 
-/* ── Accordion trigger row ── */
 .accordionTrigger {
   width: 100%;
   display: flex;
@@ -143,15 +143,12 @@
 }
 .chevronOpen { transform: rotate(180deg); }
 
-/* ── Accordion body ── */
 .accordionBody {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease;
 }
-.accordionOpen {
-  max-height: 800px;
-}
+.accordionOpen { max-height: 800px; }
 
 .accordionInner {
   padding: 4px 20px 24px;
@@ -187,6 +184,7 @@
   outline: none;
   transition: border-color 0.2s;
   background: var(--bg-input);
+  width: 100%;
 }
 .input:focus { border-color: var(--text-primary); }
 .input::placeholder { color: var(--text-muted); }
@@ -214,7 +212,7 @@
   transition: all 0.2s;
   margin-top: 4px;
 }
-.saveBtn:hover:not(:disabled) { background: #f0a500; color: var(--text-primary); }
+.saveBtn:hover:not(:disabled) { background: var(--gold); color: var(--text-primary); }
 .saveBtn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
 
 .subDivider {
@@ -233,11 +231,6 @@
   margin: 0 0 14px;
 }
 
-/* ── Sliders ── */
-.mapStyleBtn:hover { border-color: var(--text-primary); color: var(--text-primary); }
-.mapStyleActive { background: #0a1628 !important; border-color: #0a1628 !important; color: #f0a500 !important; }
-.mapStyleEmoji { font-size: 20px; }
-
 /* ── Toggles ── */
 .toggleRow {
   display: flex;
@@ -245,7 +238,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 14px 0;
-  border-bottom: 1px solid #f0f2f8;
+  border-bottom: 1px solid var(--border);
 }
 .toggleRow:last-child { border-bottom: none; }
 .toggleLabel { font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--text-primary); margin: 0 0 2px; }
@@ -262,7 +255,7 @@
   flex-shrink: 0;
   transition: background 0.25s;
 }
-.toggleOn { background: #00c9a7; }
+.toggleOn { background: var(--teal); }
 .toggleThumb {
   position: absolute;
   top: 3px;
@@ -283,7 +276,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 14px 0;
-  border-bottom: 1px solid #f0f2f8;
+  border-bottom: 1px solid var(--border);
 }
 .dangerRow:last-child { border-bottom: none; }
 .dangerLabel { font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 0 0 2px; }
@@ -306,7 +299,11 @@
   flex-shrink: 0;
   transition: all 0.2s;
 }
-.dangerOutlineBtn:hover { border-color: var(--error); color: var(--error); background: #fff0f3; }
+.dangerOutlineBtn:hover {
+  border-color: var(--error);
+  color: var(--error);
+  background: rgba(255, 77, 109, 0.08);
+}
 
 /* ── Logout ── */
 .logoutRow {
@@ -336,7 +333,7 @@
   flex-shrink: 0;
   transition: all 0.2s;
 }
-.logoutBtn:hover { background: #ff4d6d; color: #fff; border-color: var(--error); }
+.logoutBtn:hover { background: var(--error); color: #fff; border-color: var(--error); }
 
 /* ── Confirm modal ── */
 .overlay {
@@ -376,7 +373,7 @@
 .cancelBtn:hover { background: var(--bg-page); }
 .dangerBtn {
   padding: 9px 18px; border: none; border-radius: 8px;
-  background: #ff4d6d; color: #fff;
+  background: var(--error); color: #fff;
   font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
   cursor: pointer; transition: opacity 0.15s;
 }
@@ -388,7 +385,7 @@
   .formGrid { grid-template-columns: 1fr; }
 }
 
-/* ── Inline feedback — shown next to save button inside accordion ── */
+/* ── Inline feedback ── */
 .inlineFeedback {
   display: flex;
   align-items: center;
@@ -400,7 +397,7 @@
   animation: fadeIn 0.2s ease;
 }
 .inlineFeedbackSuccess { background: rgba(0,201,167,0.12); border: 1px solid rgba(0,201,167,0.3); color: #00a882; }
-.inlineFeedbackError   { background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.3); color: var(--error); }
+.inlineFeedbackError   { background: rgba(255,77,109,0.1);  border: 1px solid rgba(255,77,109,0.3); color: var(--error); }
 
 .select {
   padding: 10px 14px;
