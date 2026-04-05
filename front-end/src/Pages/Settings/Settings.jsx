@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  User, Lock, Zap, Monitor,
+  User, Lock, Zap, Monitor, CreditCard,
   Shield, LogOut, ArrowLeft, ChevronDown,
   CheckCircle, AlertCircle, Trash2, X, Bus,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import useSettings from '../../hooks/useSettings';
+import useWallet from '../../hooks/useWallet';
 import styles from './Settings.module.css';
 
 const Accordion = ({ icon: Icon, title, hint, children }) => {
@@ -70,6 +71,16 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
     updateProfile, changePassword, updatePreferences,
     clearSavedRoutes, deleteAccount,
   } = useSettings(user, onUserUpdate, onLogout);
+
+  const { wallet, loadingWallet, recharging, walletError, setWalletError, recharge } = useWallet(user);
+  const [rechargeAmount, setRechargeAmount] = useState('');
+
+  const handleRecharge = async () => {
+    const amount = parseFloat(rechargeAmount);
+    if (!amount || amount <= 0) return;
+    const ok = await recharge(amount);
+    if (ok) setRechargeAmount('');
+  };
 
   const [name,  setName]  = useState(user?.name  || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -191,6 +202,54 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme }) => {
             </button>
           </div>
         </Accordion>
+
+        {/* Feature 2 — Nol Virtual Wallet */}
+        {user && (
+          <Accordion icon={CreditCard} title={t('settings.wallet')} hint={t('settings.walletHint')}>
+            <div className={styles.form}>
+              {loadingWallet ? (
+                <div className={styles.fieldError}>{t('settings.walletLoading')}</div>
+              ) : wallet ? (
+                <>
+                  <div className={styles.walletBalance}>
+                    <span className={styles.walletLabel}>{t('settings.walletBalance')}</span>
+                    <span className={styles.balanceAmount}>{wallet.balance.toFixed(2)} {t('settings.aed')}</span>
+                    {wallet.isBalanceLow && (
+                      <span className={styles.lowBalanceTag}>{t('settings.lowBalance')}</span>
+                    )}
+                  </div>
+                  <div className={styles.walletCard}>
+                    <span className={styles.walletCardLabel}>{t('settings.cardNumber')}</span>
+                    <span className={styles.walletCardNumber}>{wallet.cardNumber}</span>
+                  </div>
+                  <div className={styles.formRow}>
+                    <label className={styles.label}>{t('settings.rechargeAmount')}</label>
+                    <input
+                      className={styles.input}
+                      type="number"
+                      min="1"
+                      max="500"
+                      step="0.5"
+                      value={rechargeAmount}
+                      onChange={e => setRechargeAmount(e.target.value)}
+                      placeholder="e.g. 50"
+                    />
+                  </div>
+                  {walletError && (
+                    <p className={styles.fieldError}><AlertCircle size={12} /> {walletError}</p>
+                  )}
+                  <button
+                    className={styles.saveBtn}
+                    onClick={handleRecharge}
+                    disabled={recharging || !rechargeAmount}
+                  >
+                    {recharging ? t('settings.recharging') : t('settings.rechargeBtn')}
+                  </button>
+                </>
+              ) : null}
+            </div>
+          </Accordion>
+        )}
 
         <Accordion icon={Monitor} title={t('settings.display')} hint={t('settings.displayHint')}>
           <div className={styles.toggleRow}>

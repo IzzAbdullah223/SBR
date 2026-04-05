@@ -87,6 +87,10 @@ const MapView = ({
   loadingStop = false,
   onStopClick,
   onStopClose,
+  isFavorite,
+  onAddFavorite,
+  onRemoveFavorite,
+  user,
   theme = 'light',
 }) => {
   const { t } = useTranslation();
@@ -213,6 +217,10 @@ const MapView = ({
           stop={selectedStop}
           loadingStop={loadingStop}
           onClose={onStopClose}
+          isFavorite={isFavorite ? isFavorite(selectedStop.stopId) : false}
+          onAddFavorite={onAddFavorite}
+          onRemoveFavorite={onRemoveFavorite}
+          user={user}
         />
       )}
     </div>

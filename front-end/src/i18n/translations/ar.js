@@ -51,7 +51,16 @@ const ar = {
     viewOnMap: 'عرض على الخريطة',
     selected: 'تم الاختيار ✓',
     findingRoutes: 'جارٍ البحث عن أفضل مسارات الحافلات...',
-    emptyState: 'أدخل نقطة الانطلاق والوجهة للعثور على الحافلات',
+    emptyState:     'أدخل نقطة الانطلاق والوجهة للعثور على الحافلات',
+    nol:            'نول',
+    cash:           'نقداً',
+    topUpNeeded:    'رصيد غير كافٍ: تحتاج {{amount}} درهم',
+    walkTo:         'امشِ إلى',
+    board:          'اركب الحافلة',
+    transferAt:     'انتقل في',
+    boardNext:      'اركب',
+    arrive:         'الوصول إلى',
+    totalJourney:   'مجموع الرحلة:',
   },
 
   saved: {
@@ -85,9 +94,18 @@ const ar = {
   },
 
   stopCard: {
-    location: 'الموقع',
-    availableRoutes: 'الخطوط المتاحة ({{count}})',
-    amenities: 'المرافق',
+    location:       'الموقع',
+    availableRoutes:'الخطوط المتاحة ({{count}})',
+    amenities:      'المرافق',
+    nextDepartures: 'المغادرات القادمة',
+    now:            'الآن',
+    min:            'دقيقة',
+    favorite:       'حفظ المحطة',
+    unfavorite:     'إزالة المحطة',
+  },
+
+  stops: {
+    myStops: 'محطاتي',
   },
 
   auth: {
@@ -178,6 +196,16 @@ const ar = {
     deleteAccountTitle: 'حذف الحساب؟',
     deleteAccountMessage: 'سيؤدي هذا إلى حذف حسابك وجميع بياناتك بشكل دائم. لا يمكن التراجع عن هذا الإجراء.',
     confirmPasswordPlaceholder: 'أدخل كلمة مرورك للتأكيد',
+    wallet:          'محفظة بطاقة نول',
+    walletHint:      'رصيد بطاقة نول الافتراضية وإعادة الشحن',
+    walletLoading:   'جارٍ تحميل المحفظة...',
+    walletBalance:   'الرصيد الحالي',
+    aed:             'درهم',
+    lowBalance:      'رصيد منخفض',
+    cardNumber:      'رقم البطاقة',
+    rechargeAmount:  'مبلغ الشحن (درهم)',
+    rechargeBtn:     'شحن الرصيد',
+    recharging:      'جارٍ الشحن...',
     cancel: 'إلغاء',
     confirm: 'تأكيد',
   },

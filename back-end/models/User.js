@@ -59,6 +59,17 @@ const userSchema = new mongoose.Schema({
     },
   },
 
+  // Favorite bus stops — saved from the map stop card
+  favoriteStops: [{
+    stopId:   { type: String, required: true },
+    name:     { type: String, required: true },
+    position: {
+      lat: { type: Number, required: true },
+      lng: { type: Number, required: true },
+    },
+    savedAt: { type: Date, default: Date.now },
+  }],
+
   isActive:     { type: Boolean, default: true },
   isVerified:   { type: Boolean, default: false },
   lastLogin:    { type: Date },
@@ -93,8 +104,9 @@ userSchema.methods.getPublicProfile = function () {
     name: this.name,
     email: this.email,
     phone: this.phone,
-    preferences: this.preferences,
-    createdAt: this.createdAt,
+    preferences:    this.preferences,
+    favoriteStops:  this.favoriteStops,
+    createdAt:      this.createdAt,
   };
 };
 

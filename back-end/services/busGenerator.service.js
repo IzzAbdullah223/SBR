@@ -42,7 +42,9 @@ export const generateDirectBuses = (routeInfo, origin, destination, currentTime 
 
       arrivalTime: arrival.minutesFromNow,
       travelTime: routeTravelTime,
-      cost: route.fare?.baseFare || 3,
+      cost: route.fare?.nolFare || route.fare?.baseFare || 3,
+      nolFare: route.fare?.nolFare || route.fare?.baseFare || 3,
+      cashFare: route.fare?.cashFare || (route.fare?.baseFare || 3) + 1,
       walkingDistance,
       walkingTime,
       transfers: 0,
@@ -95,17 +97,25 @@ export const generateTransferBuses = async (transferInfo, origin, destination, c
   const transferWaitTime = 5;
   const leg1Arrivals = scheduleGen.generateArrivalTimes(frequency1, dubaiTime, 3);
 
-  leg1Arrivals.forEach((leg1Arrival, i) => {
-    const arrivalAtTransfer = scheduleGen.estimateTransferStopArrival(
-      leg1Arrival.minutesFromNow,
-      walkingTime,
-      leg1Duration
-    );
+  // Use stop sequence position to estimate how far into route1 the transfer stop sits,
+  // rather than always assuming the halfway point (0.5).
+  const route1Stops = route1.stops || [];
+  const transferIndex = route1Stops.findIndex(s => s.stopId === transferStopId);
+  const transferRatio = transferIndex >= 0
+    ? transferIndex / Math.max(route1Stops.length - 1, 1)
+    : 0.5;
 
+  leg1Arrivals.forEach((leg1Arrival, i) => {
+    const timeToTransferStop = walkingTime + (leg1Duration * transferRatio);
+    const arrivalAtTransfer = leg1Arrival.minutesFromNow + timeToTransferStop;
     const leg2DepartureMin = Math.ceil(arrivalAtTransfer + transferWaitTime);
     const leg2DepartureTime = timeHelper.addMinutes(dubaiTime, leg2DepartureMin);
     const totalTime = scheduleGen.calculateTransferTime(leg1Duration, transferWaitTime, leg2Duration);
-    const totalCost = (route1.fare?.baseFare || 3) + (route2.fare?.baseFare || 3);
+    const leg1Nol  = route1.fare?.nolFare  || route1.fare?.baseFare || 3;
+    const leg2Nol  = route2.fare?.nolFare  || route2.fare?.baseFare || 3;
+    const leg1Cash = route1.fare?.cashFare || leg1Nol + 1;
+    const leg2Cash = route2.fare?.cashFare || leg2Nol + 1;
+    const totalCost = leg1Nol + leg2Nol;
     const busId = `${route1.routeNumber}-${route2.routeNumber}-${Date.now()}-${i}`;
 
     buses.push({
@@ -118,12 +128,12 @@ export const generateTransferBuses = async (transferInfo, origin, destination, c
       arrivalTime: leg1Arrival.minutesFromNow,
       travelTime: totalTime,
       cost: totalCost,
+      nolFare: leg1Nol + leg2Nol,
+      cashFare: leg1Cash + leg2Cash,
       walkingDistance,
       walkingTime,
       transfers: 1,
 
-      // departureTime is the leg 1 departure — BusResults.jsx reads bus.departureTime
-      // for the top-level display line, so transfer buses need this field too
       departureTime: leg1Arrival.formatted,
       departureTime24: leg1Arrival.formatted24,
 
@@ -137,14 +147,18 @@ export const generateTransferBuses = async (transferInfo, origin, destination, c
         routeNumber: route1.routeNumber,
         routeName: route1.name || `Route ${route1.routeNumber}`,
         duration: leg1Duration,
-        cost: route1.fare?.baseFare || 3,
+        cost: leg1Nol,
+        nolFare: leg1Nol,
+        cashFare: leg1Cash,
         departureTime: leg1Arrival.formatted,
       },
       leg2: {
         routeNumber: route2.routeNumber,
         routeName: route2.name || `Route ${route2.routeNumber}`,
         duration: leg2Duration,
-        cost: route2.fare?.baseFare || 3,
+        cost: leg2Nol,
+        nolFare: leg2Nol,
+        cashFare: leg2Cash,
         departureTime: timeHelper.formatTime(leg2DepartureTime),
       },
       transferStop: {

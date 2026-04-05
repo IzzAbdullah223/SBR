@@ -51,7 +51,16 @@ const en = {
     viewOnMap: 'View on Map',
     selected: 'Selected ✓',
     findingRoutes: 'Finding best bus routes...',
-    emptyState: 'Enter origin and destination to find buses',
+    emptyState:     'Enter origin and destination to find buses',
+    nol:            'Nol',
+    cash:           'Cash',
+    topUpNeeded:    'Top up needed: {{amount}} AED short',
+    walkTo:         'Walk to',
+    board:          'Board Bus',
+    transferAt:     'Transfer at',
+    boardNext:      'Board',
+    arrive:         'Arrive at',
+    totalJourney:   'Total journey:',
   },
 
   saved: {
@@ -85,9 +94,18 @@ const en = {
   },
 
   stopCard: {
-    location: 'Location',
-    availableRoutes: 'Available Routes ({{count}})',
-    amenities: 'Amenities',
+    location:       'Location',
+    availableRoutes:'Available Routes ({{count}})',
+    amenities:      'Amenities',
+    nextDepartures: 'Next Departures',
+    now:            'Now',
+    min:            'min',
+    favorite:       'Save stop',
+    unfavorite:     'Remove stop',
+  },
+
+  stops: {
+    myStops: 'My Stops',
   },
 
   auth: {
@@ -178,6 +196,16 @@ const en = {
     deleteAccountTitle: 'Delete Account?',
     deleteAccountMessage: 'This will permanently delete your account and all data. This cannot be undone.',
     confirmPasswordPlaceholder: 'Enter your password to confirm',
+    wallet:          'Nol Card Wallet',
+    walletHint:      'Virtual Nol card balance and top-up',
+    walletLoading:   'Loading wallet...',
+    walletBalance:   'Current Balance',
+    aed:             'AED',
+    lowBalance:      'Low balance',
+    cardNumber:      'Card Number',
+    rechargeAmount:  'Top-up amount (AED)',
+    rechargeBtn:     'Top Up',
+    recharging:      'Topping up...',
     cancel: 'Cancel',
     confirm: 'Confirm',
   },

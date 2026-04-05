@@ -3,12 +3,15 @@ import MapComponent from '../../Components/Map/Map';
 import SearchInput from '../../Components/SearchInput/SearchInput';
 import BusResults from '../../Components/BusResults/BusResults';
 import SavedRoutes from '../../Components/SavedRoutes/SavedRoutes';
+import FavoriteStops from '../../Components/FavoriteStops/FavoriteStops';
 import { Search, X } from 'lucide-react';
 import { MAP_CONFIG } from '../../utils/constants';
 import useFindBuses from '../../hooks/useFindBuses';
 import useShape from '../../hooks/useShape';
 import useSavedRoutes from '../../hooks/useSavedRoutes';
 import useBusStop from '../../hooks/useBusStop';
+import useWallet from '../../hooks/useWallet';
+import useFavoriteStops from '../../hooks/useFavoriteStop';
 import Navbar from '../../Components/NavBar/Navbar';
 import Modal from '../../Components/Modal/Modal';
 import { SignUp } from '../Authentication/SignUp/SignUp';
@@ -32,13 +35,13 @@ const Home = ({
 }) => {
   const { t } = useTranslation();
 
-  const [originInput, setOriginInput] = useState('');
+  const [originInput,      setOriginInput]      = useState('');
   const [destinationInput, setDestinationInput] = useState('');
-  const [origin, setOrigin] = useState(null);
-  const [destination, setDestination] = useState(null);
-  const [selectedBus, setSelectedBus] = useState(null);
+  const [origin,           setOrigin]           = useState(null);
+  const [destination,      setDestination]      = useState(null);
+  const [selectedBus,      setSelectedBus]      = useState(null);
   const [programmaticFill, setProgrammaticFill] = useState(false);
-  const [inputError, setInputError] = useState(null);
+  const [inputError,       setInputError]       = useState(null);
 
   const [optimizationMode, setOptimizationMode] = useState(
     () => user?.preferences?.optimizationMode || 'fastest'
@@ -56,18 +59,21 @@ const Home = ({
   };
 
   const { buses, loading, error, errorType, findBuses, clearResults } = useFindBuses();
-  const { shapeCoordinates, shapeCoordinatesLeg2 } = useShape(selectedBus);
+  const { shapeCoordinates, shapeCoordinatesLeg2 }                   = useShape(selectedBus);
+  const { selectedStop, loadingStop, selectStop, clearStop }         = useBusStop();
 
-  // useBusStop handles: immediate display of basic stop data,
-  // then fetches full stop from GET /api/bus-stops/:stopId for routes + amenities
-  const { selectedStop, loadingStop, selectStop, clearStop } = useBusStop();
+  // Feature 2 — Nol Wallet
+  const { walletBalance } = useWallet(user);
+
+  // Feature 4 — Favorite Stops
+  const { favoriteStops, addFavorite, removeFavorite, isFavorite } = useFavoriteStops(user);
 
   const {
     savedRoutes, loadingSaved, savingKey, saveError, showSaved,
     saveRoute, deleteSavedRoute, toggleSavedPanel, setSaveError, isJourneySaved,
   } = useSavedRoutes(user);
 
-  const isSavingJourney = !!(origin && destination && savingKey === `${origin.name}__${destination.name}`);
+  const isSavingJourney    = !!(origin && destination && savingKey === `${origin.name}__${destination.name}`);
   const journeyAlreadySaved = !!(origin && destination && isJourneySaved(origin.lat, origin.lng, destination.lat, destination.lng));
 
   const handleOriginChange = (e, locationData) => {
@@ -140,6 +146,11 @@ const Home = ({
     if (showSaved) toggleSavedPanel();
   };
 
+  // Feature 4 — clicking a favorite stop chip opens the stop card on the map
+  const handleFavoriteStopClick = (stop) => {
+    selectStop(stop);
+  };
+
   const mapStops = useMemo(() => {
     if (!selectedBus) return [];
     const stops = [];
@@ -167,7 +178,8 @@ const Home = ({
       <div className={styles.content}>
         <div className={styles.leftPanel}>
 
-          <div className={styles.section}>
+          <div className={styles.sectionTop}>
+            {/* Saved journey chips */}
             <div className={styles.savedRoutesPinned}>
               <SavedRoutes
                 savedRoutes={savedRoutes}
@@ -179,6 +191,14 @@ const Home = ({
                 onToggle={toggleSavedPanel}
               />
             </div>
+
+            {/* Feature 4 — Favorite stop chips (second row, only when user has favorites) */}
+            <FavoriteStops
+              favoriteStops={favoriteStops}
+              user={user}
+              onStopClick={handleFavoriteStopClick}
+            />
+
             <p className={styles.sectionTitle}>{t('home.whereGoing')}</p>
             <SearchInput
               label={t('home.labelOrigin')}
@@ -261,6 +281,7 @@ const Home = ({
                 isSavingJourney={isSavingJourney}
                 journeyAlreadySaved={journeyAlreadySaved}
                 user={user}
+                walletBalance={walletBalance}
               />
             </div>
           )}
@@ -279,6 +300,10 @@ const Home = ({
             loadingStop={loadingStop}
             onStopClick={selectStop}
             onStopClose={clearStop}
+            isFavorite={isFavorite}
+            onAddFavorite={addFavorite}
+            onRemoveFavorite={removeFavorite}
+            user={user}
             theme={theme}
           />
         </div>

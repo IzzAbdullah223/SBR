@@ -534,3 +534,151 @@
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
+/* ─── Feature 1: TOPSIS plain-language label ─── */
+.topsisLabel {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  letter-spacing: 0.3px;
+  margin-bottom: 10px;
+}
+
+.scoreRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.scoreLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--gray-400);
+}
+
+.score {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+/* ─── Feature 2: Nol card fare display ─── */
+.nolFare {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--teal);
+}
+
+.cashFare {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.balanceWarn {
+  grid-column: 1 / -1;
+  background: rgba(255, 77, 109, 0.08);
+  border: 1px solid rgba(255, 77, 109, 0.25);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.warnText {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--error);
+}
+
+/* ─── Feature 3: Journey Timeline ─── */
+.timeline {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.busCard:not(.selected) .timeline {
+  border-top-color: var(--border);
+}
+
+.timelineStep {
+  display: flex;
+  gap: 12px;
+  position: relative;
+}
+
+.timelineStep:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 26px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+
+.busCard.selected .timelineStep:not(:last-child)::before {
+  background: rgba(255,255,255,0.2);
+}
+
+.timelineDot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 13px;
+  z-index: 1;
+  margin-bottom: 4px;
+}
+
+.dotWalk    { background: rgba(240,165,0,0.15);  color: var(--gold); }
+.dotBus     { background: rgba(102,126,234,0.15); color: #667eea; }
+.dotTransfer{ background: rgba(0,201,167,0.15);   color: var(--teal); }
+.dotArrive  { background: rgba(76,175,80,0.15);   color: #4CAF50; }
+
+.timelineContent {
+  padding: 4px 0 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.timelineTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 2px;
+  line-height: 1.4;
+}
+
+.busCard.selected .timelineTitle { color: #fff; }
+
+.timelineSub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.busCard.selected .timelineSub { color: rgba(255,255,255,0.6); }
+
+.timelineTime {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold);
+  white-space: nowrap;
+  padding-top: 4px;
+  flex-shrink: 0;
+}

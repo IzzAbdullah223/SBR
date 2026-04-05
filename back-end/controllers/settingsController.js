@@ -151,3 +151,56 @@ export const updateLanguage = async (req, res) => {
     res.status(500).json({ message: 'Failed to update language', error: err.message });
   }
 };
+// ── GET FAVORITE STOPS ────────────────────────────────────────────────────
+export const getFavoriteStops = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ success: true, data: user.favoriteStops || [] });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch favorite stops', error: err.message });
+  }
+};
+
+// ── ADD FAVORITE STOP ─────────────────────────────────────────────────────
+export const addFavoriteStop = async (req, res) => {
+  try {
+    const { stopId, name, position } = req.body;
+    if (!stopId || !name || !position?.lat || !position?.lng) {
+      return res.status(400).json({ message: 'stopId, name and position are required' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Prevent duplicates
+    const already = user.favoriteStops.some(s => s.stopId === stopId);
+    if (already) {
+      return res.status(409).json({ message: 'Stop already in favorites' });
+    }
+
+    user.favoriteStops.push({ stopId, name, position, savedAt: new Date() });
+    await user.save();
+
+    res.json({ success: true, data: user.favoriteStops });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to add favorite stop', error: err.message });
+  }
+};
+
+// ── REMOVE FAVORITE STOP ─────────────────────────────────────────────────
+export const removeFavoriteStop = async (req, res) => {
+  try {
+    const { stopId } = req.params;
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.favoriteStops = user.favoriteStops.filter(s => s.stopId !== stopId);
+    await user.save();
+
+    res.json({ success: true, data: user.favoriteStops });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to remove favorite stop', error: err.message });
+  }
+};

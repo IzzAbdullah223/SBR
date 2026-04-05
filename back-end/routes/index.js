@@ -1,25 +1,22 @@
-/**
- * MAIN ROUTES INDEX
- * Combines all route modules
- */
-
 import express from 'express';
-import busStopRoutes from './busStopRoutes.js';
-import busRouteRoutes from './busRouteRoutes.js';
-import topsisRoutes from './topsisRoutes.js';
-import shapeRoutes from './shapeRoutes.js';
-import authRoutes from './authRoute.js';
-import savedRouteRoutes from './savedRoutes.js'; 
-import settingsRoutes from './settingsRoutes.js';
+import busStopRoutes    from './busStopRoutes.js';
+import busRouteRoutes   from './busRouteRoutes.js';
+import topsisRoutes     from './topsisRoutes.js';
+import shapeRoutes      from './shapeRoutes.js';
+import authRoutes       from './authRoute.js';
+import savedRouteRoutes from './savedRoutes.js';
+import settingsRoutes   from './settingsRoutes.js';
+import walletRoutes     from './walletRoutes.js';
 
 const router = express.Router();
 
-router.use('/bus-stops', busStopRoutes);
-router.use('/routes', busRouteRoutes);
-router.use('/find-buses', topsisRoutes);
-router.use('/shapes', shapeRoutes);
-router.use('/auth', authRoutes);
-router.use('/saved-routes', savedRouteRoutes); // ✅ ADDED
-router.use('/settings', settingsRoutes)
+router.use('/bus-stops',    busStopRoutes);
+router.use('/routes',       busRouteRoutes);
+router.use('/find-buses',   topsisRoutes);
+router.use('/shapes',       shapeRoutes);
+router.use('/auth',         authRoutes);
+router.use('/saved-routes', savedRouteRoutes);
+router.use('/settings',     settingsRoutes);
+router.use('/wallet',       walletRoutes);
 
 export default router;

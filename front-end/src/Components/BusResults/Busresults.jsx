@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { Clock, DollarSign, MapPin, GitMerge, Star, Award, Navigation, ArrowRight, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Clock, DollarSign, MapPin, GitMerge, Star, Award, Navigation, ArrowRight, Bookmark, BookmarkCheck, CreditCard } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { getRouteLabel } from '../../utils/routeLabels';
 import styles from './BusResults.module.css';
 
-const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, isSavingJourney, journeyAlreadySaved, user }) => {
+const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, isSavingJourney, journeyAlreadySaved, user, walletBalance = null }) => {
   const { t } = useTranslation();
   const cardRefs = useRef({});
 
@@ -43,6 +44,12 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
     return '#F44336';
   };
 
+  const getLabelStyle = (color) => {
+    if (color === 'gold') return { background: 'rgba(240,165,0,0.15)', color: 'var(--gold)' };
+    if (color === 'teal') return { background: 'rgba(0,201,167,0.12)', color: 'var(--teal)' };
+    return { background: 'var(--bg-page)', color: 'var(--text-muted)' };
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -78,6 +85,7 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
         {buses.map((bus, index) => {
           const isSelected = selectedBus?.busId === bus.busId;
           const scoreColor = getScoreColor(bus.score);
+          const label      = getRouteLabel(bus, buses);
 
           return (
             <div
@@ -106,9 +114,16 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
               </div>
 
               <div className={styles.scoreSection}>
-                <div className={styles.scoreLabel}>{t('results.topsisScore')}</div>
-                <div className={styles.score} style={{ color: scoreColor }}>
-                  {(bus.score * 100).toFixed(1)}%
+                {/* Plain-language label — primary info for the user */}
+                <div className={styles.topsisLabel} style={getLabelStyle(label.color)}>
+                  {label.text}
+                </div>
+                {/* Technical score — secondary, for academic presentation */}
+                <div className={styles.scoreRow}>
+                  <span className={styles.scoreLabel}>{t('results.topsisScore')}</span>
+                  <span className={styles.score} style={{ color: scoreColor }}>
+                    {(bus.score * 100).toFixed(0)}%
+                  </span>
                 </div>
                 <div className={styles.scoreBar}>
                   <div
@@ -140,10 +155,29 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
                 </div>
 
                 <div className={styles.criteriaItem}>
-                  <DollarSign size={16} color="#4CAF50" />
+                  <CreditCard size={16} color="#4CAF50" />
                   <span className={styles.criteriaLabel}>{t('results.fare')}</span>
-                  <span className={styles.criteriaValue}>{bus.cost} {t('results.aed')}</span>
+                  <span className={styles.criteriaValue}>
+                    <span className={styles.nolFare}>
+                      {t('results.nol')} {bus.nolFare ?? bus.cost} {t('results.aed')}
+                    </span>
+                    <span className={styles.cashFare}>
+                      {t('results.cash')} {bus.cashFare ?? (bus.cost + 1)} {t('results.aed')}
+                    </span>
+                  </span>
                 </div>
+
+                {/* Nol balance warning — only shown when user is logged in and wallet loaded */}
+                {walletBalance !== null && walletBalance < (bus.nolFare ?? bus.cost) && (
+                  <div className={`${styles.criteriaItem} ${styles.balanceWarn}`}>
+                    <DollarSign size={14} color="var(--error)" />
+                    <span className={styles.warnText}>
+                      {t('results.topUpNeeded', {
+                        amount: ((bus.nolFare ?? bus.cost) - walletBalance).toFixed(2)
+                      })}
+                    </span>
+                  </div>
+                )}
 
                 <div className={styles.criteriaItem}>
                   <MapPin size={16} color="#FF9800" />
@@ -199,6 +233,63 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
                 <ArrowRight size={14} />
                 <span className={styles.destStop}>🏁 {bus.destinationStop?.name}</span>
               </div>
+
+              {/* Feature 3 — Journey Timeline, expands when card is selected */}
+              {isSelected && (
+                <div className={styles.timeline}>
+                  <div className={styles.timelineStep}>
+                    <div className={`${styles.timelineDot} ${styles.dotWalk}`}>🚶</div>
+                    <div className={styles.timelineContent}>
+                      <p className={styles.timelineTitle}>
+                        {t('results.walkTo')} {bus.originStop?.name}
+                      </p>
+                      <p className={styles.timelineSub}>
+                        {bus.walkingDistance} {t('results.km')} · {bus.walkingTime} {t('results.minutes')}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className={styles.timelineStep}>
+                    <div className={`${styles.timelineDot} ${styles.dotBus}`}>🚌</div>
+                    <div className={styles.timelineContent}>
+                      <p className={styles.timelineTitle}>
+                        {t('results.board')} {bus.journeyType === 'transfer' ? bus.leg1?.routeNumber : bus.routeNumber}
+                      </p>
+                      <p className={styles.timelineSub}>
+                        {bus.journeyType === 'transfer' ? bus.leg1?.routeName : bus.routeName}
+                      </p>
+                    </div>
+                    <span className={styles.timelineTime}>{bus.departureTime}</span>
+                  </div>
+
+                  {bus.journeyType === 'transfer' && bus.transferStop && (
+                    <div className={styles.timelineStep}>
+                      <div className={`${styles.timelineDot} ${styles.dotTransfer}`}>🔄</div>
+                      <div className={styles.timelineContent}>
+                        <p className={styles.timelineTitle}>
+                          {t('results.transferAt')} {bus.transferStop?.name}
+                        </p>
+                        <p className={styles.timelineSub}>
+                          {t('results.boardNext')} {bus.leg2?.routeNumber}
+                        </p>
+                      </div>
+                      <span className={styles.timelineTime}>{bus.leg2?.departureTime}</span>
+                    </div>
+                  )}
+
+                  <div className={styles.timelineStep}>
+                    <div className={`${styles.timelineDot} ${styles.dotArrive}`}>📍</div>
+                    <div className={styles.timelineContent}>
+                      <p className={styles.timelineTitle}>
+                        {t('results.arrive')} {bus.destinationStop?.name}
+                      </p>
+                      <p className={styles.timelineSub}>
+                        {t('results.totalJourney')} {bus.travelTime} {t('results.minutes')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <button className={`${styles.selectButton} ${isSelected ? styles.selectedBtn : ''}`}>
                 {isSelected ? t('results.selected') : t('results.viewOnMap')}
