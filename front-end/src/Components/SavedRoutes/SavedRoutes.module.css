@@ -1,16 +1,10 @@
-/* ═══════════════════════════════════════════════════════
-   SAVEDROUTES — Citymapper-inspired redesign
-   Horizontal quick-chips when collapsed, full cards expanded
-═══════════════════════════════════════════════════════ */
-
 /* ── Wrapper ── */
 .wrapper {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 /* ═══════════════════════════════════════════════════════
    COLLAPSED STATE — horizontal scrollable chips row
-   inspired by Citymapper's "Go to" quick shortcuts
 ═══════════════════════════════════════════════════════ */
 
 .collapsedRow {
@@ -19,7 +13,6 @@
   gap: 8px;
 }
 
-/* small bookmark button that opens the full panel */
 .toggleChip {
   display: flex;
   align-items: center;
@@ -30,6 +23,7 @@
   border-radius: 99px;
   cursor: pointer;
   flex-shrink: 0;
+  min-width: 110px;
   transition: background 0.2s;
 }
 
@@ -55,14 +49,18 @@
   line-height: 1.5;
 }
 
-/* horizontal scroll rail for quick-access chips */
+/* Chip rail — hard-capped to show exactly 2 chips (140px each + 6px gap = 286px).
+   The fade mask on the right edge signals there are more chips to scroll. */
 .chipsRail {
   display: flex;
   gap: 6px;
   overflow-x: auto;
-  flex: 1;
+  flex: 0 0 auto;
+  width: 286px;
   padding-bottom: 2px;
   scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, black 75%, transparent 100%);
+  mask-image: linear-gradient(to right, black 75%, transparent 100%);
 }
 .chipsRail::-webkit-scrollbar { display: none; }
 
@@ -76,13 +74,23 @@
   border: 1.5px solid var(--border);
   border-radius: 99px;
   cursor: pointer;
-  white-space: nowrap;
   flex-shrink: 0;
+  max-width: 140px;
+  overflow: hidden;
   transition: all 0.18s ease;
   font-family: 'DM Sans', sans-serif;
   font-size: 12px;
   font-weight: 600;
   color: var(--text-primary);
+}
+
+/* Text inside chip — truncates cleanly */
+.chip span,
+.chip > *:last-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .chip:hover {
@@ -119,7 +127,6 @@
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* panel top bar */
 .panelHeader {
   display: flex;
   align-items: center;
@@ -163,7 +170,6 @@
   font-family: 'DM Sans', sans-serif;
 }
 
-/* close X button */
 .closeBtn {
   width: 28px;
   height: 28px;
@@ -212,7 +218,6 @@
 
 .card:hover .deleteBtn { opacity: 1; transform: scale(1); }
 
-/* connector column */
 .connector {
   display: flex;
   flex-direction: column;
@@ -244,7 +249,6 @@
   box-shadow: 0 0 0 3px rgba(240,165,0,0.15);
 }
 
-/* text column */
 .journey {
   flex: 1;
   min-width: 0;
@@ -273,7 +277,6 @@
   line-height: 1.4;
 }
 
-/* go arrow */
 .goArrow {
   color: var(--gray-400);
   flex-shrink: 0;
@@ -284,7 +287,6 @@
   transform: translateX(2px);
 }
 
-/* delete — hidden until hover */
 .deleteBtn {
   position: absolute;
   right: 8px;

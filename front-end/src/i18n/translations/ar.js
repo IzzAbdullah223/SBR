@@ -19,6 +19,7 @@ const ar = {
     clearAll: 'مسح الكل',
     loginToSave: 'سجّل دخولك لحفظ تفضيلاتك',
     logIn: 'تسجيل الدخول',
+    clearPin: 'إزالة المحطة',
     selectFromDropdown: 'يرجى اختيار نقطة الانطلاق والوجهة من القائمة المنسدلة.',
   },
 
@@ -71,7 +72,7 @@ const ar = {
     loading: 'جارٍ تحميل المسارات المحفوظة...',
     empty: 'لا توجد مسارات محفوظة بعد',
     emptySubtitle: 'ابحث عن مسار واضغط على "حفظ الرحلة" لتثبيته هنا للوصول السريع.',
-    buttonLabel: 'المحفوظات',
+    buttonLabel: 'رحلاتي',
     remove: 'حذف',
     close: 'إغلاق',
   },
@@ -102,10 +103,17 @@ const ar = {
     min:            'دقيقة',
     favorite:       'حفظ المحطة',
     unfavorite:     'إزالة المحطة',
+    setAsOrigin:    'تعيين كنقطة انطلاق',
+    setAsDest:      'تعيين كوجهة',
   },
 
   stops: {
-    myStops: 'محطاتي',
+    myStops:      'محطاتي',
+    savedCount:   '{{count}} محفوظ',
+    empty:        'لا توجد محطات مفضلة بعد',
+    emptySubtitle:'اضغط على النجمة في أي محطة لحفظها هنا.',
+    remove:       'حذف',
+    close:        'إغلاق',
   },
 
   auth: {

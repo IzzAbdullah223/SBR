@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-import Home from './Pages/Home/Home';
+import Home     from './Pages/Home/Home';
 import Settings from './Pages/Settings/Settings';
-import useAuth from './hooks/useAuth';
+import useAuth   from './hooks/useAuth';
+import useWallet from './hooks/useWallet';
 
 function App() {
   const {
@@ -21,8 +22,18 @@ function App() {
     closeSignUp,
   } = useAuth();
 
+  // Single wallet call — shared across Home (balance warning) and Settings (full UI)
+  const {
+    wallet,
+    loadingWallet,
+    recharging,
+    walletError,
+    setWalletError,
+    recharge,
+    walletBalance,
+  } = useWallet(user);
+
   return (
-    // data-theme on the root div — all CSS variables switch instantly
     <div className="App" data-theme={theme}>
       <BrowserRouter>
         <Routes>
@@ -42,6 +53,7 @@ function App() {
                 openSignUp={openSignUp}
                 closeLogin={closeLogin}
                 closeSignUp={closeSignUp}
+                walletBalance={walletBalance}
               />
             }
           />
@@ -56,6 +68,12 @@ function App() {
                     onLogout={handleLogout}
                     theme={theme}
                     toggleTheme={toggleTheme}
+                    wallet={wallet}
+                    loadingWallet={loadingWallet}
+                    recharging={recharging}
+                    walletError={walletError}
+                    setWalletError={setWalletError}
+                    recharge={recharge}
                   />
                 : <Navigate to="/" replace />
             }

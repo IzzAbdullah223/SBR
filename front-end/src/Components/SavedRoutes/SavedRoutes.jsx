@@ -28,7 +28,7 @@ const SavedRoutes = ({ savedRoutes, loading, onDelete, onSelectJourney, user, is
                   title={`${route.origin?.name} → ${route.destination?.name}`}
                 >
                   <div className={styles.chipDot} />
-                  {route.destination?.name?.split(',')[0]}
+                  <span>{route.destination?.name?.split(',')[0]}</span>
                 </button>
               ))}
             </div>

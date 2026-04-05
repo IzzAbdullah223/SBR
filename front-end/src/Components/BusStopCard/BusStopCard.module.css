@@ -197,3 +197,31 @@
 [dir="rtl"] .closeBtn { right: auto; left: 12px; }
 [dir="rtl"] .header { padding-right: 0; padding-left: 28px; }
 [dir="rtl"] .starBtn { margin-left: 0; margin-right: auto; }
+
+/* ── Action buttons (Set as Origin / Destination) ── */
+.actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.actionBtn {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: center;
+}
+
+.actionBtn:hover {
+  border-color: var(--teal);
+  background: rgba(0,201,167,0.08);
+  color: var(--teal);
+}

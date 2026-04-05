@@ -19,6 +19,7 @@ const en = {
     clearAll: 'Clear all',
     loginToSave: 'Log in to save your preference',
     logIn: 'Log in',
+    clearPin: 'Clear pinned stop',
     selectFromDropdown: 'Please select both origin and destination from the dropdown suggestions.',
   },
 
@@ -71,7 +72,7 @@ const en = {
     loading: 'Loading saved routes...',
     empty: 'No saved routes yet',
     emptySubtitle: 'Search for a route and tap "Save Journey" to pin it here for quick access.',
-    buttonLabel: 'Saved',
+    buttonLabel: 'My Journeys',
     remove: 'Remove',
     close: 'Close',
   },
@@ -102,10 +103,17 @@ const en = {
     min:            'min',
     favorite:       'Save stop',
     unfavorite:     'Remove stop',
+    setAsOrigin:    'Set as Origin',
+    setAsDest:      'Set as Destination',
   },
 
   stops: {
-    myStops: 'My Stops',
+    myStops:      'My Stops',
+    savedCount:   '{{count}} saved',
+    empty:        'No favorite stops yet',
+    emptySubtitle:'Tap the star on any bus stop to save it here.',
+    remove:       'Remove',
+    close:        'Close',
   },
 
   auth: {

@@ -23,6 +23,8 @@ const BusStopCard = ({
   isFavorite       = false,
   onAddFavorite,
   onRemoveFavorite,
+  onSetAsOrigin,
+  onSetAsDestination,
   user,
 }) => {
   const { t } = useTranslation();
@@ -134,6 +136,22 @@ const BusStopCard = ({
               </ul>
             </div>
           )}
+
+          {/* Action buttons — pin this stop as origin or destination */}
+          <div className={styles.actions}>
+            <button
+              className={styles.actionBtn}
+              onClick={() => onSetAsOrigin && onSetAsOrigin(stop)}
+            >
+              {t('stopCard.setAsOrigin')}
+            </button>
+            <button
+              className={styles.actionBtn}
+              onClick={() => onSetAsDestination && onSetAsDestination(stop)}
+            >
+              {t('stopCard.setAsDest')}
+            </button>
+          </div>
         </div>
       )}
     </div>

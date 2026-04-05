@@ -1,39 +1,50 @@
-.row {
+.wrapper {
+  margin-bottom: 10px;
+}
+
+/* ── COLLAPSED ── */
+.collapsedRow {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
 }
 
-.label {
+.toggleChip {
   display: flex;
   align-items: center;
-  gap: 5px;
-  flex-shrink: 0;
-  padding: 5px 10px;
-  background: rgba(240,165,0,0.1);
-  border: 1px solid rgba(240,165,0,0.25);
+  gap: 6px;
+  padding: 7px 12px;
+  background: var(--navy);
+  border: none;
   border-radius: 99px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 11px;
+  cursor: pointer;
+  flex-shrink: 0;
+  min-width: 110px;
+  transition: background 0.2s;
+}
+.toggleChip:hover { background: #0f1f38; }
+
+.toggleChipIcon { color: var(--gold); }
+
+.toggleChipLabel {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
   font-weight: 700;
-  color: var(--gold);
+  color: #fff;
   white-space: nowrap;
 }
 
-.starIcon { color: var(--gold); }
-
-.count {
+.toggleChipCount {
   background: var(--gold);
-  color: var(--navbar-bg);
+  color: var(--navy);
   font-size: 10px;
   font-weight: 800;
-  padding: 1px 5px;
+  padding: 1px 6px;
   border-radius: 99px;
   line-height: 1.5;
 }
 
-/* Rail — same max-width pattern as SavedRoutes so 2 chips show */
+/* Chip rail — exactly 2 chips visible, same as SavedRoutes */
 .chipsRail {
   display: flex;
   gap: 6px;
@@ -51,32 +62,231 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 10px;
+  padding: 7px 12px;
   background: var(--bg-card);
-  border: 1.5px solid rgba(240,165,0,0.3);
+  border: 1.5px solid var(--border);
   border-radius: 99px;
   cursor: pointer;
-  white-space: nowrap;
   flex-shrink: 0;
-  max-width: 130px;
+  max-width: 140px;
   overflow: hidden;
   transition: all 0.18s ease;
   font-family: 'DM Sans', sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-.chip:hover {
-  border-color: var(--gold);
-  background: rgba(240,165,0,0.08);
-  transform: translateY(-1px);
-}
-
-.chipIcon { color: var(--gold); flex-shrink: 0; }
-
-.chipLabel {
+.chip span,
+.chip > *:last-child {
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+}
+.chip:hover {
+  border-color: var(--gold);
+  background: rgba(240,165,0,0.06);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(240,165,0,0.15);
+}
+
+.chipDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+/* ── EXPANDED PANEL ── */
+.panel {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  animation: panelOpen 0.22s ease;
+  box-shadow: 0 4px 20px rgba(10,22,40,0.08);
+}
+
+@keyframes panelOpen {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1.5px solid var(--border);
+}
+
+.panelTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panelIconBox {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, var(--navy), #1a3a6e);
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panelIcon { color: var(--gold); }
+
+.panelTitle {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.panelCount {
+  background: var(--bg-page);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.closeBtn {
+  width: 28px;
+  height: 28px;
+  background: var(--bg-page);
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+.closeBtn:hover { background: var(--border); color: var(--text-primary); }
+
+/* ── List ── */
+.list {
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.list::-webkit-scrollbar { width: 3px; }
+.list::-webkit-scrollbar-track { background: transparent; }
+.list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+/* ── Stop card row ── */
+.card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  border: 1.5px solid transparent;
+  position: relative;
+}
+.card:hover {
+  background: var(--bg-page);
+  border-color: var(--border);
+}
+.card:hover .deleteBtn { opacity: 1; transform: scale(1); }
+
+.stopIconBox {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(240,165,0,0.1);
+  border: 1px solid rgba(240,165,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stopIcon { color: var(--gold); }
+
+.stopInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stopName {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+.stopId {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+/* delete — hidden until hover */
+.deleteBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: scale(0.8) translateY(-50%);
+  transform-origin: right center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(255,77,109,0.1);
+  color: #ff4d6d;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+.deleteBtn:hover { background: rgba(255,77,109,0.2); }
+
+/* ── Empty state ── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 20px;
+  text-align: center;
+  gap: 6px;
+}
+
+.emptyIllustration { font-size: 32px; margin-bottom: 4px; line-height: 1; }
+
+.emptyTitle {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.emptySubtitle {
+  font-size: 12px;
+  color: var(--gray-400);
+  margin: 0;
+  line-height: 1.5;
+  max-width: 200px;
 }

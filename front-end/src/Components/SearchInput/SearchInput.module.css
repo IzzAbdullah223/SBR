@@ -160,3 +160,43 @@
   color: var(--gray-400);
   font-size: 13px;
 }
+/* ─── Pinned Stop Pill ─── */
+.pinnedPill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border: 2px solid var(--teal);
+  border-radius: var(--radius-sm);
+  background: rgba(0,201,167,0.08);
+  min-height: 48px;
+}
+
+.pinnedIcon { color: var(--teal); flex-shrink: 0; }
+
+.pinnedName {
+  flex: 1;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pinnedClear {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,201,167,0.15);
+  color: var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.pinnedClear:hover { background: var(--teal); color: #fff; }

@@ -90,6 +90,8 @@ const MapView = ({
   isFavorite,
   onAddFavorite,
   onRemoveFavorite,
+  onSetAsOrigin,
+  onSetAsDestination,
   user,
   theme = 'light',
 }) => {
@@ -220,6 +222,8 @@ const MapView = ({
           isFavorite={isFavorite ? isFavorite(selectedStop.stopId) : false}
           onAddFavorite={onAddFavorite}
           onRemoveFavorite={onRemoveFavorite}
+          onSetAsOrigin={onSetAsOrigin}
+          onSetAsDestination={onSetAsDestination}
           user={user}
         />
       )}

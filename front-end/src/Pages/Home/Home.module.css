@@ -39,13 +39,13 @@
   flex-shrink: 0;
 }
 
-/* Top section holds saved routes chips + search inputs.
-   Less top padding so "Where are you going?" stays visible. */
+/* Top section - FIXED: increased top padding */
 .sectionTop {
-  padding: 10px 24px 16px;
+  padding: 24px 24px 16px;
   flex-shrink: 0;
 }
 
+/* Section Title - FIXED: added top margin */
 .sectionTitle {
   font-family: 'Syne', sans-serif;
   font-size: 15px;
@@ -53,7 +53,7 @@
   line-height: 1.5;
   color: var(--text-primary);
   letter-spacing: 0.2px;
-  margin: 0 0 12px 0;
+  margin: 12px 0 12px 0;
   padding-bottom: 2px;
   display: flex;
   align-items: center;
@@ -207,7 +207,26 @@
 }
 
 /* ─── Saved Routes panel ─── */
-.savedRoutesPinned { margin-bottom: 14px; }
+.savedRoutesPinned { 
+  margin-bottom: 12px;
+}
+
+/* ─── FIX FOR FAVORITE STOPS SPACING ─── */
+/* This targets the wrapper class from FavoriteStops component */
+.wrapper {
+  margin-bottom: 24px !important;
+}
+
+/* Backup selector in case wrapper doesn't work */
+.favoriteStops {
+  margin-bottom: 24px;
+  display: block;
+}
+
+/* Also ensure any div containing favorite stops has spacing */
+[class*="favoriteStops"] {
+  margin-bottom: 24px;
+}
 
 /* ─── Optimization Mode Selector ─── */
 .modeCard {
