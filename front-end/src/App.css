@@ -81,16 +81,18 @@
 
 body {
   font-family: 'DM Sans', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   background: var(--navy);
-  line-height: 1.5;
-  transition: background 0.3s ease, color 0.3s ease;
+  overflow: hidden; /* Prevent the whole browser window from scrolling */
+  height: 100vh;
+  width: 100vw;
 }
 
 .App {
   height: 100vh;
-  overflow: hidden;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Let the specific page handle internal scrolling */
 }
 
 [data-theme="dark"] .leaflet-tile-pane {

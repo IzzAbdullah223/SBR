@@ -46,25 +46,36 @@
 }
 
 /* Section Title - FIXED: added top margin */
+/* --- TEST: Removing the line and flex alignment --- */
 .sectionTitle {
-  font-family: 'Syne', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.5;
+  /* 1. Font & Color */
+  font-family: 'Syne', sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
   color: var(--text-primary);
-  letter-spacing: 0.2px;
-  margin: 12px 0 12px 0;
-  padding-bottom: 2px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+
+  /* 2. Alignment Fix (Works for both EN and AR) */
+  display: block !important; 
+  text-align: inherit; /* This lets the parent or i18n handle RTL/LTR */
+  
+  /* 3. The Slicing Fix */
+  line-height: 1.8 !important; /* Higher line height gives 'y' and 'g' room */
+  padding-bottom: 4px !important; /* Physical gap so the border doesn't touch letters */
+  margin: 24px 0 16px 0 !important;
+  
+  /* 4. The "New" Line (If you still want a line) */
+  border-bottom: 1px solid var(--border); 
+  width: 100%; /* Ensures the line spans the whole width */
+  
+  /* 5. Safety */
+  overflow: visible !important;
+  height: auto !important;
 }
 
+/* --- DELETE OR COMMENT THIS OUT COMPLETELY --- */
 .sectionTitle::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
+  display: none !important;
+  content: none !important;
 }
 
 /* ─── Find + Reset row ─── */

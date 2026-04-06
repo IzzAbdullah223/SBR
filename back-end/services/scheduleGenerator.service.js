@@ -12,11 +12,17 @@ export const getServiceFrequency = (schedule, currentTime) => {
 
 export const generateArrivalTimes = (frequency, currentTime, count = 5) => {
   const arrivals = [];
-  const firstBusOffset = Math.floor(Math.random() * 5) + 1;
+
+  // Simulate user arriving at a random point in the bus cycle.
+  // First bus is between 3 and (frequency - 1) minutes away — never less than 3.
+  // This ensures realistic waits like 5, 9, or 13 minutes, not 1-2 minutes.
+  const minWait = Math.max(3, Math.floor(frequency * 0.2));
+  const maxWait = frequency - 1;
+  const firstBusOffset = Math.floor(Math.random() * (maxWait - minWait + 1)) + minWait;
 
   for (let i = 0; i < count; i++) {
-    const variance = Math.floor(Math.random() * 3);
-    const minutesToAdd = firstBusOffset + (i * frequency) + variance;
+    // Subsequent buses are exactly frequency apart — no variance so times never repeat
+    const minutesToAdd = firstBusOffset + (i * frequency);
     const arrivalTime = timeHelper.addMinutes(currentTime, minutesToAdd);
 
     arrivals.push({

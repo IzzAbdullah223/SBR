@@ -43,7 +43,8 @@
   background: var(--bg-card);
   border: 2px solid var(--border);
   border-radius: var(--radius);
-  padding: 18px;
+  padding: 14px;
+  position: relative;
   cursor: pointer;
   transition: all 0.25s ease;
   position: relative;
@@ -75,62 +76,111 @@
 }
 
 /* ─── Medal ─── */
-.medal {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-}
 
-.rank {
-  font-family: 'Syne', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-muted);
-  background: var(--bg-page);
-  padding: 2px 8px;
-  border-radius: 99px;
-}
 
 /* ─── Bus Header ─── */
-.busHeader {
+.cardTopRow {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 0 42px 0 4px;
 }
 
 .busNumber {
   min-width: 54px;
-  height: 54px;
+  height: 50px;
+  padding: 0 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-family: 'Syne', sans-serif;
-  font-size: 18px;
+  font-size: 13px;
   font-weight: 800;
-  border-radius: 14px;
+  border-radius: 12px;
   flex-shrink: 0;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  text-align: center;
 }
 
-.busInfo { flex: 1; min-width: 0; }
+.busInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
-.busInfo h3 {
-  margin: 0 0 6px 0;
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.4;
+.stopRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.stopFrom, .stopTo {
+  font-size: 12px;
+  font-weight: 700;
+  color: inherit;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: inherit;
+  /* flex child — will shrink equally sharing available space */
+  flex: 1;
+  min-width: 0;
+}
+
+.stopArrow {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* Save icon — absolute top-right */
+.saveIcon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-page);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+  transition: all 0.18s ease;
+}
+.saveIcon:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(240,165,0,0.08);
+}
+.saveIconSaved {
+  border-color: var(--teal);
+  color: var(--teal);
+  background: rgba(0,201,167,0.08);
+}
+.busCard.selected .saveIcon {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.6);
+}
+.busCard.selected .saveIconSaved {
+  border-color: var(--teal);
+  color: var(--teal);
 }
 
 .badges {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+  margin-top: 4px;
+  margin-left: 2px;
 }
 
 .busType {
@@ -168,61 +218,14 @@
 }
 
 /* ─── Score Section ─── */
-.scoreSection {
-  margin-bottom: 14px;
-  padding: 14px;
-  background: var(--bg-page);
-  border-radius: var(--radius-sm);
-}
 
-.busCard.selected .scoreSection {
-  background: rgba(255,255,255,0.1);
-}
-
-.scoreLabel {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--gray-400);
-  margin-bottom: 4px;
-}
-
-.busCard.selected .scoreLabel {
-  color: rgba(255,255,255,0.6);
-}
-
-.score {
-  font-family: 'Syne', sans-serif;
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 8px;
-  letter-spacing: -1px;
-}
-
-.scoreBar {
-  height: 6px;
-  background: var(--border);
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.busCard.selected .scoreBar {
-  background: rgba(255,255,255,0.2);
-}
-
-.scoreBarFill {
-  height: 100%;
-  border-radius: 99px;
-  transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
 
 /* ─── Criteria Grid ─── */
 .criteria {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
 .criteriaItem {
@@ -326,82 +329,6 @@
   color: rgba(255,255,255,0.5);
 }
 
-/* ─── Transfer Details ─── */
-.transferDetails {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  background: rgba(240, 165, 0, 0.06);
-  border: 1px solid rgba(240, 165, 0, 0.2);
-  border-radius: var(--radius-sm);
-  margin-bottom: 12px;
-  font-size: 12px;
-  overflow: hidden;
-}
-
-.leg {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  flex: 1;
-  overflow: hidden;
-}
-
-/* legName uses CSS ellipsis instead of hardcoded substring truncation */
-.legName {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 11px;
-  color: var(--gray-600);
-}
-
-.leg span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 11px;
-  color: var(--gray-600);
-}
-
-.legBadge {
-  color: white;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.legArrow {
-  color: var(--gold);
-  flex-shrink: 0;
-}
-
-/* ─── Stop Names ─── */
-.stopNames {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--gray-400);
-  margin-bottom: 12px;
-  padding: 0 4px;
-  overflow: hidden;
-}
-
-.busCard.selected .stopNames {
-  color: rgba(255,255,255,0.6);
-}
-
-.originStop, .destStop {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
-}
 
 /* ─── Select Button ─── */
 .selectButton {
@@ -492,39 +419,6 @@
   margin: 0;
 }
 
-.saveBtn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: var(--bg-card);
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.saveBtn:hover:not(:disabled) {
-  border-color: var(--gold);
-  color: var(--gold);
-  background: rgba(240, 165, 0, 0.05);
-}
-
-.saveBtn:disabled {
-  cursor: default;
-}
-
-.saveBtnSaved {
-  border-color: var(--teal);
-  color: var(--teal);
-  background: rgba(0, 201, 167, 0.06);
-}
-
 .saveBtnSpinner {
   display: inline-block;
   width: 12px;
@@ -537,13 +431,13 @@
 /* ─── Feature 1: TOPSIS plain-language label ─── */
 .topsisLabel {
   display: inline-block;
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: 99px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   font-family: 'Syne', sans-serif;
   letter-spacing: 0.3px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .scoreRow {

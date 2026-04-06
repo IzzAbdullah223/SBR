@@ -20,10 +20,18 @@ export const generateDirectBuses = (routeInfo, origin, destination, currentTime 
   if (!timeHelper.isWithinServiceHours(schedule, dubaiTime)) return buses;
 
   const frequency = scheduleGen.getServiceFrequency(schedule, dubaiTime);
-  const arrivalTimes = scheduleGen.generateArrivalTimes(frequency, dubaiTime, 5);
+  const allArrivalTimes = scheduleGen.generateArrivalTimes(frequency, dubaiTime, 8);
   const walkingDistance = calculateWalkingDistance(origin, originStop);
   const walkingTime = scheduleGen.calculateWalkingTime(walkingDistance);
   const routeTravelTime = route.stats?.duration || 20;
+
+  // Filter out buses that depart before the user can walk to the stop.
+  // +2 min buffer for boarding (tap Nol card, find seat).
+  const arrivalTimes = allArrivalTimes
+    .filter(dep => dep.minutesFromNow >= walkingTime + 2)
+    .slice(0, 5);
+
+  if (arrivalTimes.length === 0) return buses;
 
   arrivalTimes.forEach((arrival, i) => {
     const busId = `${route.routeNumber}-${Date.now()}-${i}`;
@@ -95,7 +103,14 @@ export const generateTransferBuses = async (transferInfo, origin, destination, c
   const leg1Duration = route1.stats?.duration || 20;
   const leg2Duration = route2.stats?.duration || 20;
   const transferWaitTime = 5;
-  const leg1Arrivals = scheduleGen.generateArrivalTimes(frequency1, dubaiTime, 3);
+  const allLeg1Arrivals = scheduleGen.generateArrivalTimes(frequency1, dubaiTime, 6);
+
+  // Filter out leg1 departures the user cannot reach on foot.
+  const leg1Arrivals = allLeg1Arrivals
+    .filter(dep => dep.minutesFromNow >= walkingTime + 2)
+    .slice(0, 3);
+
+  if (leg1Arrivals.length === 0) return buses;
 
   // Use stop sequence position to estimate how far into route1 the transfer stop sits,
   // rather than always assuming the halfway point (0.5).

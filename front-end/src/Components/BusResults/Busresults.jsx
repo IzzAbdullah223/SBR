@@ -1,10 +1,14 @@
 import { useEffect, useRef } from 'react';
-import { Clock, DollarSign, MapPin, GitMerge, Star, Award, Navigation, ArrowRight, Bookmark, BookmarkCheck, CreditCard } from 'lucide-react';
+import { Clock, DollarSign, MapPin, GitMerge, Star, Navigation, ArrowRight, Bookmark, BookmarkCheck, CreditCard } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getRouteLabel } from '../../utils/routeLabels';
 import styles from './BusResults.module.css';
 
-const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, isSavingJourney, journeyAlreadySaved, user, walletBalance = null }) => {
+const BusResults = ({
+  buses, onSelectBus, selectedBus, loading,
+  onSaveJourney, isSavingJourney, journeyAlreadySaved,
+  user, walletBalance = null
+}) => {
   const { t } = useTranslation();
   const cardRefs = useRef({});
 
@@ -31,19 +35,6 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
     );
   }
 
-  const getMedalIcon = (index) => {
-    if (index === 0) return <Award size={24} color="#FFD700" fill="#FFD700" />;
-    if (index === 1) return <Award size={24} color="#C0C0C0" fill="#C0C0C0" />;
-    if (index === 2) return <Award size={24} color="#CD7F32" fill="#CD7F32" />;
-    return <span className={styles.rank}>#{index + 1}</span>;
-  };
-
-  const getScoreColor = (score) => {
-    if (score >= 0.7) return '#4CAF50';
-    if (score >= 0.4) return '#FF9800';
-    return '#F44336';
-  };
-
   const getLabelStyle = (color) => {
     if (color === 'gold') return { background: 'rgba(240,165,0,0.15)', color: 'var(--gold)' };
     if (color === 'teal') return { background: 'rgba(0,201,167,0.12)', color: 'var(--teal)' };
@@ -52,29 +43,14 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
 
   return (
     <div className={styles.container}>
+
+      {/* Panel header — title + route count only, save button moved into cards */}
       <div className={styles.header}>
         <div className={styles.headerTop}>
           <h2>
-            <Star size={24} color="#667eea" />
+            <Star size={20} color="#667eea" />
             {t('results.title')}
           </h2>
-          {user && onSaveJourney && (
-            <button
-              className={`${styles.saveBtn} ${journeyAlreadySaved ? styles.saveBtnSaved : ''}`}
-              onClick={onSaveJourney}
-              disabled={isSavingJourney || journeyAlreadySaved}
-              title={journeyAlreadySaved ? t('results.saved') : t('results.saveJourney')}
-            >
-              {isSavingJourney ? (
-                <span className={styles.saveBtnSpinner} />
-              ) : journeyAlreadySaved ? (
-                <BookmarkCheck size={15} />
-              ) : (
-                <Bookmark size={15} />
-              )}
-              <span>{journeyAlreadySaved ? t('results.saved') : t('results.saveJourney')}</span>
-            </button>
-          )}
         </div>
         <p className={styles.subtitle}>
           {t('results.subtitle', { count: buses.length })}
@@ -84,8 +60,12 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
       <div className={styles.resultsContainer}>
         {buses.map((bus, index) => {
           const isSelected = selectedBus?.busId === bus.busId;
-          const scoreColor = getScoreColor(bus.score);
           const label      = getRouteLabel(bus, buses);
+
+          // For transfer journeys show both route numbers: "88 → 27"
+          const routeDisplay = bus.journeyType === 'transfer' && bus.leg1 && bus.leg2
+            ? `${bus.leg1.routeNumber} → ${bus.leg2.routeNumber}`
+            : bus.routeNumber;
 
           return (
             <div
@@ -94,48 +74,56 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
               className={`${styles.busCard} ${isSelected ? styles.selected : ''}`}
               onClick={() => onSelectBus(bus)}
             >
-              <div className={styles.medal}>{getMedalIcon(index)}</div>
+              {/* Save — absolute top-right */}
+              {user && onSaveJourney && (
+                <button
+                  className={`${styles.saveIcon} ${journeyAlreadySaved ? styles.saveIconSaved : ''}`}
+                  onClick={(e) => { e.stopPropagation(); onSaveJourney(); }}
+                  disabled={isSavingJourney || journeyAlreadySaved}
+                  title={journeyAlreadySaved ? t('results.saved') : t('results.saveJourney')}
+                >
+                  {isSavingJourney
+                    ? <span className={styles.saveBtnSpinner} />
+                    : journeyAlreadySaved
+                      ? <BookmarkCheck size={14} />
+                      : <Bookmark size={14} />
+                  }
+                </button>
+              )}
 
-              <div className={styles.busHeader}>
-                <div className={styles.busNumber} style={{ backgroundColor: bus.color || '#667eea' }}>
-                  {bus.routeNumber}
+              {/* ── Route number + stop names row ── */}
+              <div className={styles.cardTopRow}>
+                <div
+                  className={styles.busNumber}
+                  style={{ backgroundColor: bus.color || '#667eea' }}
+                >
+                  {routeDisplay}
                 </div>
+
                 <div className={styles.busInfo}>
-                  <h3>{bus.routeName}</h3>
+                  <div className={styles.stopRow}>
+                    <span className={styles.stopFrom}>{bus.originStop?.name?.split(',')[0]}</span>
+                    <ArrowRight size={11} className={styles.stopArrow} />
+                    <span className={styles.stopTo}>{bus.destinationStop?.name?.split(',')[0]}</span>
+                  </div>
                   <div className={styles.badges}>
-                    <span className={styles.busType}>{bus.routeType}</span>
-                    {bus.journeyType === 'transfer' ? (
-                      <span className={styles.transferBadge}>{t('results.transfer')}</span>
-                    ) : (
-                      <span className={styles.directBadge}>{t('results.direct')}</span>
-                    )}
+                    {bus.journeyType === 'transfer'
+                      ? <span className={styles.transferBadge}>{t('results.transfer')}</span>
+                      : <span className={styles.directBadge}>{t('results.direct')}</span>
+                    }
                   </div>
                 </div>
               </div>
 
-              <div className={styles.scoreSection}>
-                {/* Plain-language label — primary info for the user */}
-                <div className={styles.topsisLabel} style={getLabelStyle(label.color)}>
-                  {label.text}
-                </div>
-                {/* Technical score — secondary, for academic presentation */}
-                <div className={styles.scoreRow}>
-                  <span className={styles.scoreLabel}>{t('results.topsisScore')}</span>
-                  <span className={styles.score} style={{ color: scoreColor }}>
-                    {(bus.score * 100).toFixed(0)}%
-                  </span>
-                </div>
-                <div className={styles.scoreBar}>
-                  <div
-                    className={styles.scoreBarFill}
-                    style={{ width: `${bus.score * 100}%`, backgroundColor: scoreColor }}
-                  />
-                </div>
+              {/* Plain-language TOPSIS label */}
+              <div className={styles.topsisLabel} style={getLabelStyle(label.color)}>
+                {label.text}
               </div>
 
+              {/* ── Criteria grid ── */}
               <div className={styles.criteria}>
                 <div className={styles.criteriaItem}>
-                  <Navigation size={16} color="#667eea" />
+                  <Navigation size={15} color="#667eea" />
                   <span className={styles.criteriaLabel}>{t('results.departs')}</span>
                   <span className={styles.criteriaValue}>
                     {bus.departureTime || `${bus.arrivalTime} ${t('results.minutes')}`}
@@ -143,19 +131,19 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
                 </div>
 
                 <div className={styles.criteriaItem}>
-                  <Clock size={16} color="#667eea" />
+                  <Clock size={15} color="#667eea" />
                   <span className={styles.criteriaLabel}>{t('results.wait')}</span>
                   <span className={styles.criteriaValue}>{bus.arrivalTime} {t('results.minutes')}</span>
                 </div>
 
                 <div className={styles.criteriaItem}>
-                  <Clock size={16} color="#9C27B0" />
+                  <Clock size={15} color="#9C27B0" />
                   <span className={styles.criteriaLabel}>{t('results.journey')}</span>
                   <span className={styles.criteriaValue}>{bus.travelTime} {t('results.minutes')}</span>
                 </div>
 
                 <div className={styles.criteriaItem}>
-                  <CreditCard size={16} color="#4CAF50" />
+                  <CreditCard size={15} color="#4CAF50" />
                   <span className={styles.criteriaLabel}>{t('results.fare')}</span>
                   <span className={styles.criteriaValue}>
                     <span className={styles.nolFare}>
@@ -167,10 +155,9 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
                   </span>
                 </div>
 
-                {/* Nol balance warning — only shown when user is logged in and wallet loaded */}
                 {walletBalance !== null && walletBalance < (bus.nolFare ?? bus.cost) && (
                   <div className={`${styles.criteriaItem} ${styles.balanceWarn}`}>
-                    <DollarSign size={14} color="var(--error)" />
+                    <DollarSign size={13} color="var(--error)" />
                     <span className={styles.warnText}>
                       {t('results.topUpNeeded', {
                         amount: ((bus.nolFare ?? bus.cost) - walletBalance).toFixed(2)
@@ -180,7 +167,7 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
                 )}
 
                 <div className={styles.criteriaItem}>
-                  <MapPin size={16} color="#FF9800" />
+                  <MapPin size={15} color="#FF9800" />
                   <span className={styles.criteriaLabel}>{t('results.walk')}</span>
                   <span className={styles.criteriaValue}>
                     {bus.walkingDistance} {t('results.km')} ({bus.walkingTime} {t('results.minutes')})
@@ -188,12 +175,13 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
                 </div>
 
                 <div className={styles.criteriaItem}>
-                  <GitMerge size={16} color="#F44336" />
+                  <GitMerge size={15} color="#F44336" />
                   <span className={styles.criteriaLabel}>{t('results.transfers')}</span>
                   <span className={styles.criteriaValue}>{bus.transfers}</span>
                 </div>
               </div>
 
+              {/* Also Departs */}
               {bus.upcomingDepartures && bus.upcomingDepartures.length > 1 && (
                 <div className={styles.upcomingDepartures}>
                   <span className={styles.upcomingLabel}>{t('results.alsoDeparts')}</span>
@@ -208,33 +196,7 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
                 </div>
               )}
 
-              {bus.journeyType === 'transfer' && bus.leg1 && bus.leg2 && (
-                <div className={styles.transferDetails}>
-                  <div className={styles.leg}>
-                    <span className={styles.legBadge} style={{ backgroundColor: bus.color }}>
-                      {bus.leg1.routeNumber}
-                    </span>
-                    <span className={styles.legName}>{bus.leg1.routeName}</span>
-                    <span>{bus.leg1.departureTime}</span>
-                  </div>
-                  <ArrowRight size={16} className={styles.legArrow} />
-                  <div className={styles.leg}>
-                    <span className={styles.legBadge} style={{ backgroundColor: '#667eea' }}>
-                      {bus.leg2.routeNumber}
-                    </span>
-                    <span className={styles.legName}>{bus.leg2.routeName}</span>
-                    <span>{bus.leg2.departureTime}</span>
-                  </div>
-                </div>
-              )}
-
-              <div className={styles.stopNames}>
-                <span className={styles.originStop}>📍 {bus.originStop?.name}</span>
-                <ArrowRight size={14} />
-                <span className={styles.destStop}>🏁 {bus.destinationStop?.name}</span>
-              </div>
-
-              {/* Feature 3 — Journey Timeline, expands when card is selected */}
+              {/* Journey Timeline — only when selected */}
               {isSelected && (
                 <div className={styles.timeline}>
                   <div className={styles.timelineStep}>
@@ -294,6 +256,7 @@ const BusResults = ({ buses, onSelectBus, selectedBus, loading, onSaveJourney, i
               <button className={`${styles.selectButton} ${isSelected ? styles.selectedBtn : ''}`}>
                 {isSelected ? t('results.selected') : t('results.viewOnMap')}
               </button>
+
             </div>
           );
         })}

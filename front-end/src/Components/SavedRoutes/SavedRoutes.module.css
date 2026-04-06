@@ -23,7 +23,10 @@
   border-radius: 99px;
   cursor: pointer;
   flex-shrink: 0;
-  min-width: 110px;
+  
+  /* FIXED WIDTH for both containers to be the same size */
+  width: 130px; 
+  justify-content: flex-start;
   transition: background 0.2s;
 }
 
@@ -51,20 +54,20 @@
 
 /* Chip rail — hard-capped to show exactly 2 chips (140px each + 6px gap = 286px).
    The fade mask on the right edge signals there are more chips to scroll. */
+/* ── Updated Rail to show exactly 2 items without scrolling ── */
 .chipsRail {
   display: flex;
   gap: 6px;
-  overflow-x: auto;
-  flex: 0 0 auto;
-  width: 286px;
-  padding-bottom: 2px;
-  scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(to right, black 75%, transparent 100%);
-  mask-image: linear-gradient(to right, black 75%, transparent 100%);
+  flex: 1;
+  overflow: visible; /* No longer need to hide overflow */
+  padding-bottom: 0;
+  
+  /* Remove the fade mask since we only show 2 items now */
+  -webkit-mask-image: none;
+  mask-image: none;
 }
-.chipsRail::-webkit-scrollbar { display: none; }
 
-/* individual destination chip */
+/* ── Consistent chip sizing ── */
 .chip {
   display: flex;
   align-items: center;
@@ -75,7 +78,9 @@
   border-radius: 99px;
   cursor: pointer;
   flex-shrink: 0;
-  max-width: 140px;
+  
+  /* Adjusted width to fit 2 chips perfectly next to the toggle */
+  width: 135px; 
   overflow: hidden;
   transition: all 0.18s ease;
   font-family: 'DM Sans', sans-serif;

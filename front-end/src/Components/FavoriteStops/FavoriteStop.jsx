@@ -13,7 +13,7 @@ const FavoriteStops = ({ favoriteStops, user, onStopClick, onDelete, isOpen, onT
       <div className={styles.wrapper}>
         <div className={styles.collapsedRow}>
           <button className={styles.toggleChip} onClick={onToggle} title={t('stops.myStops')}>
-            <Star size={13} className={styles.toggleChipIcon} />
+        
             <span className={styles.toggleChipLabel}>{t('stops.myStops')}</span>
             {favoriteStops.length > 0 && (
               <span className={styles.toggleChipCount}>{favoriteStops.length}</span>
@@ -22,7 +22,7 @@ const FavoriteStops = ({ favoriteStops, user, onStopClick, onDelete, isOpen, onT
 
           {favoriteStops.length > 0 && (
             <div className={styles.chipsRail}>
-              {favoriteStops.map((stop) => (
+            {favoriteStops.slice(0, 2).map((stop) => (
                 <button
                   key={stop.stopId}
                   className={styles.chip}

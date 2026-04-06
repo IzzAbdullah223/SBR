@@ -20,7 +20,7 @@ const SavedRoutes = ({ savedRoutes, loading, onDelete, onSelectJourney, user, is
 
           {user && savedRoutes.length > 0 && (
             <div className={styles.chipsRail}>
-              {savedRoutes.map((route) => (
+              {savedRoutes.slice(0, 2).map((route) => (
                 <button
                   key={route._id}
                   className={styles.chip}
