@@ -48,14 +48,7 @@ export const findBuses = async (req, res) => {
 
     const routeData = await routeFinder.findAllRoutes(origin, destination);
 
-    // ✅ FIXED: check order was wrong before.
-    // Old code checked BOTH empty first, then origin-only, then dest-only.
-    // But routeData.success is false when EITHER array is empty, so the
-    // individual checks (NO_ORIGIN_STOPS / NO_DEST_STOPS) never fired —
-    // everything fell through to the generic NO_STOPS fallback.
-    //
-    // Correct order: check each individually first (most specific),
-    // then both empty together, then the generic !success fallback last.
+
 
     if (routeData.originStops?.length === 0 && routeData.destStops?.length === 0) {
       return res.status(404).json({
@@ -107,7 +100,8 @@ export const findBuses = async (req, res) => {
         },
       });
     }
-
+    
+ 
     // ── Step 3: Generate buses ──────────────────────────────────────────────
     const allBuses = await busGenerator.generateAllBuses(routeData, origin, destination);
 
@@ -125,12 +119,7 @@ export const findBuses = async (req, res) => {
       });
     }
 
-    // ── Step 4: Rank using TOPSIS ───────────────────────────────────────────
-    // Problem: busGenerator creates 5 departure times per route.
-    // If we rank all of them together, TOPSIS compares 5 nearly identical
-    // buses (same route, 1-2 min apart) against each other — they crowd out
-    // other routes and the ranking becomes meaningless.
-    //
+ 
     // Fix: pick ONE representative bus per route (the earliest departure)
     // and run TOPSIS on those. This ranks actual different routes against
     // each other. Then after ranking, attach the remaining departures back
@@ -140,16 +129,16 @@ export const findBuses = async (req, res) => {
     const busGroups = {};
     allBuses.forEach(bus => {
       const key = bus.routeNumber;
-      if (!busGroups[key]) busGroups[key] = [];
+      if (!busGroups[key]) busGroups[key] = [];// create array at key like key:[]
       busGroups[key].push(bus);
     });
 
     // Sort each group by arrivalTime and pick the first as the representative
     // the representative is what TOPSIS scores — it carries the route's
     // best (earliest) departure as its arrivalTime criterion
-    const representatives = Object.values(busGroups).map(group => {
+    const representatives = Object.values(busGroups).map(group => {//Output — array of the values only, keys gone
       const sorted = group.sort((a, b) => a.arrivalTime - b.arrivalTime);
-      const rep = sorted[0];
+      const rep = sorted[0];//is the first element — earliest departure. This bus represents the entire route in TOPSIS.
       // attach all departures so frontend can show the full schedule
       rep.upcomingDepartures = sorted.map(b => ({
         departureTime: b.departureTime,
@@ -158,8 +147,6 @@ export const findBuses = async (req, res) => {
       }));
       return rep;
     });
-
-    console.log(`📊 Running TOPSIS on ${representatives.length} unique routes`);
 
     let rankedBuses;
     try {

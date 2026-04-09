@@ -10,14 +10,14 @@ import api from '../services/Api';
 // falls back to the raw backend message if the code isn't recognised
 const getErrorMessage = (errorCode, message) => {
   const errors = {
-    INVALID_ORIGIN:      '📍 Please select your origin from the dropdown — don\'t just type it.',
-    INVALID_DESTINATION: '📍 Please select your destination from the dropdown — don\'t just type it.',
-    NO_STOPS_BOTH:       '🚏 No bus stops found near either location. Try selecting a spot closer to a main road.',
-    NO_ORIGIN_STOPS:     '🚏 No bus stops found near your origin. Try a nearby main road or landmark.',
-    NO_DEST_STOPS:       '🚏 No bus stops found near your destination. Try a nearby main road or landmark.',
-    NO_STOPS:            '🚏 No bus stops found near your locations. Try different areas.',
-    NO_ROUTES:           '🗺️ Bus stops were found but no routes connect these two locations. Try locations along major roads.',
-    OUT_OF_SERVICE:      '🕐 Routes found but no buses are running right now. Dubai RTA buses run from 5:00 AM to 11:30 PM.',
+    INVALID_ORIGIN:      'Please select your origin from the dropdown — don\'t just type it.',
+    INVALID_DESTINATION: 'Please select your destination from the dropdown — don\'t just type it.',
+    NO_STOPS_BOTH:       'No bus stops found near either location. Try selecting a spot closer to a main road.',
+    NO_ORIGIN_STOPS:     'No bus stops found near your origin. Try a nearby main road or landmark.',
+    NO_DEST_STOPS:       'No bus stops found near your destination. Try a nearby main road or landmark.',
+    NO_STOPS:            'No bus stops found near your locations. Try different areas.',
+    NO_ROUTES:           'Bus stops were found but no routes connect these two locations. Try locations along major roads.',
+    OUT_OF_SERVICE:      'outes found but no buses are running right now. Dubai RTA buses run from 5:00 AM to 11:30 PM.',
     SERVER_ERROR:        '⚙️ Something went wrong on our end. Please try again.',
     NETWORK_ERROR:       '📡 Cannot reach the server. Please check your connection and try again.',
   };
@@ -42,11 +42,11 @@ export const ERROR_TYPES = {
 };
 
 const useFindBuses = () => {
-  const [buses, setBuses] = useState([]);
+  const [buses, setBuses] = useState([]);//ranked bus array started with [] and not null so buses.len work alwasy
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);       // error message string
   const [errorType, setErrorType] = useState(null); // 'info' | 'error' | null
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState(null);//stats receives TOPSIS metadata from the backend — things like how many routes were evaluated, processing time. It's stored but currently not displayed in the UI. It exists for potential future use or debugging.
 
   const findBuses = useCallback(async (origin, destination, optimizationMode) => {
     // useCallback saves a function in memory so React doesn't recreate it on every render.
@@ -55,7 +55,7 @@ const useFindBuses = () => {
     // With dependencies [x] — only recreate when x changes.
 
     // Frontend validation — catch obvious issues before hitting the server
-    if (!origin?.lat || !origin?.lng) {
+    if (!origin?.lat || !origin?.lng) { // like checking the deepest if we have or but cord are null
       setError(getErrorMessage('INVALID_ORIGIN'));
       setErrorType('error');
       return;
@@ -78,9 +78,9 @@ const useFindBuses = () => {
       setBuses([]);
       setStats(null);
 
-      // fetchData is used here (not fetchAPI) — it always returns the body
-      // even on 404/400 so we can read the errorCode and show the right message.
-      // see Api.js for why this distinction matters
+      // allowErrorResponse: true is set on this endpoint in Api.js — 
+// it returns the body even on 4xx so we can read errorCode
+// and show the correct user-facing message
       const response = await api.topsis.findBuses(origin, destination, optimizationMode);
 
       if (response.success) {

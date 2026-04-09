@@ -79,7 +79,7 @@ const Home = ({
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleFindBuses = async () => {
-    if (!origin || !destination) {
+    if (!origin || !destination) { 
       setInputError(t('home.selectFromDropdown'));
       return;
     }

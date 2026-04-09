@@ -42,7 +42,7 @@ const useLocationPicker = () => {
     } else {
       setOrigin(null);
     }
-  }, []);
+  }, []); // only calculates once when the it mounts
 
   const handleDestinationChange = useCallback((e, locationData) => {
     setProgrammaticFill(false);

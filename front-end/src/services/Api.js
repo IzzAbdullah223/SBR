@@ -1,5 +1,5 @@
 const API_BASE_URL = '/api';
-
+//This pattern is called a service layer or API client. The benefit is enormous — if your backend URL changes, an endpoint gets renamed, or you need to add a header to every request, you change it in one place and everything updates automatically.
 const fetchAPI = async (endpoint, options = {}) => {
   try {
     const token = localStorage.getItem('token');
@@ -33,6 +33,7 @@ const fetchAPI = async (endpoint, options = {}) => {
     throw error;
   }
 };
+//Each group maps exactly to a backend route group. authAPI → /auth/*, settingsAPI → /settings/*, etc. The function signatures match what the backend expects — no transformation needed.
 
 export const authAPI = {
   login:  (email, password) =>
@@ -60,6 +61,7 @@ export const topsisAPI = {
       allowErrorResponse: true,
     }),
 };
+
 
 export const shapesAPI = {
   getById: (shapeId, originStopId, destStopId) => {

@@ -4,7 +4,7 @@ import Home     from './Pages/Home/Home';
 import Settings from './Pages/Settings/Settings';
 import useAuth   from './hooks/useAuth';
 import useWallet from './hooks/useWallet';
-
+//Global state ownership — it calls useAuth() and useWallet(user) at the top level. These are the only two hooks here because they produce state that multiple pages need simultaneously.
 function App() {
   const {
     user,
