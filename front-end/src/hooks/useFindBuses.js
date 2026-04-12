@@ -1,29 +1,6 @@
-// useCallback → saves a FUNCTION
-// useMemo     → saves a VALUE (result of a function)
-
-// useCallback(() => doSomething(), [])   returns the function itself
-// useMemo(() => doSomething(), [])       returns what the function returns
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../services/Api';
-
-// maps backend errorCodes to human-readable messages shown in the UI
-// falls back to the raw backend message if the code isn't recognised
-const getErrorMessage = (errorCode, message) => {
-  const errors = {
-    INVALID_ORIGIN:      'Please select your origin from the dropdown — don\'t just type it.',
-    INVALID_DESTINATION: 'Please select your destination from the dropdown — don\'t just type it.',
-    NO_STOPS_BOTH:       'No bus stops found near either location. Try selecting a spot closer to a main road.',
-    NO_ORIGIN_STOPS:     'No bus stops found near your origin. Try a nearby main road or landmark.',
-    NO_DEST_STOPS:       'No bus stops found near your destination. Try a nearby main road or landmark.',
-    NO_STOPS:            'No bus stops found near your locations. Try different areas.',
-    NO_ROUTES:           'Bus stops were found but no routes connect these two locations. Try locations along major roads.',
-    OUT_OF_SERVICE:      'outes found but no buses are running right now. Dubai RTA buses run from 5:00 AM to 11:30 PM.',
-    SERVER_ERROR:        '⚙️ Something went wrong on our end. Please try again.',
-    NETWORK_ERROR:       '📡 Cannot reach the server. Please check your connection and try again.',
-  };
-
-  return errors[errorCode] || `⚠️ ${message || 'Something went wrong. Please try again.'}`;
-};
 
 // errorCode categories — used by Home.jsx to style the error box differently
 // 'info'  = expected result, not a bug (no routes, out of service, no stops)
@@ -31,6 +8,7 @@ const getErrorMessage = (errorCode, message) => {
 export const ERROR_TYPES = {
   INVALID_ORIGIN:      'error',
   INVALID_DESTINATION: 'error',
+  SAME_LOCATION:       'error',
   NO_STOPS_BOTH:       'info',
   NO_ORIGIN_STOPS:     'info',
   NO_DEST_STOPS:       'info',
@@ -42,20 +20,41 @@ export const ERROR_TYPES = {
 };
 
 const useFindBuses = () => {
-  const [buses, setBuses] = useState([]);//ranked bus array started with [] and not null so buses.len work alwasy
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);       // error message string
-  const [errorType, setErrorType] = useState(null); // 'info' | 'error' | null
-  const [stats, setStats] = useState(null);//stats receives TOPSIS metadata from the backend — things like how many routes were evaluated, processing time. It's stored but currently not displayed in the UI. It exists for potential future use or debugging.
+  const { t } = useTranslation();
 
-  const findBuses = useCallback(async (origin, destination, optimizationMode) => {
-    // useCallback saves a function in memory so React doesn't recreate it on every render.
-    // Without it, every re-render creates a new function object — causing unnecessary re-renders in children.
-    // Empty [] means create once and never recreate.
-    // With dependencies [x] — only recreate when x changes.
+  const [buses,     setBuses]     = useState([]);
+  const [loading,   setLoading]   = useState(false);
+  const [error,     setError]     = useState(null);
+  const [errorType, setErrorType] = useState(null);
+  const [stats,     setStats]     = useState(null);
 
-    // Frontend validation — catch obvious issues before hitting the server
-    if (!origin?.lat || !origin?.lng) { // like checking the deepest if we have or but cord are null
+  // Maps backend errorCodes to translation keys
+  // All errors now go through t() so they appear in the correct language
+  const getErrorMessage = useCallback((errorCode, fallbackMessage) => {
+    const keyMap = {
+      INVALID_ORIGIN:      'errors.invalidOrigin',
+      INVALID_DESTINATION: 'errors.invalidDestination',
+      SAME_LOCATION:       'errors.sameLocation',
+      NO_STOPS_BOTH:       'errors.noStopsBoth',
+      NO_ORIGIN_STOPS:     'errors.noOriginStops',
+      NO_DEST_STOPS:       'errors.noDestStops',
+      NO_STOPS:            'errors.noStops',
+      NO_ROUTES:           'errors.noRoutes',
+      OUT_OF_SERVICE:      'errors.outOfService',
+      SERVER_ERROR:        'errors.serverError',
+      NETWORK_ERROR:       'errors.networkError',
+    };
+    const key = keyMap[errorCode];
+    if (key) return t(key);
+    return fallbackMessage || t('errors.serverError');
+  }, [t]);
+
+  // Point 4 fix: optimizationMode defaults to 'fastest'
+  // so behaviour is always predictable if caller forgets to pass it
+  const findBuses = useCallback(async (origin, destination, optimizationMode = 'fastest') => {
+
+    // Frontend validation — fast UX checks before hitting the server
+    if (!origin?.lat || !origin?.lng) {
       setError(getErrorMessage('INVALID_ORIGIN'));
       setErrorType('error');
       return;
@@ -65,8 +64,12 @@ const useFindBuses = () => {
       setErrorType('error');
       return;
     }
+
+    // Frontend same-location check — exact equality for instant UX feedback
+    // The backend also checks with a 50 metre threshold for robustness
+    // so both layers protect against this case
     if (origin.lat === destination.lat && origin.lng === destination.lng) {
-      setError('⚠️ Origin and destination cannot be the same place.');
+      setError(getErrorMessage('SAME_LOCATION'));
       setErrorType('error');
       return;
     }
@@ -78,25 +81,18 @@ const useFindBuses = () => {
       setBuses([]);
       setStats(null);
 
-      // allowErrorResponse: true is set on this endpoint in Api.js — 
-// it returns the body even on 4xx so we can read errorCode
-// and show the correct user-facing message
       const response = await api.topsis.findBuses(origin, destination, optimizationMode);
 
       if (response.success) {
-        // happy path — buses found and ranked
         setBuses(response.buses);
         setStats(response.stats);
       } else {
-        // errorCode from backend maps to a specific human-readable message
         const code = response.errorCode || 'SERVER_ERROR';
         setError(getErrorMessage(code, response.message));
         setErrorType(ERROR_TYPES[code] || 'error');
       }
 
     } catch (err) {
-      // only true network errors reach here — server completely unreachable
-      // (fetchData only throws when fetch() itself throws, not on 4xx/5xx)
       console.error('Network error finding buses:', err);
       setError(getErrorMessage('NETWORK_ERROR'));
       setErrorType('error');
@@ -104,14 +100,14 @@ const useFindBuses = () => {
       setLoading(false);
     }
 
-  }, []); // [] this empty [] for the useCallback means only calculate it once.
+  }, [getErrorMessage]);
 
   const clearResults = useCallback(() => {
     setBuses([]);
     setError(null);
     setErrorType(null);
     setStats(null);
-  }, []); // used later when doing another search to delete every bus results shown in the UI
+  }, []);
 
   return { buses, loading, error, errorType, stats, findBuses, clearResults };
 };

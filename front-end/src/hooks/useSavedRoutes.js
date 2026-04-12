@@ -42,12 +42,12 @@ const useSavedRoutes = (user) => {
   }, [user]);
 
   useEffect(() => {
-    if (user) {
-      fetchSavedRoutes();
-    } else {
-      setSavedRoutes([]);
-    }
-  }, [user]);
+  if (user?.id) {
+    fetchSavedRoutes();
+  } else {
+    setSavedRoutes([]);
+  }
+}, [user?.id]); // ✅ FIX: use user.id not whole object — prevents double fetch
 
   const saveRoute = useCallback(async (origin, destination) => {
     if (!user) {

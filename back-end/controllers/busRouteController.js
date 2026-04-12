@@ -8,7 +8,7 @@ import BusStop from '../models/BusStop.js';
  */
 export const getAllRoutes = async (req, res) => {
   try {
-    const routes = await BusRoute.find().select('-__v');
+    const routes = await BusRoute.find().select('-__v').lean();
     
     res.json({
       success: true,

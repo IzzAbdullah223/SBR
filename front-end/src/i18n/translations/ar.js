@@ -31,6 +31,23 @@ const ar = {
     direct: 'مباشر',
   },
 
+  // ── Point 3 fix: Arabic translations for all error messages
+  // Before: errors were hardcoded English in useFindBuses.js
+  // After:  t('errors.xxx') returns Arabic when app is in Arabic mode
+  errors: {
+    invalidOrigin:      'يرجى اختيار نقطة الانطلاق من القائمة المنسدلة — لا تكتب فقط.',
+    invalidDestination: 'يرجى اختيار الوجهة من القائمة المنسدلة — لا تكتب فقط.',
+    sameLocation:       '⚠️ نقطة الانطلاق والوجهة قريبتان جداً. يرجى اختيار موقعين مختلفين.',
+    noStopsBoth:        'لم يتم العثور على محطات حافلات قريبة من أي من الموقعين. حاول اختيار موقع أقرب إلى طريق رئيسي.',
+    noOriginStops:      'لم يتم العثور على محطات حافلات قريبة من نقطة انطلاقك. جرّب طريقاً رئيسياً أو معلماً قريباً.',
+    noDestStops:        'لم يتم العثور على محطات حافلات قريبة من وجهتك. جرّب طريقاً رئيسياً أو معلماً قريباً.',
+    noStops:            'لم يتم العثور على محطات حافلات قريبة من مواقعك. جرّب مناطق مختلفة.',
+    noRoutes:           'تم العثور على محطات حافلات ولكن لا توجد خطوط تربط هذين الموقعين. جرّب مواقع على الطرق الرئيسية.',
+    outOfService:       'تم العثور على خطوط ولكن لا تسير حافلات الآن. تعمل حافلات هيئة الطرق والمواصلات من 5:00 صباحاً حتى 11:30 مساءً.',
+    serverError:        '⚙️ حدث خطأ من جانبنا. يرجى المحاولة مرة أخرى.',
+    networkError:       '📡 تعذّر الاتصال بالخادم. يرجى التحقق من اتصالك والمحاولة مرة أخرى.',
+  },
+
   results: {
     title: 'المسارات الموصى بها',
     subtitle: '{{count}} مسار مرتب وفق تفضيلاتك باستخدام TOPSIS',
@@ -128,7 +145,6 @@ const ar = {
     noAccount: 'ليس لديك حساب؟',
     signUpLink: 'إنشاء حساب',
     loginFailed: 'فشل تسجيل الدخول. حاول مرة أخرى.',
-
     createAccount: 'إنشاء حساب جديد',
     nameLabel: 'الاسم',
     namePlaceholder: 'اسمك الكامل',
@@ -142,7 +158,6 @@ const ar = {
   settings: {
     title: 'الإعدادات',
     back: 'رجوع',
-
     profile: 'الملف الشخصي',
     profileHint: 'الاسم والبريد الإلكتروني ورقم الهاتف',
     fullName: 'الاسم الكامل',
@@ -153,7 +168,6 @@ const ar = {
     emailPlaceholder: 'your@email.com',
     saveChanges: 'حفظ التغييرات',
     saving: 'جارٍ الحفظ...',
-
     changePassword: 'تغيير كلمة المرور',
     changePasswordHint: 'تحديث كلمة مرور حسابك',
     currentPassword: 'كلمة المرور الحالية',
@@ -163,7 +177,6 @@ const ar = {
     updating: 'جارٍ التحديث...',
     passwordMismatch: 'كلمتا المرور غير متطابقتين',
     passwordTooShort: 'يجب أن تكون 6 أحرف على الأقل',
-
     preferences: 'التفضيلات',
     preferencesHint: 'تحسين المسارات وفق ما يهمك',
     optimizeFor: 'تحسين المسارات وفق',
@@ -172,19 +185,16 @@ const ar = {
     optLessWalking: '🚶 أقل مشياً',
     optFewestTransfers: '🔄 أقل تحويلات',
     savePreferences: 'حفظ التفضيلات',
-
     display: 'العرض',
     displayHint: 'نمط الخريطة والمظهر',
     darkMode: 'الوضع الداكن',
     darkModeHint: 'التبديل بين المظهر الفاتح والداكن',
-
     accessibility: 'إمكانية الوصول',
     accessibilityHint: 'حجم النص وإعدادات الحركة',
     largerText: 'نص أكبر',
     largerTextHint: 'يزيد حجم الخط في التطبيق',
     reduceAnimations: 'تقليل الحركة',
     reduceAnimationsHint: 'تعطيل تأثيرات الخريطة والانتقالات',
-
     privacy: 'الخصوصية والبيانات',
     privacyHint: 'إدارة بياناتك وحسابك',
     clearRoutes: 'مسح المسارات المحفوظة',
@@ -193,12 +203,10 @@ const ar = {
     deleteAccount: 'حذف الحساب',
     deleteAccountHint: 'حذف حسابك وجميع بياناتك نهائياً',
     delete: 'حذف',
-
     logout: 'تسجيل الخروج',
     logoutHint: 'تسجيل الخروج من حسابك',
     logoutBtn: 'تسجيل الخروج',
     logoutHintSub: 'يمكنك تسجيل الدخول مرة أخرى في أي وقت',
-
     clearRoutesTitle: 'مسح جميع المسارات المحفوظة؟',
     clearRoutesMessage: 'سيؤدي هذا إلى إزالة جميع رحلاتك المحفوظة بشكل دائم. لا يمكن التراجع عن هذا الإجراء.',
     deleteAccountTitle: 'حذف الحساب؟',

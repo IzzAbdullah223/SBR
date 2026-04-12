@@ -2,21 +2,25 @@ import BusRoute from '../models/BusRoute.js';
 import { findNearbyStops } from './geoCalculator.service.js';
 
 export const findDirectRoutes = async (originStops, destStops) => {
-  const allRoutes = await BusRoute.find();
+ const nearbyStopIds = [
+  ...originStops.map(s => s.stopId),
+  ...destStops.map(s => s.stopId),
+];
+const allRoutes = await BusRoute.find({
+  'stops.stopId': { $in: nearbyStopIds }//$in MongoDB operator meaning "where stopId is IN this array"
+});
   const connectingRoutes = [];
 
-  // seen tracks routeNumbers we already added — prevents the same route
-  // appearing multiple times when several nearby stops all match the same route
-  const seen = new Set();
+  const seen = new Set(); //a Set (like an array but with instant lookup, no duplicates).
 
   allRoutes.forEach(route => {
-    // skip if we already have this route number
-    if (seen.has(route.routeNumber)) return;
+ // skip if we already have this route number
+    if (seen.has(route.routeNumber)) return;//Loop every route. If we already added this route number → skip immediately. return inside forEach acts like continue(or skip this iteration and take the next one) in a regular loop — skip to the next iteration.
 
     const routeStopIds = route.stops.map(s => s.stopId);
 
     // get ALL origin stops that this route serves, then pick the closest one
-    // to the user — instead of just taking the first match which is arbitrary
+
     const matchingOriginStops = originStops.filter(s => routeStopIds.includes(s.stopId));
     const matchingDestStops = destStops.filter(s => routeStopIds.includes(s.stopId));
 
@@ -26,9 +30,6 @@ export const findDirectRoutes = async (originStops, destStops) => {
     const originStop = matchingOriginStops.sort((a, b) => a.distance - b.distance)[0];
     const destStop = matchingDestStops.sort((a, b) => a.distance - b.distance)[0];
 
-    // ✅ FIXED: removed direction check — both directions are valid
-    // direction check (destIndex > originIndex) was rejecting valid routes
-    // when user swapped origin and destination
     connectingRoutes.push({ route, originStop, destStop, type: 'direct' });
     seen.add(route.routeNumber);
   });
@@ -37,7 +38,14 @@ export const findDirectRoutes = async (originStops, destStops) => {
 };
 
 export const findRoutesWithTransfer = async (originStops, destStops) => {
-  const allRoutes = await BusRoute.find();
+  const originStopIds = originStops.map(s => s.stopId);
+const destStopIds   = destStops.map(s => s.stopId);
+
+const [routesFromOrigin, routesToDest] = await Promise.all([
+    BusRoute.find({ 'stops.stopId': { $in: originStopIds } }),
+    BusRoute.find({ 'stops.stopId': { $in: destStopIds } }),
+  ]);
+  
   const transferRoutes = [];
 
   // seen tracks route1+route2 pairs we already added — prevents the same
@@ -46,15 +54,6 @@ export const findRoutesWithTransfer = async (originStops, destStops) => {
   // - route1 and route2 share multiple common stops
   const seen = new Set();
 
-  const routesFromOrigin = allRoutes.filter(route => {
-    const routeStopIds = route.stops.map(s => s.stopId);
-    return originStops.some(stop => routeStopIds.includes(stop.stopId));
-  });
-
-  const routesToDest = allRoutes.filter(route => {
-    const routeStopIds = route.stops.map(s => s.stopId);
-    return destStops.some(stop => routeStopIds.includes(stop.stopId));
-  });
 
   routesFromOrigin.forEach(route1 => {
     routesToDest.forEach(route2 => {
@@ -80,14 +79,7 @@ export const findRoutesWithTransfer = async (originStops, destStops) => {
 
       if (!originStop || !destStop) return;
 
-      // ✅ FIXED: was commonStopIds[0] — just the first stop in route1's order
-      // which is often at the far end of the route, producing a very long leg 1.
-      //
-      // Instead: find the transfer stop that is geographically between the
-      // origin and destination. Score each common stop by:
-      //   dist(origin → transferStop) + dist(transferStop → dest)
-      // and pick the one with the smallest total — this naturally picks the
-      // stop that lies "on the way" rather than going far out of direction.
+      
       const originPos = originStop.position;
       const destPos   = destStop.position;
 
@@ -118,10 +110,12 @@ export const findRoutesWithTransfer = async (originStops, destStops) => {
 
 export const findAllRoutes = async (origin, destination) => {
   // Find nearby stops separately so we can report which one failed
-  const originStops = await findNearbyStops(origin.lat, origin.lng, 1.0);
-  const destStops = await findNearbyStops(destination.lat, destination.lng, 1.0);
+ const [originStops, destStops] = await Promise.all([ // run in parallel
+  findNearbyStops(origin.lat, origin.lng, 1.0),
+  findNearbyStops(destination.lat, destination.lng, 1.0),
+]);
 
-  // ✅ Return both arrays even on failure so topsisController can give specific errors
+  //  Return both arrays even on failure so topsisController can give specific errors
   if (originStops.length === 0 || destStops.length === 0) {
     return {
       success: false,

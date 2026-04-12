@@ -23,9 +23,7 @@
   border-radius: 99px;
   cursor: pointer;
   flex-shrink: 0;
-  
-  /* FIXED WIDTH for both containers to be the same size */
-  width: 130px; 
+  width: 130px;
   justify-content: flex-start;
   transition: background 0.2s;
 }
@@ -52,22 +50,16 @@
   line-height: 1.5;
 }
 
-/* Chip rail — hard-capped to show exactly 2 chips (140px each + 6px gap = 286px).
-   The fade mask on the right edge signals there are more chips to scroll. */
-/* ── Updated Rail to show exactly 2 items without scrolling ── */
 .chipsRail {
   display: flex;
   gap: 6px;
   flex: 1;
-  overflow: visible; /* No longer need to hide overflow */
+  overflow: visible;
   padding-bottom: 0;
-  
-  /* Remove the fade mask since we only show 2 items now */
   -webkit-mask-image: none;
   mask-image: none;
 }
 
-/* ── Consistent chip sizing ── */
 .chip {
   display: flex;
   align-items: center;
@@ -78,9 +70,7 @@
   border-radius: 99px;
   cursor: pointer;
   flex-shrink: 0;
-  
-  /* Adjusted width to fit 2 chips perfectly next to the toggle */
-  width: 135px; 
+  width: 135px;
   overflow: hidden;
   transition: all 0.18s ease;
   font-family: 'DM Sans', sans-serif;
@@ -89,7 +79,6 @@
   color: var(--text-primary);
 }
 
-/* Text inside chip — truncates cleanly */
 .chip span,
 .chip > *:last-child {
   white-space: nowrap;
@@ -209,6 +198,9 @@
   align-items: center;
   gap: 12px;
   padding: 11px 12px;
+  /* ✅ FIX: right padding makes room for the delete button so it never
+     overlaps the arrow or the journey text */
+  padding-right: 40px;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.18s ease;
@@ -221,7 +213,7 @@
   border-color: var(--border);
 }
 
-.card:hover .deleteBtn { opacity: 1; transform: scale(1); }
+.card:hover .deleteBtn { opacity: 1; }
 
 .connector {
   display: flex;
@@ -282,6 +274,9 @@
   line-height: 1.4;
 }
 
+/* ✅ FIX: goArrow no longer absolutely positioned so it doesn't
+   conflict with the delete button. It sits naturally in the flex row
+   and moves right on hover without overlapping anything. */
 .goArrow {
   color: var(--gray-400);
   flex-shrink: 0;
@@ -292,12 +287,14 @@
   transform: translateX(2px);
 }
 
+/* ✅ FIX: removed transform: scale(0.8) translateY(-50%) which caused
+   the button to appear in the wrong vertical position.
+   Now uses simple top/bottom centering with margin auto. */
 .deleteBtn {
   position: absolute;
   right: 8px;
   top: 50%;
-  transform: scale(0.8) translateY(-50%);
-  transform-origin: right center;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -309,7 +306,7 @@
   border-radius: 6px;
   cursor: pointer;
   opacity: 0;
-  transition: all 0.15s ease;
+  transition: opacity 0.15s ease, background 0.15s ease;
 }
 .deleteBtn:hover { background: rgba(255,77,109,0.2); }
 
@@ -345,7 +342,7 @@
   max-width: 210px;
 }
 
-/* loading */
+/* ── Loading ── */
 .loadingState {
   display: flex;
   align-items: center;

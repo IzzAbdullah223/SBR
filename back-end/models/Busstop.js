@@ -80,6 +80,7 @@ busStopSchema.pre('save', function (next) {
 busStopSchema.index({ location: '2dsphere' });
 busStopSchema.index({ routes: 1, status: 1 });
 
+
 busStopSchema.methods.distanceTo = function (lat, lng) {
   const R = 6371;
   const dLat = (lat - this.position.lat) * Math.PI / 180;

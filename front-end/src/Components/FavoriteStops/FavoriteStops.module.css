@@ -19,10 +19,9 @@
   border-radius: 99px;
   cursor: pointer;
   flex-shrink: 0;
-  margin-left:2;
-  
-  /* FIXED WIDTH for both containers to be the same size */
-  width: 130px; 
+  /* ✅ FIX: removed invalid margin-left:2 (missing px unit)
+     which was causing misalignment with the My Journeys button */
+  width: 130px;
   justify-content: flex-start;
   transition: background 0.2s;
 }
@@ -48,21 +47,16 @@
   line-height: 1.5;
 }
 
-/* Chip rail — exactly 2 chips visible, same as SavedRoutes */
-/* ── Updated Rail to show exactly 2 items without scrolling ── */
 .chipsRail {
   display: flex;
   gap: 6px;
   flex: 1;
-  overflow: visible; /* No longer need to hide overflow */
+  overflow: visible;
   padding-bottom: 0;
-  
-  /* Remove the fade mask since we only show 2 items now */
   -webkit-mask-image: none;
   mask-image: none;
 }
 
-/* ── Consistent chip sizing ── */
 .chip {
   display: flex;
   align-items: center;
@@ -73,9 +67,7 @@
   border-radius: 99px;
   cursor: pointer;
   flex-shrink: 0;
-  
-  /* Adjusted width to fit 2 chips perfectly next to the toggle */
-  width: 135px; 
+  width: 135px;
   overflow: hidden;
   transition: all 0.18s ease;
   font-family: 'DM Sans', sans-serif;
@@ -197,6 +189,9 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
+  /* ✅ FIX: right padding makes room for delete button so it never
+     overlaps the stop name or ID text */
+  padding-right: 40px;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.18s ease;
@@ -207,7 +202,7 @@
   background: var(--bg-page);
   border-color: var(--border);
 }
-.card:hover .deleteBtn { opacity: 1; transform: scale(1); }
+.card:hover .deleteBtn { opacity: 1; }
 
 .stopIconBox {
   width: 28px;
@@ -247,13 +242,14 @@
   font-family: monospace;
 }
 
-/* delete — hidden until hover */
+/* ✅ FIX: removed transform: scale(0.8) translateY(-50%) which caused
+   the button to appear in the wrong vertical position on hover.
+   Simple translateY(-50%) with top:50% correctly centers it. */
 .deleteBtn {
   position: absolute;
   right: 8px;
   top: 50%;
-  transform: scale(0.8) translateY(-50%);
-  transform-origin: right center;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -265,7 +261,7 @@
   border-radius: 6px;
   cursor: pointer;
   opacity: 0;
-  transition: all 0.15s ease;
+  transition: opacity 0.15s ease, background 0.15s ease;
 }
 .deleteBtn:hover { background: rgba(255,77,109,0.2); }
 

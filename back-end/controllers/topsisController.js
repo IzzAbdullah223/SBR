@@ -1,6 +1,7 @@
 import * as routeFinder from '../services/routeFinder.service.js';
 import * as busGenerator from '../services/busGenerator.service.js';
 import * as topsisService from '../services/topsis.service.js';
+import { calculateDistance } from '../services/geoCalculator.service.js';
 
 // Maps user's optimization goal to TOPSIS weight vector
 // Weights always sum to 1.0 — hidden from the user entirely
@@ -15,7 +16,7 @@ export const findBuses = async (req, res) => {
   try {
     const { origin, destination, optimizationMode } = req.body;
 
-    // ── Input validation ────────────────────────────────────────────────────
+    
     if (!origin || !destination) {
       return res.status(400).json({
         success: false,
@@ -43,7 +44,20 @@ export const findBuses = async (req, res) => {
       });
     }
 
-    // ── Step 1: Find nearby stops ───────────────────────────────────────────
+    const distKm = calculateDistance(
+  origin.lat, origin.lng,
+  destination.lat, destination.lng
+);
+
+if (distKm < 0.05) {
+  return res.status(400).json({
+    success: false,
+    errorCode: 'SAME_LOCATION',
+    message: 'Origin and destination are too close to each other.',
+  });
+}
+
+
     console.log('🔍 Finding buses from:', origin, 'to:', destination);
 
     const routeData = await routeFinder.findAllRoutes(origin, destination);
@@ -74,7 +88,7 @@ export const findBuses = async (req, res) => {
       });
     }
 
-    // ✅ Generic fallback — only reached if success:false for some other reason
+   
     if (!routeData.success) {
       return res.status(404).json({
         success: false,
@@ -83,13 +97,14 @@ export const findBuses = async (req, res) => {
       });
     }
 
-    console.log(`✅ Found ${routeData.originStops.length} origin stops`);
-    console.log(`✅ Found ${routeData.destStops.length} destination stops`);
-    console.log(`✅ Found ${routeData.directRoutes.length} direct routes`);
-    console.log(`✅ Found ${routeData.transferRoutes.length} transfer routes`);
+    console.log(` Found ${routeData.originStops.length} origin stops`);
+    console.log(` Found ${routeData.destStops.length} destination stops`);
+    console.log(` Found ${routeData.directRoutes.length} direct routes`);
+    console.log(` Found ${routeData.transferRoutes.length} transfer routes`);
 
-    // ── Step 2: Check routes found ──────────────────────────────────────────
+
     if (routeData.directRoutes.length === 0 && routeData.transferRoutes.length === 0) {
+      
       return res.status(404).json({
         success: false,
         errorCode: 'NO_ROUTES',
@@ -102,16 +117,16 @@ export const findBuses = async (req, res) => {
     }
     
  
-    // ── Step 3: Generate buses ──────────────────────────────────────────────
+   
     const allBuses = await busGenerator.generateAllBuses(routeData, origin, destination);
 
-    console.log(`🚌 Generated ${allBuses.length} total buses`);
+    console.log(` Generated ${allBuses.length} total buses`);
 
     if (allBuses.length === 0) {
       return res.status(404).json({
         success: false,
         errorCode: 'OUT_OF_SERVICE',
-        message: `Routes were found but no buses are currently running. Dubai RTA buses typically operate from 5:00 AM to 11:30 PM on weekdays.`,
+        message: `Routes were found but no buses are currently running. Dubai RTA buses typically operate from 5:00 AM to 11:30 PM on  weekdays.`,
         debug: {
           directRoutes: routeData.directRoutes.length,
           transferRoutes: routeData.transferRoutes.length,
@@ -120,7 +135,7 @@ export const findBuses = async (req, res) => {
     }
 
  
-    // Fix: pick ONE representative bus per route (the earliest departure)
+    // pick ONE representative bus per route (the earliest departure)
     // and run TOPSIS on those. This ranks actual different routes against
     // each other. Then after ranking, attach the remaining departures back
     // to each route so the frontend can show "next bus in 4 min, also at..."
@@ -152,7 +167,7 @@ export const findBuses = async (req, res) => {
     try {
       rankedBuses = topsisService.rankBuses(representatives, weights);
     } catch (topsisError) {
-      console.error('❌ TOPSIS ranking failed:', topsisError);
+      console.error(' TOPSIS ranking failed:', topsisError);
       rankedBuses = representatives.map(b => ({ ...b, score: 0 }));
     }
 

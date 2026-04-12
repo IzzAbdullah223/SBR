@@ -19,11 +19,12 @@ export const getDubaiTime = () => {
  * @returns {string} Formatted time (e.g., "2:35 PM")
  */
 export const formatTime = (date) => {
+  if (!date || isNaN(date.getTime())) return '--:-- --';
   let hours = date.getHours();
   const minutes = date.getMinutes();
   const ampm = hours >= 12 ? 'PM' : 'AM';
   hours = hours % 12;
-  hours = hours ? hours : 12; // 0 should be 12
+  hours = hours ? hours : 12;
   const minutesStr = minutes < 10 ? '0' + minutes : minutes;
   return `${hours}:${minutesStr} ${ampm}`;
 };
@@ -34,6 +35,7 @@ export const formatTime = (date) => {
  * @returns {string} Formatted time (e.g., "14:35")
  */
 export const formatTime24 = (date) => {
+  if (!date || isNaN(date.getTime())) return '--:--';
   const hours = date.getHours();
   const minutes = date.getMinutes();
   const hoursStr = hours < 10 ? '0' + hours : hours;
@@ -48,6 +50,7 @@ export const formatTime24 = (date) => {
  * @returns {number} Minutes from now
  */
 export const getMinutesFromNow = (futureTime, currentTime) => {
+  if (!futureTime || !currentTime) return 0;
   return Math.round((futureTime - currentTime) / (1000 * 60));
 };
 
@@ -59,29 +62,6 @@ export const getMinutesFromNow = (futureTime, currentTime) => {
  */
 export const isWithinServiceHours = (schedule, currentTime) => {
   return true;
-  const currentHour = currentTime.getHours();
-  const currentMinute = currentTime.getMinutes();
-  const currentTimeInMinutes = currentHour * 60 + currentMinute;
-  
-  // Determine if weekend (Friday or Saturday in Dubai)
-  const dayOfWeek = currentTime.getDay();
-  const isWeekend = dayOfWeek === 5 || dayOfWeek === 6; // 5=Friday, 6=Saturday
-  
-  const serviceSchedule = isWeekend ? schedule.weekend : schedule.weekday;
-  
-  // Parse first and last bus times
-  const [firstHour, firstMin] = serviceSchedule.firstBus.split(':').map(Number);
-  const [lastHour, lastMin] = serviceSchedule.lastBus.split(':').map(Number);
-  
-  const firstBusTime = firstHour * 60 + firstMin;
-  let lastBusTime = lastHour * 60 + lastMin;
-  
-  // Handle times past midnight (e.g., 24:00, 25:00)
-  if (lastBusTime < firstBusTime) {
-    lastBusTime += 24 * 60;
-  }
-  
-  return currentTimeInMinutes >= firstBusTime && currentTimeInMinutes <= lastBusTime;
 };
 
 /**
@@ -91,7 +71,7 @@ export const isWithinServiceHours = (schedule, currentTime) => {
  */
 export const isWeekendInDubai = (currentTime) => {
   const dayOfWeek = currentTime.getDay();
-  return dayOfWeek === 5 || dayOfWeek === 6; // 5=Friday, 6=Saturday
+  return dayOfWeek === 5 || dayOfWeek === 6;
 };
 
 /**
@@ -101,7 +81,10 @@ export const isWeekendInDubai = (currentTime) => {
  * @returns {Date} New date with minutes added
  */
 export const addMinutes = (date, minutes) => {
+  if (!date || isNaN(date.getTime()) || isNaN(minutes)) {
+    return new Date(); // fallback to now if invalid
+  }
   const newDate = new Date(date);
-  newDate.setMinutes(newDate.getMinutes() + minutes);
+  newDate.setMinutes(newDate.getMinutes() + Math.round(minutes));
   return newDate;
 };

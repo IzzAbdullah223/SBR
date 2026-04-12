@@ -14,67 +14,178 @@ import { MAP_CONFIG } from '../../utils/constants';
 import BusStopCard from '../BusStopCard/BusStopCard';
 import styles from './Map.module.css';
 
-const SmartBounds = ({ origin, destination, shapeCoordinates, shapeCoordinatesLeg2, shapeKey }) => {
+// ─── SmartBounds ─────────────────────────────────────────────────────────────
+//
+// When a bus is selected, fits the map to show EVERYTHING at once:
+//   - The full shape polyline (leg1 + leg2)
+//   - The origin bus stop marker
+//   - The transfer bus stop marker (if transfer route)
+//   - The destination bus stop marker
+//
+// When no bus is selected:
+//   - Both origin + destination typed → fit to those two points
+//   - Only origin typed → center on it at zoom 13
+//
+// GUARDS:
+//   - If origin === destination (same coords) → do NOT move the map.
+//     The search already shows an error. Moving the map would be confusing.
+
+const SmartBounds = ({
+  origin,
+  destination,
+  selectedRoute,
+  shapeCoordinates,
+  shapeCoordinatesLeg2,
+  shapeKey,
+}) => {
   const map = useMap();
   const lastShapeKey  = useRef(null);
-  const lastFittedKey = useRef(null);
   const lastOriginLat = useRef(null);
   const lastOriginLng = useRef(null);
   const lastDestLat   = useRef(null);
   const lastDestLng   = useRef(null);
 
-  const fitToOriginDest = () => {
-    if (!origin?.lat || !destination?.lat) return;
-    map.fitBounds(
-      L.latLngBounds([origin.lat, origin.lng], [destination.lat, destination.lng]),
-      { paddingTopLeft: [80, 80], paddingBottomRight: [80, 80] }
-    );
-    lastOriginLat.current = origin.lat;
-    lastOriginLng.current = origin.lng;
-    lastDestLat.current   = destination.lat;
-    lastDestLng.current   = destination.lng;
-  };
-
   useEffect(() => {
-    const leg1 = shapeCoordinates?.length > 1 ? shapeCoordinates : null;
-    const leg2 = shapeCoordinatesLeg2?.length > 1 ? shapeCoordinatesLeg2 : null;
-    const hasShape = leg1 || leg2;
 
-    if (hasShape && shapeKey !== lastShapeKey.current) {
-      const allPoints = [
-        ...(leg1 ? leg1.map(c => [c.lat, c.lng]) : []),
-        ...(leg2 ? leg2.map(c => [c.lat, c.lng]) : []),
-      ];
-      map.fitBounds(allPoints, { paddingTopLeft: [80, 80], paddingBottomRight: [80, 80] });
-      lastShapeKey.current  = shapeKey;
-      lastFittedKey.current = shapeKey;
+    // ✅ GUARD: same location entered for both origin and destination
+    // useFindBuses already blocks the search and shows an error.
+    // The map must NOT react — stay exactly where it is.
+    if (
+      origin?.lat && destination?.lat &&
+      origin.lat === destination.lat &&
+      origin.lng === destination.lng
+    ) return;
+
+    // ── Case 1: bus selected → fit to shape + all key stops ───────────────
+    if (selectedRoute && shapeKey && shapeKey !== lastShapeKey.current) {
+      lastShapeKey.current = shapeKey;
+
+      const points = [];
+
+      // Add ALL shape polyline points (leg 1)
+      if (shapeCoordinates?.length > 1) {
+        shapeCoordinates.forEach(c => points.push([c.lat, c.lng]));
+      }
+
+      // Add ALL shape polyline points (leg 2 — transfer routes)
+      if (shapeCoordinatesLeg2?.length > 1) {
+        shapeCoordinatesLeg2.forEach(c => points.push([c.lat, c.lng]));
+      }
+
+      // Add key stop markers so they are never cut off by the panel
+      if (selectedRoute.originStop?.position) {
+        points.push([
+          selectedRoute.originStop.position.lat,
+          selectedRoute.originStop.position.lng,
+        ]);
+      }
+      if (selectedRoute.journeyType === 'transfer' && selectedRoute.transferStop?.position) {
+        points.push([
+          selectedRoute.transferStop.position.lat,
+          selectedRoute.transferStop.position.lng,
+        ]);
+      }
+      if (selectedRoute.destinationStop?.position) {
+        points.push([
+          selectedRoute.destinationStop.position.lat,
+          selectedRoute.destinationStop.position.lng,
+        ]);
+      }
+
+      if (points.length >= 2) {
+        map.fitBounds(points, {
+          paddingTopLeft:     [60, 60],
+          paddingBottomRight: [60, 60],
+          maxZoom: 15,
+        });
+        return;
+      }
+
+      // Fallback if stop positions are missing
+      if (origin?.lat && destination?.lat) {
+        map.fitBounds(
+          [[origin.lat, origin.lng], [destination.lat, destination.lng]],
+          { paddingTopLeft: [60, 60], paddingBottomRight: [60, 60] }
+        );
+      }
       return;
     }
 
-    if (shapeKey && shapeKey !== lastFittedKey.current) {
-      fitToOriginDest();
-      lastFittedKey.current = shapeKey;
+    // ── Case 1b: same bus, shape just finished loading → re-fit ───────────
+    if (selectedRoute && shapeKey === lastShapeKey.current) {
+      const hasShape = shapeCoordinates?.length > 1 || shapeCoordinatesLeg2?.length > 1;
+      if (hasShape) {
+        const points = [];
+
+        if (shapeCoordinates?.length > 1) {
+          shapeCoordinates.forEach(c => points.push([c.lat, c.lng]));
+        }
+        if (shapeCoordinatesLeg2?.length > 1) {
+          shapeCoordinatesLeg2.forEach(c => points.push([c.lat, c.lng]));
+        }
+        if (selectedRoute.originStop?.position) {
+          points.push([
+            selectedRoute.originStop.position.lat,
+            selectedRoute.originStop.position.lng,
+          ]);
+        }
+        if (selectedRoute.journeyType === 'transfer' && selectedRoute.transferStop?.position) {
+          points.push([
+            selectedRoute.transferStop.position.lat,
+            selectedRoute.transferStop.position.lng,
+          ]);
+        }
+        if (selectedRoute.destinationStop?.position) {
+          points.push([
+            selectedRoute.destinationStop.position.lat,
+            selectedRoute.destinationStop.position.lng,
+          ]);
+        }
+
+        if (points.length >= 2) {
+          map.fitBounds(points, {
+            paddingTopLeft:     [60, 60],
+            paddingBottomRight: [60, 60],
+            maxZoom: 15,
+          });
+        }
+      }
       return;
     }
 
-    const originChanged = origin?.lat !== lastOriginLat.current || origin?.lng !== lastOriginLng.current;
-    const destChanged   = destination?.lat !== lastDestLat.current || destination?.lng !== lastDestLng.current;
+    // ── Case 2: no bus selected, both origin + destination typed ───────────
+    const originChanged =
+      origin?.lat !== lastOriginLat.current ||
+      origin?.lng !== lastOriginLng.current;
+    const destChanged =
+      destination?.lat !== lastDestLat.current ||
+      destination?.lng !== lastDestLng.current;
 
     if (origin?.lat && destination?.lat && (originChanged || destChanged)) {
-      fitToOriginDest();
+      map.fitBounds(
+        [[origin.lat, origin.lng], [destination.lat, destination.lng]],
+        { paddingTopLeft: [80, 80], paddingBottomRight: [80, 80] }
+      );
+      lastOriginLat.current = origin.lat;
+      lastOriginLng.current = origin.lng;
+      lastDestLat.current   = destination.lat;
+      lastDestLng.current   = destination.lng;
       return;
     }
 
+    // ── Case 3: only origin typed → center on it ───────────────────────────
     if (origin?.lat && originChanged && !destination?.lat) {
       map.setView([origin.lat, origin.lng], 13);
       lastOriginLat.current = origin.lat;
       lastOriginLng.current = origin.lng;
     }
-  }, [shapeCoordinates, shapeCoordinatesLeg2, shapeKey, origin, destination]);
+
+  }, [selectedRoute, shapeKey, shapeCoordinates, shapeCoordinatesLeg2, origin, destination]);
 
   return null;
 };
 
+// ─── MapView ──────────────────────────────────────────────────────────────────
 const MapView = ({
   origin,
   destination,
@@ -136,6 +247,7 @@ const MapView = ({
         <SmartBounds
           origin={origin}
           destination={destination}
+          selectedRoute={selectedRoute}
           shapeCoordinates={shapeCoordinates}
           shapeCoordinatesLeg2={shapeCoordinatesLeg2}
           shapeKey={shapeKey}
@@ -188,11 +300,21 @@ const MapView = ({
         )}
 
         {fallbackPositions && (
-          <Polyline positions={fallbackPositions} color="#667eea" weight={3} opacity={0.5} dashArray="8,12" />
+          <Polyline
+            positions={fallbackPositions}
+            color="#667eea"
+            weight={3}
+            opacity={0.5}
+            dashArray="8,12"
+          />
         )}
 
         {busStops.map((stop) => {
-          if (!stop?.position || !isValidCoord(stop.position.lat) || !isValidCoord(stop.position.lng)) return null;
+          if (
+            !stop?.position ||
+            !isValidCoord(stop.position.lat) ||
+            !isValidCoord(stop.position.lng)
+          ) return null;
 
           const isSelected = selectedStop?.stopId === stop.stopId;
           const isOnRoute  =

@@ -1,15 +1,7 @@
-// savedRouteController.js
-// Handles CRUD for saved journeys
-// Logic change from previous version:
-//   OLD — saved a specific bus (routeNumber, color, journeyType, fare etc.)
-//   NEW — saves a journey (origin + destination only)
-//         no bus-specific fields needed — a fresh search is run when user loads the journey
+
 
 import SavedRoute from '../models/SavedRoute.js';
 
-// ── GET /api/saved-routes ──────────────────────────────────────────────────
-// Returns all saved journeys for the logged-in user
-// Sorted by most recently saved first
 export const getSavedRoutes = async (req, res) => {
   try {
     const routes = await SavedRoute.findByUserId(req.user.id);

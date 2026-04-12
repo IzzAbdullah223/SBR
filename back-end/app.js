@@ -5,6 +5,7 @@ import cors from 'cors';
 import { db_connection } from './DB/dbConnection.js';
 import apiRoutes from './routes/index.js';
 import passport from './config/passport.js';
+import compression from 'compression';
 
 const app = express();
 await db_connection();
@@ -15,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 
 app.use('/api', apiRoutes);
-
+app.use(compression());
 app.get('/health', (req, res) => {
   res.json({
     status: 'OK',

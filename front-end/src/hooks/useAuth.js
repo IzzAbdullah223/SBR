@@ -28,18 +28,17 @@ const useAuth = () => {
       const payload = JSON.parse(atob(token.split('.')[1]));
 
       if (payload.exp * 1000 > Date.now()) {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const parsed = JSON.parse(storedUser);
-          setUser(parsed);
-          const lang = parsed?.preferences?.language;
-          if (lang && lang !== i18n.language) {
-            skipDbSave();
-            i18n.changeLanguage(lang);
-          }
-        } else {
-          setUser(payload.user);
-        }
+  const storedUser = localStorage.getItem('user');
+  //  always set user immediately from best available data
+  // so saved routes and favorite stops start loading right away
+  // without waiting for the profile network request to complete
+  const immediateUser = storedUser ? JSON.parse(storedUser) : payload.user;
+  setUser(immediateUser);
+  const lang = immediateUser?.preferences?.language;
+  if (lang && lang !== i18n.language) {
+    skipDbSave();
+    i18n.changeLanguage(lang);
+  }
 
         fetch('/api/settings/profile', {
           headers: { Authorization: `Bearer ${token}` },

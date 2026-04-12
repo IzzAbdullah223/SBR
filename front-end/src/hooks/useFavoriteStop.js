@@ -18,13 +18,13 @@ const useFavoriteStops = (user) => {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (user) {
-      fetchFavorites();
-    } else {
-      setFavoriteStops([]);
-    }
-  }, [user]);
+useEffect(() => {
+  if (user?.id) {
+    fetchFavorites();
+  } else {
+    setFavoriteStops([]);
+  }
+}, [user?.id]); // ✅ FIX: use user.id not whole object — prevents double fetch
 
   const addFavorite = useCallback(async (stop) => {
     try {

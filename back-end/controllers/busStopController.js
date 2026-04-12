@@ -7,7 +7,7 @@ import { calculateDistance } from '../services/geoCalculator.service.js';
  */
 export const getAllStops = async (req, res) => {
   try {
-    const stops = await BusStop.find().select('-__v');
+    const stops = await BusStop.find().select('-__v').lean();
 
     res.json({
       success: true,

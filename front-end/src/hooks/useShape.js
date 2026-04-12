@@ -1,13 +1,8 @@
 import { useState, useEffect } from 'react';
 import api from '../services/Api';
 
-// Threshold: if trimmed segment is more than 75% of the full shape,
-// it means the stops are near the two termini and the "trim" didn't help much.
-// In that case, try the return shape — it may give a shorter segment.
-const TRIM_RATIO_THRESHOLD = 0.75;
-
 // Fetch a shape and trim it between two stops.
-// Returns the coordinate array, or null on failure.
+// Returns the coordinate array and trimRatio, or null on failure.
 const fetchTrimmedShape = async (shapeId, originStopId, destStopId) => {
   if (!shapeId) return null;
   try {
@@ -19,36 +14,46 @@ const fetchTrimmedShape = async (shapeId, originStopId, destStopId) => {
   }
 };
 
-// Fetch both the outbound and return shapes, return whichever gives a shorter segment.
-// Falls back to whichever one succeeds if only one is available.
+// Fetch the best shape for a route segment.
+//
+// Strategy:
+//   1. Try the outbound shape first — shapeController already reverses it
+//      automatically if the user is travelling opposite to the stored direction.
+//      So we ALWAYS trust the outbound result if it exists.
+//   2. Only if outbound is completely missing do we try the return shape.
+//   3. If both are missing, return null — Map.jsx draws a dashed straight line.
+//
+// Why we removed the trimRatio threshold check:
+//   The old code replaced a correctly-reversed outbound shape with the return
+//   shape whenever trimRatio > 0.75. This caused the line to jump onto wrong
+//   roads because the return shape physically travels different streets.
+//   Since our GTFS snapshot only reliably captured one direction per route,
+//   the mathematical reversal in shapeController is more trustworthy than
+//   switching to a return shape that may have incomplete or mismatched data.
 const fetchBestShape = async (shapeId, shapeIdReturn, originStopId, destStopId) => {
-  const outbound = await fetchTrimmedShape(shapeId, originStopId, destStopId);
 
-  // If outbound trim is already tight (< threshold), use it immediately
-  if (outbound && outbound.trimRatio < TRIM_RATIO_THRESHOLD) {
-    console.log(`✅ Outbound shape ${shapeId} trim ratio ${outbound.trimRatio.toFixed(2)} — using outbound`);
-    return outbound.coordinates;
+  // Step 1 — try outbound shape (handles both directions via auto-reverse)
+  if (shapeId) {
+    const outbound = await fetchTrimmedShape(shapeId, originStopId, destStopId);
+    if (outbound) {
+      console.log(`✅ Using outbound shape ${shapeId} (trimRatio=${outbound.trimRatio.toFixed(2)})`);
+      return outbound.coordinates;
+    }
   }
 
-  // Otherwise try the return shape too
-  const returnShape = shapeIdReturn
-    ? await fetchTrimmedShape(shapeIdReturn, originStopId, destStopId)
-    : null;
-
-  if (!outbound && !returnShape) return null;
-  if (!outbound) return returnShape.coordinates;
-  if (!returnShape) {
-    console.log(`⚠️  Shape ${shapeId} trim ratio ${outbound.trimRatio.toFixed(2)} — no return shape, using outbound`);
-    return outbound.coordinates;
+  // Step 2 — outbound missing or failed, try return shape as last resort
+  if (shapeIdReturn) {
+    console.log(`⚠️  Outbound shape ${shapeId} missing — trying return shape ${shapeIdReturn}`);
+    const returnShape = await fetchTrimmedShape(shapeIdReturn, originStopId, destStopId);
+    if (returnShape) {
+      console.log(`✅ Using return shape ${shapeIdReturn} as fallback`);
+      return returnShape.coordinates;
+    }
   }
 
-  // Both available — use whichever gives the shorter (more focused) segment
-  if (returnShape.trimRatio < outbound.trimRatio) {
-    console.log(`🔄 Return shape ${shapeIdReturn} is better (${returnShape.trimRatio.toFixed(2)} < ${outbound.trimRatio.toFixed(2)})`);
-    return returnShape.coordinates;
-  }
-  console.log(`✅ Outbound shape ${shapeId} is better (${outbound.trimRatio.toFixed(2)} ≤ ${returnShape.trimRatio.toFixed(2)})`);
-  return outbound.coordinates;
+  // Step 3 — both missing, Map.jsx will draw a dashed straight line
+  console.log(`⚠️  No shape available for ${shapeId} — map will use dashed fallback line`);
+  return null;
 };
 
 const useShape = (selectedBus) => {
@@ -118,7 +123,7 @@ const useShape = (selectedBus) => {
 
             const coords2 = await fetchBestShape(
               selectedBus.shapeIdLeg2,
-              selectedBus.shapeIdLeg2Return,  // ← now available from busGenerator
+              selectedBus.shapeIdLeg2Return,
               transferStopId,
               destStopId
             );

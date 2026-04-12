@@ -31,6 +31,24 @@ const en = {
     direct: 'Direct',
   },
 
+  // ── Point 3 fix: all search/find error messages now have translation keys
+  // so they appear in the correct language (Arabic or English).
+  // Before: hardcoded English strings in useFindBuses.js
+  // After:  t('errors.xxx') looked up here at runtime
+  errors: {
+    invalidOrigin:      'Please select your origin from the dropdown — don\'t just type it.',
+    invalidDestination: 'Please select your destination from the dropdown — don\'t just type it.',
+    sameLocation:       '⚠️ Origin and destination are too close to each other. Please choose different locations.',
+    noStopsBoth:        'No bus stops found near either location. Try selecting a spot closer to a main road.',
+    noOriginStops:      'No bus stops found near your origin. Try a nearby main road or landmark.',
+    noDestStops:        'No bus stops found near your destination. Try a nearby main road or landmark.',
+    noStops:            'No bus stops found near your locations. Try different areas.',
+    noRoutes:           'Bus stops were found but no routes connect these two locations. Try locations along major roads.',
+    outOfService:       'Routes found but no buses are running right now. Dubai RTA buses run from 5:00 AM to 11:30 PM.',
+    serverError:        '⚙️ Something went wrong on our end. Please try again.',
+    networkError:       '📡 Cannot reach the server. Please check your connection and try again.',
+  },
+
   results: {
     title: 'Recommended Routes',
     subtitle: '{{count}} routes ranked by your preferences using TOPSIS',
@@ -128,7 +146,6 @@ const en = {
     noAccount: "Don't have an account?",
     signUpLink: 'Sign Up',
     loginFailed: 'Login failed. Please try again.',
-
     createAccount: 'Create Account',
     nameLabel: 'Name',
     namePlaceholder: 'Your full name',
@@ -142,7 +159,6 @@ const en = {
   settings: {
     title: 'Settings',
     back: 'Back',
-
     profile: 'Profile',
     profileHint: 'Name, email and phone number',
     fullName: 'Full Name',
@@ -153,7 +169,6 @@ const en = {
     emailPlaceholder: 'your@email.com',
     saveChanges: 'Save Changes',
     saving: 'Saving...',
-
     changePassword: 'Change Password',
     changePasswordHint: 'Update your account password',
     currentPassword: 'Current Password',
@@ -163,7 +178,6 @@ const en = {
     updating: 'Updating...',
     passwordMismatch: 'Passwords do not match',
     passwordTooShort: 'Must be at least 6 characters',
-
     preferences: 'Preferences',
     preferencesHint: 'Optimize routes for what matters to you',
     optimizeFor: 'Optimize routes for',
@@ -172,19 +186,16 @@ const en = {
     optLessWalking: '🚶 Less walking',
     optFewestTransfers: '🔄 Fewest transfers',
     savePreferences: 'Save Preferences',
-
     display: 'Display',
     displayHint: 'Map style and appearance',
     darkMode: 'Dark Mode',
     darkModeHint: 'Switch between light and dark appearance',
-
     accessibility: 'Accessibility',
     accessibilityHint: 'Text size and motion settings',
     largerText: 'Larger Text',
     largerTextHint: 'Increases font size across the app',
     reduceAnimations: 'Reduce Animations',
     reduceAnimationsHint: 'Disables map fly animations and transitions',
-
     privacy: 'Privacy & Data',
     privacyHint: 'Manage your data and account',
     clearRoutes: 'Clear Saved Routes',
@@ -193,12 +204,10 @@ const en = {
     deleteAccount: 'Delete Account',
     deleteAccountHint: 'Permanently deletes your account and all data',
     delete: 'Delete',
-
     logout: 'Log Out',
     logoutHint: 'Sign out of your account',
     logoutBtn: 'Log Out',
     logoutHintSub: 'You can log back in at any time',
-
     clearRoutesTitle: 'Clear All Saved Routes?',
     clearRoutesMessage: 'This will permanently remove all your saved journeys. This cannot be undone.',
     deleteAccountTitle: 'Delete Account?',
