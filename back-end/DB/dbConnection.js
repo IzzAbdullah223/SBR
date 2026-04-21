@@ -6,29 +6,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
  dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
-// ─────────────────────────────────────────────
-// WHY CACHED CONNECTION?
-//
-// LOCAL (nodemon): The server process stays alive forever.
-//   mongoose.connect() is called once on startup, and the
-//   same connection is reused for every request. No problem.
-//
-// RENDER / any long-running server: Same as local — one
-//   process, one connection, lives until you redeploy.
-//   Also fine without caching, but caching doesn't hurt.
-//
-// VERCEL / AWS Lambda / serverless: Each incoming request
-//   may spin up a BRAND NEW Node.js process (cold start).
-//   Without caching, you'd call mongoose.connect() on
-//   EVERY request — slow and hits Atlas connection limits.
-//   With caching, the connection is stored on `global` which
-//   survives between requests within the SAME warm instance.
-//
-// The pattern works identically in all three environments.
-// ─────────────────────────────────────────────
 
-// `global` persists across multiple calls within the same
-// Node.js process. On serverless it survives between warm
 // invocations of the same instance.
 let cached = global.mongooseConnection;
 
