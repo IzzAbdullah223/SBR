@@ -12,7 +12,7 @@
   z-index: 1;
 }
 
-/* ─── Popup ─── */
+
 .popup {
   font-family: 'DM Sans', sans-serif;
   min-width: 140px;
@@ -32,7 +32,7 @@
   margin: 2px 0;
 }
 
-/* ─── Leaflet Overrides ─── */
+
 :global(.leaflet-container) {
   height: 100%;
   width: 100%;

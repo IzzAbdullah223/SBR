@@ -1,7 +1,4 @@
-/* ═══════════════════════════════════════════════════════
-   SEARCHINPUT.MODULE.CSS
-   Clean input with animated dropdown
-═══════════════════════════════════════════════════════ */
+
 
 .inputGroup {
   display: flex;
@@ -19,7 +16,7 @@
   letter-spacing: 0.6px;
 }
 
-/* ─── Input Wrapper ─── */
+
 .inputWrapper {
   position: relative;
 }
@@ -49,7 +46,7 @@
   box-shadow: 0 0 0 4px rgba(10, 22, 40, 0.06);
 }
 
-/* ─── Loading Spinner ─── */
+
 .loadingSpinner {
   position: absolute;
   right: 14px;
@@ -70,7 +67,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* ─── Error ─── */
+
 .errorTooltip {
   position: absolute;
   top: calc(100% + 6px);
@@ -87,7 +84,7 @@
   animation: slideDown 0.2s ease;
 }
 
-/* ─── Dropdown ─── */
+
 .dropdown {
   position: absolute;
   top: calc(100% + 6px);
@@ -109,7 +106,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── Dropdown Item ─── */
+
 .dropdownItem {
   display: flex;
   align-items: flex-start;
@@ -153,14 +150,14 @@
   text-overflow: ellipsis;
 }
 
-/* ─── No Results ─── */
+
 .noResults {
   padding: 16px;
   text-align: center;
   color: var(--gray-400);
   font-size: 13px;
 }
-/* ─── Pinned Stop Pill ─── */
+
 .pinnedPill {
   display: flex;
   align-items: center;

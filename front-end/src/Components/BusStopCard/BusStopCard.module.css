@@ -34,7 +34,7 @@
 }
 .closeBtn:hover { background: var(--border); color: var(--text-primary); }
 
-/* ── Header ── */
+
 .header {
   display: flex;
   align-items: center;
@@ -76,7 +76,7 @@
   font-family: monospace;
 }
 
-/* ── Star / Favorite button ── */
+
 .starBtn {
   width: 30px;
   height: 30px;
@@ -95,7 +95,7 @@
 .starred { border-color: var(--gold); color: var(--gold); background: rgba(240,165,0,0.1); }
 .starBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ── Loading ── */
+
 .loadingRow {
   display: flex;
   justify-content: center;
@@ -112,7 +112,7 @@
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Content ── */
+
 .content { display: flex; flex-direction: column; gap: 12px; }
 
 .section { display: flex; flex-direction: column; gap: 6px; }
@@ -129,7 +129,7 @@
   gap: 5px;
 }
 
-/* ── Departure Board ── */
+
 .departureBoard {
   display: flex;
   flex-direction: column;
@@ -171,7 +171,7 @@
   font-family: 'DM Sans', sans-serif;
 }
 
-/* ── Coordinates ── */
+
 .coordinates {
   margin: 0;
   font-size: 11px;
@@ -183,7 +183,7 @@
   border: 1px solid var(--border);
 }
 
-/* ── Amenities ── */
+
 .amenitiesList {
   margin: 0;
   padding-left: 14px;
@@ -192,13 +192,13 @@
 }
 .amenitiesList li { margin-bottom: 3px; }
 
-/* ── RTL ── */
+
 [dir="rtl"] .card { right: auto; left: 16px; }
 [dir="rtl"] .closeBtn { right: auto; left: 12px; }
 [dir="rtl"] .header { padding-right: 0; padding-left: 28px; }
 [dir="rtl"] .starBtn { margin-left: 0; margin-right: auto; }
 
-/* ── Action buttons (Set as Origin / Destination) ── */
+
 .actions {
   display: flex;
   gap: 6px;

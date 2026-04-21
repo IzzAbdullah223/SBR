@@ -1,11 +1,9 @@
-/* ── Wrapper ── */
+
 .wrapper {
   margin-bottom: 10px;
 }
 
-/* ═══════════════════════════════════════════════════════
-   COLLAPSED STATE — horizontal scrollable chips row
-═══════════════════════════════════════════════════════ */
+
 
 .collapsedRow {
   display: flex;
@@ -103,9 +101,7 @@
   flex-shrink: 0;
 }
 
-/* ═══════════════════════════════════════════════════════
-   EXPANDED STATE — full panel with all saved routes
-═══════════════════════════════════════════════════════ */
+
 
 .panel {
   background: var(--bg-card);
@@ -179,7 +175,7 @@
 }
 .closeBtn:hover { background: var(--border); color: var(--text-primary); }
 
-/* ── Scrollable list ── */
+
 .list {
   max-height: 260px;
   overflow-y: auto;
@@ -192,14 +188,13 @@
 .list::-webkit-scrollbar-track { background: transparent; }
 .list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 
-/* ── Route card ── */
+
 .card {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 11px 12px;
-  /* ✅ FIX: right padding makes room for the delete button so it never
-     overlaps the arrow or the journey text */
+  
   padding-right: 40px;
   border-radius: 12px;
   cursor: pointer;
@@ -274,9 +269,7 @@
   line-height: 1.4;
 }
 
-/* ✅ FIX: goArrow no longer absolutely positioned so it doesn't
-   conflict with the delete button. It sits naturally in the flex row
-   and moves right on hover without overlapping anything. */
+
 .goArrow {
   color: var(--gray-400);
   flex-shrink: 0;
@@ -287,9 +280,7 @@
   transform: translateX(2px);
 }
 
-/* ✅ FIX: removed transform: scale(0.8) translateY(-50%) which caused
-   the button to appear in the wrong vertical position.
-   Now uses simple top/bottom centering with margin auto. */
+
 .deleteBtn {
   position: absolute;
   right: 8px;
@@ -310,7 +301,7 @@
 }
 .deleteBtn:hover { background: rgba(255,77,109,0.2); }
 
-/* ── Empty states ── */
+
 .emptyState {
   display: flex;
   flex-direction: column;
@@ -342,7 +333,7 @@
   max-width: 210px;
 }
 
-/* ── Loading ── */
+
 .loadingState {
   display: flex;
   align-items: center;

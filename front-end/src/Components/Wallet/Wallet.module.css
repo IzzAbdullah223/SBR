@@ -5,7 +5,7 @@
   margin-top: 16px;
 }
 
-/* ── Balance card — mimics a real Nol card ── */
+
 .balanceCard {
   background: linear-gradient(135deg, var(--navbar-bg) 0%, #1a3461 100%);
   border-radius: 14px;
@@ -17,7 +17,7 @@
   overflow: hidden;
 }
 
-/* Decorative circle */
+
 .balanceCard::before {
   content: '';
   position: absolute;
@@ -94,7 +94,7 @@
   letter-spacing: 2px;
 }
 
-/* ── Top-up ── */
+
 .topUpRow {
   display: flex;
   gap: 10px;
@@ -149,7 +149,7 @@
 .topUpBtn:hover:not(:disabled) { background: var(--gold-light); transform: translateY(-1px); }
 .topUpBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-/* ── Error ── */
+
 .error {
   display: flex;
   align-items: center;
@@ -159,7 +159,7 @@
   margin: 0;
 }
 
-/* ── Loading ── */
+
 .loading {
   display: flex;
   align-items: center;

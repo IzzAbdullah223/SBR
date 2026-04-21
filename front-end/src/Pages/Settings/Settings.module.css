@@ -1,14 +1,14 @@
-/* ── Page Wrapper ── */
+
 .page {
   height: 100vh;
   background: var(--bg-page);
   font-family: 'DM Sans', sans-serif;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Keeps the top bar fixed at the top */
+  overflow: hidden; 
 }
 
-/* ── Top bar ── */
+
 .topBar {
   height: 52px;
   background: var(--navbar-bg);
@@ -45,22 +45,22 @@
   margin: 0;
 }
 
-/* ── Scrolling Content Area ── */
+
 .content {
   max-width: 600px;
   width: 100%;
   margin: 0 auto;
-  padding: 20px 20px 120px; /* Large bottom padding so the last item isn't cut off */
+  padding: 20px 20px 120px; 
   display: flex;
   flex-direction: column;
   gap: 12px;
-  flex: 1; /* Takes up all available space between topBar and bottom */
-  overflow-y: auto; /* Enables scrolling here */
+  flex: 1; 
+  overflow-y: auto; 
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
 }
 
-/* ── Accordion ── */
+
 .accordion {
   background: var(--bg-card);
   border-radius: 14px;
@@ -120,7 +120,7 @@
   transition: max-height 0.4s ease-in-out;
 }
 
-/* Fix: Increase this value significantly to fit large forms */
+
 .accordionOpen { 
   max-height: 1500px; 
 }
@@ -130,7 +130,7 @@
   border-top: 1.5px solid var(--border);
 }
 
-/* ── Form Elements ── */
+
 .form { display: flex; flex-direction: column; gap: 14px; }
 .formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .formRow { display: flex; flex-direction: column; gap: 6px; }
@@ -167,7 +167,7 @@
 
 .saveBtn:hover:not(:disabled) { background: var(--gold); color: #000; }
 
-/* ── Toggles & Rows ── */
+
 .toggleRow, .dangerRow, .logoutRow {
   display: flex;
   align-items: center;
@@ -197,7 +197,7 @@
 
 .logoutBtn { color: var(--error); border-color: var(--error); font-weight: 700; }
 
-/* ── Modals ── */
+
 .overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.6);
   display: flex; align-items: center; justify-content: center; z-index: 1000;

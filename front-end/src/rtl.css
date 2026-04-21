@@ -1,18 +1,6 @@
-/*
- * rtl.css — Global RTL overrides for Arabic layout
- *
- * Imported once in main.jsx.
- * All rules scoped to [dir="rtl"] — only active in Arabic mode.
- *
- * STRATEGY:
- * direction:rtl on leftPanel makes the browser handle all flex row reversals
- * automatically — no flex-direction:row-reverse needed anywhere inside.
- * We only handle: fonts, absolute positions, border sides, LTR exceptions.
- */
 
-/* ═══════════════════════════════════════════════════════
-   1. FONTS — Cairo loaded via App.css @import
-═══════════════════════════════════════════════════════ */
+
+
 
 [dir="rtl"] {
   font-family: 'Cairo', 'DM Sans', sans-serif;
@@ -35,14 +23,7 @@
   font-family: 'Cairo', sans-serif;
 }
 
-/* ═══════════════════════════════════════════════════════
-   2. LEFT PANEL — root directional context
-   direction:rtl cascades to ALL children automatically:
-     - flex rows flow right-to-left
-     - text anchors to the right
-     - block elements start from the right edge
-   No flex-direction:row-reverse needed inside.
-═══════════════════════════════════════════════════════ */
+
 
 [dir="rtl"] [class*="leftPanel"] {
   direction: rtl;
@@ -50,22 +31,18 @@
   border-left: 1px solid var(--border);
 }
 
-/* sectionTitle is a flex row [emoji][text][line].
-   direction:rtl alone does not reorder flex children — must use row-reverse.
-   With row-reverse: [line][text][emoji] which is correct for RTL. */
+
 [dir="rtl"] [class*="sectionTitle"] {
   flex-direction: row-reverse;
   text-align: right;
 }
 
-/* ::after already lands on the left after row-reverse — keep it visible */
+
 [dir="rtl"] [class*="sectionTitle"]::after {
   align-self: center;
 }
 
-/* ═══════════════════════════════════════════════════════
-   3. NAVBAR (outside leftPanel — needs its own direction)
-═══════════════════════════════════════════════════════ */
+
 
 [dir="rtl"] [class*="navbar"] {
   direction: rtl;
@@ -80,9 +57,7 @@
   max-width: 160px;
 }
 
-/* ═══════════════════════════════════════════════════════
-   4. SEARCH INPUT
-═══════════════════════════════════════════════════════ */
+
 
 [dir="rtl"] [class*="searchInput"] {
   padding: 13px 14px 13px 44px;
@@ -99,17 +74,15 @@
   text-align: right;
 }
 
-/* ═══════════════════════════════════════════════════════
-   5. BUS RESULTS
-═══════════════════════════════════════════════════════ */
 
-/* BusResults header h2 = [Star icon][title text] flex row — reverse it */
+
+
 [dir="rtl"] [class*="header"] h2 {
   flex-direction: row-reverse;
   text-align: right;
 }
 
-/* Medal is absolute positioned — flip manually */
+
 [dir="rtl"] [class*="medal"] {
   right: auto;
   left: 14px;
@@ -132,11 +105,9 @@
   margin-right: auto;
 }
 
-/* ═══════════════════════════════════════════════════════
-   6. SAVED ROUTES
-═══════════════════════════════════════════════════════ */
 
-/* deleteBtn is absolute positioned — flip manually */
+
+
 [dir="rtl"] [class*="deleteBtn"] {
   right: auto;
   left: 8px;
@@ -150,9 +121,7 @@
   transform: scaleX(-1) translateX(-2px);
 }
 
-/* ═══════════════════════════════════════════════════════
-   7. SETTINGS PAGE (outside leftPanel — needs direction)
-═══════════════════════════════════════════════════════ */
+
 
 [dir="rtl"] [class*="page"] {
   direction: rtl;
@@ -176,7 +145,7 @@
   direction: rtl;
 }
 
-/* Latin-value inputs stay LTR */
+
 [dir="rtl"] input[type="email"],
 [dir="rtl"] input[type="password"] {
   direction: ltr;
@@ -192,9 +161,7 @@
   justify-content: flex-end;
 }
 
-/* ═══════════════════════════════════════════════════════
-   8. AUTH MODALS
-═══════════════════════════════════════════════════════ */
+
 
 [dir="rtl"] [class*="switchText"] {
   text-align: center;
@@ -213,9 +180,7 @@
   text-align: right;
 }
 
-/* ═══════════════════════════════════════════════════════
-   9. CLOSE BUTTONS — per component
-═══════════════════════════════════════════════════════ */
+
 
 [dir="rtl"] [class*="panelHeader"] [class*="closeBtn"] {
   right: auto;
@@ -231,35 +196,27 @@
   left: 16px;
 }
 
-/* ═══════════════════════════════════════════════════════
-   10. MAP POPUP
-═══════════════════════════════════════════════════════ */
+
 
 [dir="rtl"] :global(.leaflet-popup-content) {
   direction: rtl;
   text-align: right;
 }
 
-/* ═══════════════════════════════════════════════════════
-   11. SCORE BAR — always fills left to right
-═══════════════════════════════════════════════════════ */
+
 
 [dir="rtl"] [class*="scoreBarFill"] {
   margin-left: auto;
   margin-right: 0;
 }
 
-/* ═══════════════════════════════════════════════════════
-   12. MODE BUTTONS grid — direction:rtl reverses column order
-═══════════════════════════════════════════════════════ */
+
 
 [dir="rtl"] [class*="modeButtons"] {
   direction: rtl;
 }
 
-/* ═══════════════════════════════════════════════════════
-   13. RESPONSIVE — mobile RTL
-═══════════════════════════════════════════════════════ */
+
 
 @media (max-width: 968px) {
   [dir="rtl"] [class*="leftPanel"] {

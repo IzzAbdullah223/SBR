@@ -4,9 +4,9 @@ import { findNearbyStops } from './geoCalculator.service.js';
 export const findDirectRoutes = async (originStops, destStops) => {
  const nearbyStopIds = [
   ...originStops.map(s => s.stopId),
-  ...destStops.map(s => s.stopId),
+  ...destStops.map(s=> s.stopId),
 ];
-const allRoutes = await BusRoute.find({
+const allRoutes = await BusRoute.find({ 
   'stops.stopId': { $in: nearbyStopIds }//$in MongoDB operator meaning "where stopId is IN this array"
 });
   const connectingRoutes = [];

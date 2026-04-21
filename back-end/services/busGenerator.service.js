@@ -15,7 +15,7 @@ export const generateDirectBuses = (routeInfo, origin, destination, currentTime 
   const buses = [];
 
   const dubaiTime = currentTime || timeHelper.getDubaiTime();
-  const schedule  = getRouteSchedule(route);
+  const schedule  = getRouteSchedule(route);//Gets this route's schedule — either from DB or the default fallback.
 
   if (!timeHelper.isWithinServiceHours(schedule, dubaiTime)) return buses;
 

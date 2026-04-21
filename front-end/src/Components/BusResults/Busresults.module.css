@@ -1,7 +1,4 @@
-/* ═══════════════════════════════════════════════════════
-   BUSRESULTS.MODULE.CSS
-   Clean card-based results with smooth animations
-═══════════════════════════════════════════════════════ */
+
 
 .container {
   display: flex;
@@ -31,14 +28,14 @@
   color: var(--gray-400);
 }
 
-/* ─── Results List ─── */
+
 .resultsContainer {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* ─── Bus Card ─── */
+
 .busCard {
   background: var(--bg-card);
   border: 2px solid var(--border);
@@ -75,10 +72,10 @@
   box-shadow: var(--shadow-lg);
 }
 
-/* ─── Medal ─── */
 
 
-/* ─── Bus Header ─── */
+
+
 .cardTopRow {
   display: flex;
   align-items: center;
@@ -127,7 +124,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  /* flex child — will shrink equally sharing available space */
+  
   flex: 1;
   min-width: 0;
 }
@@ -137,7 +134,7 @@
   flex-shrink: 0;
 }
 
-/* Save icon — absolute top-right */
+
 .saveIcon {
   position: absolute;
   top: 10px;
@@ -217,10 +214,10 @@
   border-radius: 6px;
 }
 
-/* ─── Score Section ─── */
 
 
-/* ─── Criteria Grid ─── */
+
+
 .criteria {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -263,9 +260,8 @@
   color: var(--white);
 }
 
-/* ─── Upcoming Departures ─── */
-/* shows the remaining departure times for this route beyond the first one
-   only visible when upcomingDepartures is returned from topsisController */
+
+
 .upcomingDepartures {
   display: flex;
   flex-direction: column;
@@ -330,7 +326,7 @@
 }
 
 
-/* ─── Select Button ─── */
+
 .selectButton {
   width: 100%;
   padding: 11px;
@@ -364,7 +360,7 @@
   border-color: rgba(255,255,255,0.3);
 }
 
-/* ─── Loading ─── */
+
 .loading {
   display: flex;
   flex-direction: column;
@@ -394,7 +390,7 @@
   margin: 0;
 }
 
-/* ─── Empty ─── */
+
 .empty {
   padding: 48px 20px;
   text-align: center;
@@ -406,7 +402,7 @@
   margin: 0;
 }
 
-/* ─── Save Journey button (in header) ─── */
+
 .headerTop {
   display: flex;
   align-items: center;
@@ -428,7 +424,7 @@
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
-/* ─── Feature 1: TOPSIS plain-language label ─── */
+
 .topsisLabel {
   display: inline-block;
   padding: 3px 10px;
@@ -462,7 +458,7 @@
   letter-spacing: -0.5px;
 }
 
-/* ─── Feature 2: Nol card fare display ─── */
+
 .nolFare {
   display: block;
   font-size: 13px;
@@ -491,7 +487,7 @@
   color: var(--error);
 }
 
-/* ─── Feature 3: Journey Timeline ─── */
+
 .timeline {
   margin-top: 14px;
   padding-top: 14px;

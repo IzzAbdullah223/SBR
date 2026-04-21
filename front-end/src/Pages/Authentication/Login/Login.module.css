@@ -1,6 +1,4 @@
-/* ✅ FIX #4: was using hardcoded hex values (#0a1628, #eef0f6, red).
-   Now uses CSS variables to match SignUp.module.css and the rest of the app.
-   If the theme ever changes, both modals update together. */
+
 
 .container h1 {
   font-family: 'Syne', sans-serif;
@@ -17,8 +15,7 @@
   margin: 0 0 24px 0;
 }
 
-/* ✅ FIX #7: general form-level error box for server/unknown errors
-   sits above the fields so it's clearly not tied to one input */
+
 .formError {
   background: rgba(255, 77, 109, 0.08);
   border: 1px solid rgba(255, 77, 109, 0.25);
@@ -73,8 +70,7 @@
   border-color: var(--text-primary);
 }
 
-/* ✅ FIX #5: red border on the input itself when it has an error —
-   visually connects the input to the error message below it */
+
 .inputError {
   border-color: var(--error) !important;
 }
@@ -84,8 +80,7 @@
 }
 
 .error {
-  /* ✅ FIX #4: was 'color: red' — now uses var(--error) = #ff4d6d
-     matching SignUp.module.css and the rest of the design system */
+  
   color: var(--error);
   font-size: 12px;
   margin: 0;
@@ -116,7 +111,7 @@
   cursor: not-allowed;
 }
 
-/* ✅ FIX #9: switch link styles */
+
 .switchText {
   margin: 20px 0 0 0;
   text-align: center;
