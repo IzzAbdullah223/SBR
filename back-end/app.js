@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 import cors from 'cors';
-import { db_connection } from './DB/dbConnection.js';
+import { db_connection } from './db/dbConnection.js';
 import apiRoutes from './routes/index.js';
 import passport from './config/passport.js';
 import compression from 'compression';
@@ -10,7 +10,12 @@ import compression from 'compression';
 const app = express();
 await db_connection();
 
-app.use(cors());
+
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*',
+  credentials: true
+}))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
@@ -37,9 +42,9 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`\n🚀 Server running on port ${PORT}`);
-  console.log(`📍 API: http://localhost:${PORT}/api`);
-  console.log(`💚 Health: http://localhost:${PORT}/health\n`);
+  console.log(`\n Server running on port ${PORT}`);
+  console.log(` API: http://localhost:${PORT}/api`);
+  console.log(` Health: http://localhost:${PORT}/health\n`);
 });
 
 export default app;

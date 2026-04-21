@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 //This pattern is called a service layer or API client. The benefit is enormous — if your backend URL changes, an endpoint gets renamed, or you need to add a header to every request, you change it in one place and everything updates automatically.
 const fetchAPI = async (endpoint, options = {}) => {
   try {

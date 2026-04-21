@@ -8,7 +8,7 @@ const normalizeWeights = (weights) => {
     transfers:        weights.transfers        / total,
   };
 };
-export const rankBuses = (buses, weights) => {=
+export const rankBuses = (buses, weights) => {
   if (!buses || buses.length === 0) return [];
 
   if (buses.length === 1) {
