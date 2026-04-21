@@ -1,11 +1,6 @@
-/**
- * SETTINGS CONTROLLER
- * Handles profile update, password change, delete saved routes, delete account
- * All routes are protected by verifyToken middleware — req.user.id is always set
- */
 
 import User from '../models/User.js';
-import SavedRoute from '../models/SavedRoute.js';
+import SavedRoute from '../models/Savedroute.js';
 import bcrypt from 'bcryptjs';
 
 // ── GET PROFILE ────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 
 
-import SavedRoute from '../models/SavedRoute.js';
+import SavedRoute from '../models/Savedroute.js';
 
 export const getSavedRoutes = async (req, res) => {
   try {
