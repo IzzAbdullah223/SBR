@@ -3,6 +3,8 @@ import { initReactI18next } from 'react-i18next';
 import en from './i18n/translations/en';
 import ar from './i18n/translations/ar';
 
+import { settingsAPI } from './services/Api';
+
 const savedLang = localStorage.getItem('sbr-lang');
 const browserLang = navigator.language?.startsWith('ar') ? 'ar' : 'en';
 const initialLang = savedLang || browserLang;
@@ -38,14 +40,8 @@ i18n.on('languageChanged', (lng) => {
 
   const token = localStorage.getItem('token');
   if (token) {
-    fetch('/api/settings/language', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ language: lng }),
-    }).catch(() => {});
+  
+    settingsAPI.updateLanguage(lng).catch(() => {});
   }
 });
 

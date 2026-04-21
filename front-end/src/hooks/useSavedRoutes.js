@@ -1,22 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
-
-const API_BASE = '/api';
-
-const authFetch = async (url, options = {}) => {
-  const token = localStorage.getItem('token');
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    },
-  });
-  return response.json();
-};
+import { savedRoutesAPI } from '../services/Api';
 
 // Truncate a location name so the combined routeName never exceeds the schema maxlength.
-// LocationIQ display names can be very long — e.g. "Zayed University – Knowledge Village Campus"
 const truncate = (str, max) => str.length > max ? str.slice(0, max - 1) + '…' : str;
 
 const useSavedRoutes = (user) => {
@@ -30,10 +15,9 @@ const useSavedRoutes = (user) => {
     if (!user) return;
     setLoadingSaved(true);
     try {
-      const data = await authFetch(`${API_BASE}/saved-routes`);
-      if (data.success) {
-        setSavedRoutes(data.data);
-      }
+      // ✅ now uses savedRoutesAPI instead of raw fetch
+      const data = await savedRoutesAPI.getAll();
+      if (data.success) setSavedRoutes(data.data);
     } catch {
       // silent — panel will just show empty state
     } finally {
@@ -42,12 +26,12 @@ const useSavedRoutes = (user) => {
   }, [user]);
 
   useEffect(() => {
-  if (user?.id) {
-    fetchSavedRoutes();
-  } else {
-    setSavedRoutes([]);
-  }
-}, [user?.id]); // ✅ FIX: use user.id not whole object — prevents double fetch
+    if (user?.id) {
+      fetchSavedRoutes();
+    } else {
+      setSavedRoutes([]);
+    }
+  }, [user?.id]);
 
   const saveRoute = useCallback(async (origin, destination) => {
     if (!user) {
@@ -60,7 +44,6 @@ const useSavedRoutes = (user) => {
     setSaveError(null);
 
     try {
-      // Truncate each leg to 48 chars so "A → B" always fits within 100 chars
       const originLabel      = truncate(origin.name,      48);
       const destinationLabel = truncate(destination.name, 48);
 
@@ -76,10 +59,8 @@ const useSavedRoutes = (user) => {
         },
       };
 
-      const data = await authFetch(`${API_BASE}/saved-routes`, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
+      // ✅ now uses savedRoutesAPI instead of raw fetch
+      const data = await savedRoutesAPI.create(payload);
 
       if (data.success) {
         setSavedRoutes((prev) => [data.data, ...prev]);
@@ -99,9 +80,8 @@ const useSavedRoutes = (user) => {
   const deleteSavedRoute = useCallback(async (routeId) => {
     if (!user) return;
     try {
-      const data = await authFetch(`${API_BASE}/saved-routes/${routeId}`, {
-        method: 'DELETE',
-      });
+      // ✅ now uses savedRoutesAPI instead of raw fetch
+      const data = await savedRoutesAPI.delete(routeId);
       if (data.success) {
         setSavedRoutes((prev) => prev.filter((r) => r._id !== routeId));
       }

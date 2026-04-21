@@ -9,7 +9,7 @@ import compression from 'compression';
 
 const app = express();
 
-// ✅ FIX 1: compression BEFORE routes so responses are actually compressed
+
 app.use(compression());
 
 app.use(cors({
@@ -39,14 +39,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, error: 'Internal server error' });
 });
 
-// ✅ FIX 2: db_connection called inside the listen callback, not at top level.
-// This works for both local (starts the server) and Render (same behaviour).
-// On Vercel (serverless) you would NOT use app.listen at all — but since you
-// are on Render (long-running server), this is exactly right.
 
-// ✅ FIX 3: app.listen is GUARDED — it only runs when this file is the
-// direct entry point (node app.js), NOT when imported by a test or another module.
-// This means Jest and other importers don't accidentally start the server.
 if (process.argv[1] && process.argv[1].endsWith('app.js')) {
   const PORT = process.env.PORT || 5000;
 
