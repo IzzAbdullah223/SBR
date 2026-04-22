@@ -39,5 +39,4 @@ Built as a **Final Year Capstone Project** for the Bachelor of Software Engineer
 
 
 
-Abdullah223](https://github.com/IzzAbdullah223) |
-| Abdalla Mohammed | [@AAMB11](https://github.com/AAMB11) |
+
