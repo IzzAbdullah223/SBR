@@ -30,11 +30,11 @@ Built as a **Final Year Capstone Project** for the Bachelor of Software Engineer
 **Deployed on:** Vercel + Render + MongoDB Atlas
 
 
-#Team
+Team
 
-Ahmed Asaad         @Ahmedsalim007
-Izz Abdullah        @IzzAbdullah223
-Abdalla Mohammed   @AAMB11
+Ahmed Asaad — @Ahmedsalim007
+Izz Abdullah — @IzzAbdullah223
+Abdalla Mohammed — @AAMB11
 
 
 
