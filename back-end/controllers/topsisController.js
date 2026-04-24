@@ -3,8 +3,6 @@ import * as busGenerator from '../services/busGenerator.service.js';
 import * as topsisService from '../services/topsis.service.js';
 import { calculateDistance } from '../services/geoCalculator.service.js';
 
-// Maps user's optimization goal to TOPSIS weight vector
-// Weights always sum to 1.0 — hidden from the user entirely
 const MODE_WEIGHTS = {
   fastest:           { time: 0.55, cost: 0.20, walkingDistance: 0.15, transfers: 0.10 },
   cheapest:          { time: 0.15, cost: 0.55, walkingDistance: 0.20, transfers: 0.10 },
@@ -25,7 +23,7 @@ export const findBuses = async (req, res) => {
       });
     }
 
-    // Resolve weights from mode — fall back to 'fastest' if mode not provided
+ 
     const weights = MODE_WEIGHTS[optimizationMode] || MODE_WEIGHTS.fastest;
 
     if (!origin.lat || !origin.lng) {
@@ -56,12 +54,7 @@ if (distKm < 0.05) {
     message: 'Origin and destination are too close to each other.',
   });
 }
-
-
-    console.log('🔍 Finding buses from:', origin, 'to:', destination);
-
     const routeData = await routeFinder.findAllRoutes(origin, destination);
-
 
 
     if (routeData.originStops?.length === 0 && routeData.destStops?.length === 0) {
@@ -97,11 +90,6 @@ if (distKm < 0.05) {
       });
     }
 
-    console.log(` Found ${routeData.originStops.length} origin stops`);
-    console.log(` Found ${routeData.destStops.length} destination stops`);
-    console.log(` Found ${routeData.directRoutes.length} direct routes`);
-    console.log(` Found ${routeData.transferRoutes.length} transfer routes`);
-
 
     if (routeData.directRoutes.length === 0 && routeData.transferRoutes.length === 0) {
       
@@ -117,11 +105,9 @@ if (distKm < 0.05) {
     }
     
  
-   
     const allBuses = await busGenerator.generateAllBuses(routeData, origin, destination);
 
-    console.log(` Generated ${allBuses.length} total buses`);
-
+  
     if (allBuses.length === 0) {
       return res.status(404).json({
         success: false,
@@ -171,7 +157,7 @@ if (distKm < 0.05) {
       rankedBuses = representatives.map(b => ({ ...b, score: 0 }));
     }
 
-    console.log(`⭐ Ranked ${rankedBuses.length} routes using TOPSIS`);
+   
 
     return res.status(200).json({
       success: true,

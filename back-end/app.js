@@ -39,11 +39,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, error: 'Internal server error' });
 });
 
-
+ await db_connection(); 
 if (process.argv[1] && process.argv[1].endsWith('app.js')) {
   const PORT = process.env.PORT || 5000;
-
-  await db_connection(); // connect to DB before accepting requests
 
   app.listen(PORT, () => {
     console.log(`\n Server running on port ${PORT}`);

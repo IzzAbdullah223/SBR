@@ -1,7 +1,4 @@
-/**
- * TIME HELPER SERVICE
- * Handles all time-related calculations and formatting for Dubai timezone (GMT+4)
- */
+
 
 /**
  * Get current time in Dubai (GMT+4)
