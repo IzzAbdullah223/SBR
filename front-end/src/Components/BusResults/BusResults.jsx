@@ -44,7 +44,6 @@ const BusResults = ({
   return (
     <div className={styles.container}>
 
-      {/* Panel header — title + route count only, save button moved into cards */}
       <div className={styles.header}>
         <div className={styles.headerTop}>
           <h2>
@@ -62,7 +61,6 @@ const BusResults = ({
           const isSelected = selectedBus?.busId === bus.busId;
           const label      = getRouteLabel(bus, buses);
 
-          // For transfer journeys show both route numbers: "88 → 27"
           const routeDisplay = bus.journeyType === 'transfer' && bus.leg1 && bus.leg2
             ? `${bus.leg1.routeNumber} → ${bus.leg2.routeNumber}`
             : bus.routeNumber;
@@ -199,6 +197,8 @@ const BusResults = ({
               {/* Journey Timeline — only when selected */}
               {isSelected && (
                 <div className={styles.timeline}>
+
+                  {/* Step 1 — Walk */}
                   <div className={styles.timelineStep}>
                     <div className={`${styles.timelineDot} ${styles.dotWalk}`}>🚶</div>
                     <div className={styles.timelineContent}>
@@ -211,6 +211,7 @@ const BusResults = ({
                     </div>
                   </div>
 
+                  {/* Step 2 — Board first bus */}
                   <div className={styles.timelineStep}>
                     <div className={`${styles.timelineDot} ${styles.dotBus}`}>🚌</div>
                     <div className={styles.timelineContent}>
@@ -219,11 +220,19 @@ const BusResults = ({
                       </p>
                       <p className={styles.timelineSub}>
                         {bus.journeyType === 'transfer' ? bus.leg1?.routeName : bus.routeName}
+                        {/* ✅ Show leg1 riding duration */}
+                        {bus.journeyType === 'transfer' && bus.leg1?.duration
+                          ? ` · ${Math.round(bus.leg1.duration)} ${t('results.minutes')}`
+                          : bus.travelTime
+                          ? ` · ${bus.travelTime} ${t('results.minutes')}`
+                          : ''
+                        }
                       </p>
                     </div>
                     <span className={styles.timelineTime}>{bus.departureTime}</span>
                   </div>
 
+              
                   {bus.journeyType === 'transfer' && bus.transferStop && (
                     <div className={styles.timelineStep}>
                       <div className={`${styles.timelineDot} ${styles.dotTransfer}`}>🔄</div>
@@ -232,13 +241,20 @@ const BusResults = ({
                           {t('results.transferAt')} {bus.transferStop?.name}
                         </p>
                         <p className={styles.timelineSub}>
+                        
                           {t('results.boardNext')} {bus.leg2?.routeNumber}
+                          {bus.leg2?.duration
+                            ? ` · ${Math.round(bus.leg2.duration)} ${t('results.minutes')}`
+                            : ''
+                          }
                         </p>
                       </div>
+               
                       <span className={styles.timelineTime}>{bus.leg2?.departureTime}</span>
                     </div>
                   )}
 
+                  {/* Step 4 — Arrive at destination */}
                   <div className={styles.timelineStep}>
                     <div className={`${styles.timelineDot} ${styles.dotArrive}`}>📍</div>
                     <div className={styles.timelineContent}>
@@ -249,7 +265,12 @@ const BusResults = ({
                         {t('results.totalJourney')} {bus.travelTime} {t('results.minutes')}
                       </p>
                     </div>
+                  
+                    {bus.destinationArrivalTime && (
+                      <span className={styles.timelineTime}>{bus.destinationArrivalTime}</span>
+                    )}
                   </div>
+
                 </div>
               )}
 

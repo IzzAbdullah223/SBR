@@ -39,7 +39,7 @@ const busRouteSchema = new mongoose.Schema({
       },
       frequency: {
         type: Number,
-        default: 15  // minutes between buses
+        default: 15  
       }
     },
     weekend: {
@@ -116,7 +116,7 @@ shapeIdReturn: {
   timestamps: true
 });
 
-// Index for faster queries
+
 busRouteSchema.index({ 'stops.stopId': 1 });
 
 const BusRoute = mongoose.model('BusRoute', busRouteSchema);

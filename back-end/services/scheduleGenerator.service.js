@@ -9,7 +9,7 @@ export const getServiceFrequency = (schedule, currentTime) => {
   const isWeekend = timeHelper.isWeekendInDubai(currentTime);
   return isWeekend ? schedule.weekend.frequency : schedule.weekday.frequency;
 };
-
+// offset is gap between you arriving busstop and first bus
 export const generateArrivalTimes = (frequency, currentTime, count = 5, forceMinOffset = null) => {
   const arrivals = [];
 
@@ -21,7 +21,9 @@ export const generateArrivalTimes = (frequency, currentTime, count = 5, forceMin
 
     if (firstBusOffset < forceMinOffset) firstBusOffset += frequency;
 
-  } else {
+  } 
+  
+  else {
     const minWait = Math.max(3, Math.floor(frequency * 0.2));
     const maxWait = frequency - 1;
     firstBusOffset = Math.floor(Math.random() * (maxWait - minWait + 1)) + minWait;

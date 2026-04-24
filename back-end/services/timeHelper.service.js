@@ -58,8 +58,23 @@ export const getMinutesFromNow = (futureTime, currentTime) => {
  * @returns {boolean} True if within service hours
  */
 export const isWithinServiceHours = (schedule, currentTime) => {
-  return true;
+  
+  return true; // to fake it when using after scheduled (remove if you want real schedule).
+  
+  const isWeekend = isWeekendInDubai(currentTime);
+  const daySchedule = isWeekend ? schedule.weekend : schedule.weekday;
+  const currentHour   = currentTime.getHours();
+  const currentMinute = currentTime.getMinutes();
+  const [firstHour, firstMinute] = daySchedule.firstBus.split(':').map(Number);
+  const [lastHour, lastMinute] = daySchedule.lastBus.split(':').map(Number);
+  const currentTotal = (currentHour * 60) + currentMinute;
+  const firstTotal   = (firstHour  * 60) + firstMinute;
+  const lastTotal    = (lastHour   * 60) + lastMinute;
+
+  
+  return currentTotal >= firstTotal && currentTotal <= lastTotal;
 };
+
 
 /**
  * Check if current day is weekend in Dubai
