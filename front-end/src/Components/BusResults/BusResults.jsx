@@ -60,10 +60,18 @@ const BusResults = ({
         {buses.map((bus, index) => {
           const isSelected = selectedBus?.busId === bus.busId;
           const label      = getRouteLabel(bus, buses);
+          
 
           const routeDisplay = bus.journeyType === 'transfer' && bus.leg1 && bus.leg2
             ? `${bus.leg1.routeNumber} → ${bus.leg2.routeNumber}`
             : bus.routeNumber;
+
+          // Always whole number — both direct (already integer) and transfer (now rounded in backend)
+          const ridingTime      = Math.round(bus.travelTime);
+          // door-to-door: walk + wait + ride — falls back to riding time if missing
+          const totalJourney    = Math.round(bus.totalJourneyTime ?? bus.travelTime);
+          // For direct: travelTime IS the riding time. Show it in the board sub-line.
+          const directRideLabel = bus.journeyType !== 'transfer' ? ridingTime : null;
 
           return (
             <div
@@ -72,7 +80,6 @@ const BusResults = ({
               className={`${styles.busCard} ${isSelected ? styles.selected : ''}`}
               onClick={() => onSelectBus(bus)}
             >
-              {/* Save — absolute top-right */}
               {user && onSaveJourney && (
                 <button
                   className={`${styles.saveIcon} ${journeyAlreadySaved ? styles.saveIconSaved : ''}`}
@@ -89,7 +96,6 @@ const BusResults = ({
                 </button>
               )}
 
-              {/* ── Route number + stop names row ── */}
               <div className={styles.cardTopRow}>
                 <div
                   className={styles.busNumber}
@@ -113,12 +119,10 @@ const BusResults = ({
                 </div>
               </div>
 
-              {/* Plain-language TOPSIS label */}
               <div className={styles.topsisLabel} style={getLabelStyle(label.color)}>
                 {label.text}
               </div>
 
-              {/* ── Criteria grid ── */}
               <div className={styles.criteria}>
                 <div className={styles.criteriaItem}>
                   <Navigation size={15} color="#667eea" />
@@ -134,10 +138,11 @@ const BusResults = ({
                   <span className={styles.criteriaValue}>{bus.arrivalTime} {t('results.minutes')}</span>
                 </div>
 
+                {/* Riding time only — not door-to-door */}
                 <div className={styles.criteriaItem}>
                   <Clock size={15} color="#9C27B0" />
                   <span className={styles.criteriaLabel}>{t('results.journey')}</span>
-                  <span className={styles.criteriaValue}>{bus.travelTime} {t('results.minutes')}</span>
+                  <span className={styles.criteriaValue}>{ridingTime} {t('results.minutes')}</span>
                 </div>
 
                 <div className={styles.criteriaItem}>
@@ -179,7 +184,6 @@ const BusResults = ({
                 </div>
               </div>
 
-              {/* Also Departs */}
               {bus.upcomingDepartures && bus.upcomingDepartures.length > 1 && (
                 <div className={styles.upcomingDepartures}>
                   <span className={styles.upcomingLabel}>{t('results.alsoDeparts')}</span>
@@ -194,11 +198,9 @@ const BusResults = ({
                 </div>
               )}
 
-              {/* Journey Timeline — only when selected */}
               {isSelected && (
                 <div className={styles.timeline}>
 
-                  {/* Step 1 — Walk */}
                   <div className={styles.timelineStep}>
                     <div className={`${styles.timelineDot} ${styles.dotWalk}`}>🚶</div>
                     <div className={styles.timelineContent}>
@@ -211,7 +213,6 @@ const BusResults = ({
                     </div>
                   </div>
 
-                  {/* Step 2 — Board first bus */}
                   <div className={styles.timelineStep}>
                     <div className={`${styles.timelineDot} ${styles.dotBus}`}>🚌</div>
                     <div className={styles.timelineContent}>
@@ -220,11 +221,10 @@ const BusResults = ({
                       </p>
                       <p className={styles.timelineSub}>
                         {bus.journeyType === 'transfer' ? bus.leg1?.routeName : bus.routeName}
-                        {/* ✅ Show leg1 riding duration */}
                         {bus.journeyType === 'transfer' && bus.leg1?.duration
                           ? ` · ${Math.round(bus.leg1.duration)} ${t('results.minutes')}`
-                          : bus.travelTime
-                          ? ` · ${bus.travelTime} ${t('results.minutes')}`
+                          : directRideLabel
+                          ? ` · ${directRideLabel} ${t('results.minutes')}`
                           : ''
                         }
                       </p>
@@ -232,7 +232,6 @@ const BusResults = ({
                     <span className={styles.timelineTime}>{bus.departureTime}</span>
                   </div>
 
-              
                   {bus.journeyType === 'transfer' && bus.transferStop && (
                     <div className={styles.timelineStep}>
                       <div className={`${styles.timelineDot} ${styles.dotTransfer}`}>🔄</div>
@@ -241,7 +240,6 @@ const BusResults = ({
                           {t('results.transferAt')} {bus.transferStop?.name}
                         </p>
                         <p className={styles.timelineSub}>
-                        
                           {t('results.boardNext')} {bus.leg2?.routeNumber}
                           {bus.leg2?.duration
                             ? ` · ${Math.round(bus.leg2.duration)} ${t('results.minutes')}`
@@ -249,23 +247,21 @@ const BusResults = ({
                           }
                         </p>
                       </div>
-               
                       <span className={styles.timelineTime}>{bus.leg2?.departureTime}</span>
                     </div>
                   )}
 
-                  {/* Step 4 — Arrive at destination */}
                   <div className={styles.timelineStep}>
                     <div className={`${styles.timelineDot} ${styles.dotArrive}`}>📍</div>
                     <div className={styles.timelineContent}>
                       <p className={styles.timelineTitle}>
                         {t('results.arrive')} {bus.destinationStop?.name}
                       </p>
+                      {/* totalJourney = walk + wait + ride — the true door-to-door time */}
                       <p className={styles.timelineSub}>
-                        {t('results.totalJourney')} {bus.travelTime} {t('results.minutes')}
+                        {t('results.totalJourney')} {totalJourney} {t('results.minutes')}
                       </p>
                     </div>
-                  
                     {bus.destinationArrivalTime && (
                       <span className={styles.timelineTime}>{bus.destinationArrivalTime}</span>
                     )}

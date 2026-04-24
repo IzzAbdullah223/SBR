@@ -161,11 +161,11 @@ export const findBuses = async (req, res) => {
    
       
       // attach all departures so frontend can show the full schedule
-      rep.upcomingDepartures = sorted.map((b) => ({
-        departureTime: b.departureTime,
-        departureTime24: b.departureTime24,
-        minutesFromNow: b.arrivalTime,
-      }));
+  rep.upcomingDepartures = sorted.slice(1).map((b) => ({
+  departureTime: b.departureTime,
+  departureTime24: b.departureTime24,
+  minutesFromNow: b.arrivalTime,
+}));
       return rep;
     });
 

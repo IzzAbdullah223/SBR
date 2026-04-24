@@ -1,3 +1,4 @@
+
 import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
@@ -9,9 +10,7 @@ import compression from 'compression';
 
 const app = express();
 
-
 app.use(compression());
-
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
   credentials: true
@@ -19,15 +18,10 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
-
 app.use('/api', apiRoutes);
 
 app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    message: 'Smart Bus Route Planner API is running',
-    timestamp: new Date().toISOString(),
-  });
+  res.json({ status: 'OK', message: 'Smart Bus Route Planner API is running', timestamp: new Date().toISOString() });
 });
 
 app.use((req, res) => {
@@ -39,15 +33,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, error: 'Internal server error' });
 });
 
- await db_connection(); 
-if (process.argv[1] && process.argv[1].endsWith('app.js')) {
-  const PORT = process.env.PORT || 5000;
 
+const PORT = process.env.PORT || 5000;
+
+db_connection().then(() => {
   app.listen(PORT, () => {
     console.log(`\n Server running on port ${PORT}`);
     console.log(` API: http://localhost:${PORT}/api`);
     console.log(` Health: http://localhost:${PORT}/health\n`);
   });
-}
+});
 
 export default app;
