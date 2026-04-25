@@ -5,35 +5,68 @@
   margin-top: 16px;
 }
 
-
 .balanceCard {
-  background: linear-gradient(135deg, var(--navbar-bg) 0%, #1a3461 100%);
-  border-radius: 14px;
-  padding: 20px;
+  background: linear-gradient(135deg, #085041 0%, #0F6E56 100%);
+  border-radius: 16px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 8px 32px rgba(8,80,65,0.4);
 }
-
 
 .balanceCard::before {
   content: '';
   position: absolute;
-  top: -30px;
-  right: -30px;
-  width: 120px;
-  height: 120px;
+  top: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
-  background: rgba(240,165,0,0.08);
+  background: rgba(255,255,255,0.06);
   pointer-events: none;
+}
+
+.balanceCard::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: -20px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+  pointer-events: none;
+}
+
+.simBadge {
+  display: inline-flex;
+  align-self: flex-start;
+  background: rgba(240,165,0,0.2);
+  border: 1px solid rgba(240,165,0,0.4);
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 99px;
 }
 
 .cardTopRow {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+}
+
+.cardType {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.95);
+  margin: 0 0 4px 0;
 }
 
 .cardLabel {
@@ -45,18 +78,19 @@
 }
 
 .lowTag {
-  background: rgba(255,77,109,0.25);
+  background: rgba(255,77,109,0.3);
   color: #ff6b85;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 99px;
-  border: 1px solid rgba(255,77,109,0.3);
+  border: 1px solid rgba(255,77,109,0.4);
+  white-space: nowrap;
 }
 
 .balanceAmount {
   font-family: 'Syne', sans-serif;
-  font-size: 34px;
+  font-size: 38px;
   font-weight: 800;
   color: var(--gold);
   letter-spacing: -1px;
@@ -64,18 +98,44 @@
 }
 
 .aed {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
-  opacity: 0.7;
+  opacity: 0.8;
+}
+
+.cardMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+
+.cardMetaItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardMetaLabel {
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cardMetaValue {
+  font-size: 12px;
+  color: rgba(255,255,255,0.8);
+  font-weight: 500;
 }
 
 .cardFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 4px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255,255,255,0.1);
 }
 
 .cardNumberLabel {
@@ -84,16 +144,62 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 3px;
 }
 
 .cardNumber {
   font-family: monospace;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
-  color: rgba(255,255,255,0.8);
+  color: rgba(255,255,255,0.9);
   letter-spacing: 2px;
 }
 
+.cardStatus {
+  font-size: 12px;
+  font-weight: 700;
+  color: #69f0ae;
+}
+
+.disclaimer {
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  text-align: center;
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.statBox {
+  background: var(--bg-page);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.statIcon { color: var(--gold); }
+
+.statValue {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.statLabel {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
 
 .topUpRow {
   display: flex;
@@ -149,7 +255,6 @@
 .topUpBtn:hover:not(:disabled) { background: var(--gold-light); transform: translateY(-1px); }
 .topUpBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-
 .error {
   display: flex;
   align-items: center;
@@ -158,7 +263,6 @@
   color: var(--error);
   margin: 0;
 }
-
 
 .loading {
   display: flex;

@@ -1,24 +1,22 @@
 import VirtualWallet from '../models/Virtualwallet.js';
 
-// ── GET OR CREATE WALLET ────────────────────────────────────────────────────
 export const getWallet = async (req, res) => {
   try {
     let wallet = await VirtualWallet.findByUserId(req.user.id);
 
     if (!wallet) {
-      // Auto-create wallet on first access — user doesn't need to do anything
-      wallet = await VirtualWallet.create({ userId: req.user.id });
+      wallet = await VirtualWallet.create({ userId: req.user.id, balance: 50 });
     }
 
     res.json({
       success: true,
       data: {
-        balance:          wallet.balance,
-        cardNumber:       wallet.cardNumber,
-        status:           wallet.status,
-        isBalanceLow:     wallet.isBalanceLow(),
-        lowThreshold:     wallet.lowBalanceThreshold,
-        stats:            wallet.stats,
+        balance:            wallet.balance,
+        cardNumber:         wallet.cardNumber,
+        status:             wallet.status,
+        isBalanceLow:       wallet.isBalanceLow(),
+        lowThreshold:       wallet.lowBalanceThreshold,
+        stats:              wallet.stats,
         recentTransactions: wallet.getTransactionHistory(5),
       },
     });
@@ -27,7 +25,6 @@ export const getWallet = async (req, res) => {
   }
 };
 
-// ── RECHARGE WALLET ─────────────────────────────────────────────────────────
 export const rechargeWallet = async (req, res) => {
   try {
     const { amount } = req.body;
@@ -38,19 +35,26 @@ export const rechargeWallet = async (req, res) => {
     }
 
     if (parsed > 500) {
-      return res.status(400).json({ success: false, message: 'Maximum recharge is 500 AED' });
+      return res.status(400).json({ success: false, message: 'Maximum single top-up is 500 AED' });
     }
 
     let wallet = await VirtualWallet.findByUserId(req.user.id);
-    if (!wallet) wallet = await VirtualWallet.create({ userId: req.user.id });
+    if (!wallet) wallet = await VirtualWallet.create({ userId: req.user.id, balance: 50 });
+
+    if (wallet.balance + parsed > 500) {
+      return res.status(400).json({
+        success: false,
+        message: `Maximum balance is 500 AED. You can top up ${(500 - wallet.balance).toFixed(2)} AED more.`,
+      });
+    }
 
     await wallet.recharge(parsed, `Top-up of ${parsed} AED`);
 
     res.json({
       success: true,
       data: {
-        balance:    wallet.balance,
-        cardNumber: wallet.cardNumber,
+        balance:      wallet.balance,
+        cardNumber:   wallet.cardNumber,
         isBalanceLow: wallet.isBalanceLow(),
       },
     });
@@ -59,7 +63,6 @@ export const rechargeWallet = async (req, res) => {
   }
 };
 
-// ── GET TRANSACTION HISTORY ─────────────────────────────────────────────────
 export const getTransactions = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
