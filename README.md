@@ -14,7 +14,9 @@ Built as a **Final Year Capstone Project** for the Bachelor of Software Engineer
 This is an academic project. A few things to be aware of:
 
 Bus schedules are simulated. Departure times are dynamically generated based on real route frequencies from GTFS data — they are not live real-time feeds from RTA systems.
+
 Route and stop data is real. Bus routes, stop locations, and shapes are sourced from official Dubai RTA GTFS data.
+
 The Nol Card wallet is a simulator. It demonstrates fare awareness and balance management but is not connected to any real RTA payment system. No actual transactions occur.
 
 
