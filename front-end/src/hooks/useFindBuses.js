@@ -2,9 +2,6 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../services/Api';
 
-// errorCode categories — used by Home.jsx to style the error box differently
-// 'info'  = expected result, not a bug (no routes, out of service, no stops)
-// 'error' = something actually went wrong (server error, network down)
 export const ERROR_TYPES = {
   INVALID_ORIGIN:      'error',
   INVALID_DESTINATION: 'error',
@@ -28,8 +25,6 @@ const useFindBuses = () => {
   const [errorType, setErrorType] = useState(null);
   const [stats,     setStats]     = useState(null);
 
-  // Maps backend errorCodes to translation keys
-  // All errors now go through t() so they appear in the correct language
   const getErrorMessage = useCallback((errorCode, fallbackMessage) => {
     const keyMap = {
       INVALID_ORIGIN:      'errors.invalidOrigin',
@@ -49,11 +44,7 @@ const useFindBuses = () => {
     return fallbackMessage || t('errors.serverError');
   }, [t]);
 
-  // Point 4 fix: optimizationMode defaults to 'fastest'
-  // so behaviour is always predictable if caller forgets to pass it
   const findBuses = useCallback(async (origin, destination, optimizationMode = 'fastest') => {
-
-    // Frontend validation — fast UX checks before hitting the server
     if (!origin?.lat || !origin?.lng) {
       setError(getErrorMessage('INVALID_ORIGIN'));
       setErrorType('error');
@@ -64,10 +55,6 @@ const useFindBuses = () => {
       setErrorType('error');
       return;
     }
-
-    // Frontend same-location check — exact equality for instant UX feedback
-    // The backend also checks with a 50 metre threshold for robustness
-    // so both layers protect against this case
     if (origin.lat === destination.lat && origin.lng === destination.lng) {
       setError(getErrorMessage('SAME_LOCATION'));
       setErrorType('error');
@@ -91,7 +78,6 @@ const useFindBuses = () => {
         setError(getErrorMessage(code, response.message));
         setErrorType(ERROR_TYPES[code] || 'error');
       }
-
     } catch (err) {
       console.error('Network error finding buses:', err);
       setError(getErrorMessage('NETWORK_ERROR'));
@@ -99,7 +85,6 @@ const useFindBuses = () => {
     } finally {
       setLoading(false);
     }
-
   }, [getErrorMessage]);
 
   const clearResults = useCallback(() => {
@@ -109,7 +94,7 @@ const useFindBuses = () => {
     setStats(null);
   }, []);
 
-  return { buses, loading, error, errorType, stats, findBuses, clearResults };
+  return { buses, setBuses, loading, error, errorType, stats, findBuses, clearResults };
 };
 
 export default useFindBuses;

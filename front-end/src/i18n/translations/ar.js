@@ -31,9 +31,7 @@ const ar = {
     direct: 'مباشر',
   },
 
-  // ── Point 3 fix: Arabic translations for all error messages
-  // Before: errors were hardcoded English in useFindBuses.js
-  // After:  t('errors.xxx') returns Arabic when app is in Arabic mode
+  
   errors: {
     invalidOrigin:      'يرجى اختيار نقطة الانطلاق من القائمة المنسدلة — لا تكتب فقط.',
     invalidDestination: 'يرجى اختيار الوجهة من القائمة المنسدلة — لا تكتب فقط.',
@@ -109,6 +107,9 @@ const ar = {
     endPoint: 'نقطة النهاية',
     routes: 'الخطوط:',
     stopId: 'الرقم:',
+    board:    'ركوب',
+    transfer: 'تحويل',
+    arrive:   'وصول',
   },
 
   stopCard: {

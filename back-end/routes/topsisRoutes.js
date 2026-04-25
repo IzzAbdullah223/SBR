@@ -1,15 +1,9 @@
-
-
 import express from 'express';
-import { findBuses } from '../controllers/topsisController.js';
+import { findBuses, rankBuses } from '../controllers/topsisController.js';
 
 const router = express.Router();
 
-/**
- * @route   POST /api/find-buses
- * @desc    Find and rank buses using TOPSIS algorithm
- * @access  Public
- */
 router.post('/', findBuses);
+router.post('/rank', rankBuses);
 
 export default router;

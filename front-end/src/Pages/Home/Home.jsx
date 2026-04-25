@@ -7,12 +7,12 @@ import FavoriteStops  from '../../Components/FavoriteStops/FavoriteStop';
 import { Search, X }  from 'lucide-react';
 import { MAP_CONFIG }  from '../../utils/constants';
 
-import useFindBuses       from '../../hooks/useFindBuses';
-import useShape           from '../../hooks/useShape';
-import useSavedRoutes     from '../../hooks/useSavedRoutes';
-import useBusStop         from '../../hooks/useBusStop';
-import useFavoriteStops   from '../../hooks/useFavoriteStop';
-import useLocationPicker  from '../../hooks/useLocationPicker';
+import useFindBuses        from '../../hooks/useFindBuses';
+import useShape            from '../../hooks/useShape';
+import useSavedRoutes      from '../../hooks/useSavedRoutes';
+import useBusStop          from '../../hooks/useBusStop';
+import useFavoriteStops    from '../../hooks/useFavoriteStop';
+import useLocationPicker   from '../../hooks/useLocationPicker';
 import useOptimizationMode from '../../hooks/useOptimizationMode';
 
 import Navbar  from '../../Components/NavBar/Navbar';
@@ -38,7 +38,6 @@ const Home = ({
 }) => {
   const { t } = useTranslation();
 
-  // ── Location picking — origin, destination, pinned stops ─────────────────
   const {
     origin, destination,
     originInput, destinationInput,
@@ -51,35 +50,31 @@ const Home = ({
     resetLocations,
   } = useLocationPicker();
 
-  // ── Optimization mode ─────────────────────────────────────────────────────
-  const { optimizationMode, handleModeChange } = useOptimizationMode(user);
+  // useFindBuses must come before useOptimizationMode so buses + setBuses exist when passed in
+  const { buses, setBuses, loading, error, errorType, findBuses, clearResults } = useFindBuses();
 
-  // ── Bus search + shape ────────────────────────────────────────────────────
+  // passes buses + setBuses so switching mode re-ranks existing results without a new search
+  const { optimizationMode, handleModeChange, ranking } = useOptimizationMode(user, buses, setBuses);
+
   const [selectedBus, setSelectedBus] = useState(null);
-  const { buses, loading, error, errorType, findBuses, clearResults } = useFindBuses();
-  const { shapeCoordinates, shapeCoordinatesLeg2 }                   = useShape(selectedBus);
+  const { shapeCoordinates, shapeCoordinatesLeg2 } = useShape(selectedBus);
 
-  // ── Map stop card ─────────────────────────────────────────────────────────
   const { selectedStop, loadingStop, selectStop, clearStop } = useBusStop();
 
-  // ── Feature 4 — Favorite stops ───────────────────────────────────────────
   const { favoriteStops, addFavorite, removeFavorite, isFavorite } = useFavoriteStops(user);
 
-  // ── Saved routes ──────────────────────────────────────────────────────────
   const {
     savedRoutes, loadingSaved, savingKey, saveError, showSaved,
     saveRoute, deleteSavedRoute, toggleSavedPanel, setSaveError, isJourneySaved,
   } = useSavedRoutes(user);
 
-  // ── UI state ──────────────────────────────────────────────────────────────
   const [showFavorites, setShowFavorites] = useState(false);
 
   const isSavingJourney     = !!(origin && destination && savingKey === `${origin.name}__${destination.name}`);
   const journeyAlreadySaved = !!(origin && destination && isJourneySaved(origin.lat, origin.lng, destination.lat, destination.lng));
 
-  // ── Handlers ──────────────────────────────────────────────────────────────
   const handleFindBuses = async () => {
-    if (!origin || !destination) { 
+    if (!origin || !destination) {
       setInputError(t('home.selectFromDropdown'));
       return;
     }
@@ -102,36 +97,16 @@ const Home = ({
     clearResults();
   };
 
-  useEffect(() => {
-    if (buses?.length > 0 && !selectedBus) setSelectedBus(buses[0]);
-  }, [buses, selectedBus]);
+ useEffect(() => {
+  if (buses?.length > 0) setSelectedBus(buses[0]);
+}, [buses]);
 
-  const handleSelectBus = (bus) => { setSelectedBus(bus); clearStop(); };
-
-  const handleSaveJourney = async () => {
-    if (!origin || !destination) return;
-    await saveRoute(origin, destination);
-  };
-
-  const handleSelectSavedJourney = (route) => {
-    fillFromSavedRoute(route);
-    if (showSaved) toggleSavedPanel();
-  };
-
-  // When user taps a favorite stop chip — open its stop card on the map
-  const handleFavoriteStopClick = (stop) => selectStop(stop);
-
-  // When user taps "Set as Origin" inside the stop card
-  const handleSetStopAsOrigin = (stop) => {
-    pinStopAsOrigin(stop);
-    clearStop();
-  };
-
-  // When user taps "Set as Destination" inside the stop card
-  const handleSetStopAsDestination = (stop) => {
-    pinStopAsDestination(stop);
-    clearStop();
-  };
+  const handleSelectBus      = (bus)   => { setSelectedBus(bus); clearStop(); };
+  const handleSaveJourney    = async () => { if (!origin || !destination) return; await saveRoute(origin, destination); };
+  const handleSelectSavedJourney = (route) => { fillFromSavedRoute(route); if (showSaved) toggleSavedPanel(); };
+  const handleFavoriteStopClick  = (stop)  => selectStop(stop);
+  const handleSetStopAsOrigin    = (stop)  => { pinStopAsOrigin(stop);      clearStop(); };
+  const handleSetStopAsDestination = (stop) => { pinStopAsDestination(stop); clearStop(); };
 
   const mapStops = useMemo(() => {
     if (!selectedBus) return [];
@@ -157,7 +132,6 @@ const Home = ({
         <div className={styles.leftPanel}>
 
           <div className={styles.sectionTop}>
-            {/* Saved journey chips */}
             <div className={styles.savedRoutesPinned}>
               <SavedRoutes
                 savedRoutes={savedRoutes}
@@ -170,7 +144,6 @@ const Home = ({
               />
             </div>
 
-            {/* Favorite stop chips */}
             <FavoriteStops
               favoriteStops={favoriteStops}
               user={user}
@@ -182,7 +155,6 @@ const Home = ({
 
             <p className={styles.sectionTitle}>{t('home.whereGoing')}</p>
 
-            {/* Origin — shows pinned pill when a stop is pinned */}
             <SearchInput
               label={t('home.labelOrigin')}
               placeholder={t('home.searchPlaceholderOrigin')}
@@ -193,7 +165,6 @@ const Home = ({
               onClearPin={clearPinnedOrigin}
             />
 
-            {/* Destination — shows pinned pill when a stop is pinned */}
             <SearchInput
               label={t('home.labelDestination')}
               placeholder={t('home.searchPlaceholderDest')}
@@ -213,6 +184,7 @@ const Home = ({
                   key={value}
                   className={`${styles.modeBtn} ${optimizationMode === value ? styles.modeBtnActive : ''}`}
                   onClick={() => handleModeChange(value)}
+                  disabled={ranking}
                 >
                   <span className={styles.modeBtnIcon}>{icon}</span>
                   <span className={styles.modeBtnLabel}>{t(labelKey)}</span>
@@ -231,7 +203,7 @@ const Home = ({
             <button
               className={`${styles.findButton} ${loading ? styles.loading : ''}`}
               onClick={handleFindBuses}
-              disabled={!origin || !destination || loading}
+              disabled={!origin || !destination || loading || ranking}
             >
               <Search size={20} />
               <span>{loading ? t('home.searching') : t('home.findButton')}</span>
@@ -261,7 +233,7 @@ const Home = ({
                 buses={buses}
                 onSelectBus={handleSelectBus}
                 selectedBus={selectedBus}
-                loading={loading}
+                loading={loading || ranking}
                 onSaveJourney={handleSaveJourney}
                 isSavingJourney={isSavingJourney}
                 journeyAlreadySaved={journeyAlreadySaved}

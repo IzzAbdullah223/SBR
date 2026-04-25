@@ -42,14 +42,14 @@ export const authAPI = {
 };
 
 export const busStopsAPI = {
-  getAll:    ()                      => fetchAPI('/bus-stops'),
-  getById:   (stopId)                => fetchAPI(`/bus-stops/${stopId}`),
-  getNearby: (lat, lng, radius = 1)  => fetchAPI(`/bus-stops/nearby?lat=${lat}&lng=${lng}&radius=${radius}`),
+  getAll:    ()                     => fetchAPI('/bus-stops'),
+  getById:   (stopId)               => fetchAPI(`/bus-stops/${stopId}`),
+  getNearby: (lat, lng, radius = 1) => fetchAPI(`/bus-stops/nearby?lat=${lat}&lng=${lng}&radius=${radius}`),
 };
 
 export const routesAPI = {
-  getAll:       ()             => fetchAPI('/routes'),
-  getByNumber:  (routeNumber)  => fetchAPI(`/routes/${routeNumber}`),
+  getAll:      ()            => fetchAPI('/routes'),
+  getByNumber: (routeNumber) => fetchAPI(`/routes/${routeNumber}`),
 };
 
 export const topsisAPI = {
@@ -58,6 +58,13 @@ export const topsisAPI = {
       method: 'POST',
       body: JSON.stringify({ origin, destination, optimizationMode }),
       allowErrorResponse: true,
+    }),
+
+  
+  rank: (buses, optimizationMode) =>
+    fetchAPI('/find-buses/rank', {
+      method: 'POST',
+      body: JSON.stringify({ buses, optimizationMode }),
     }),
 };
 
@@ -73,7 +80,6 @@ export const shapesAPI = {
     fetchAPI(`/shapes/route/${encodeURIComponent(routeNumber)}`),
 };
 
-// ✅ NEW — saved routes now go through the service layer like everything else
 export const savedRoutesAPI = {
   getAll:  ()        => fetchAPI('/saved-routes'),
   create:  (payload) => fetchAPI('/saved-routes', { method: 'POST', body: JSON.stringify(payload) }),
@@ -81,25 +87,22 @@ export const savedRoutesAPI = {
 };
 
 export const settingsAPI = {
-  getProfile:        ()                   => fetchAPI('/settings/profile'),
-  updateProfile:     (data)               => fetchAPI('/settings/profile',     { method: 'PUT',    body: JSON.stringify(data) }),
-  changePassword:    (data)               => fetchAPI('/settings/password',    { method: 'PUT',    body: JSON.stringify(data) }),
-  updatePreferences: (optimizationMode)   => fetchAPI('/settings/preferences', { method: 'PUT',    body: JSON.stringify({ optimizationMode }) }),
-  // ✅ updateLanguage was already here — i18n.js will now use this instead of raw fetch
-  updateLanguage:    (language)           => fetchAPI('/settings/language',    { method: 'PUT',    body: JSON.stringify({ language }) }),
-  clearSavedRoutes:  ()                   => fetchAPI('/settings/saved-routes',{ method: 'DELETE' }),
-  deleteAccount:     (password)           => fetchAPI('/settings/account',     { method: 'DELETE', body: JSON.stringify({ password }) }),
-
-  // Favorite stops
-  getFavoriteStops:  ()       => fetchAPI('/settings/favorite-stops'),
-  addFavoriteStop:   (stop)   => fetchAPI('/settings/favorite-stops',           { method: 'POST',   body: JSON.stringify(stop) }),
-  removeFavoriteStop:(stopId) => fetchAPI(`/settings/favorite-stops/${stopId}`, { method: 'DELETE' }),
+  getProfile:        ()                 => fetchAPI('/settings/profile'),
+  updateProfile:     (data)             => fetchAPI('/settings/profile',      { method: 'PUT',    body: JSON.stringify(data) }),
+  changePassword:    (data)             => fetchAPI('/settings/password',      { method: 'PUT',    body: JSON.stringify(data) }),
+  updatePreferences: (optimizationMode) => fetchAPI('/settings/preferences',   { method: 'PUT',    body: JSON.stringify({ optimizationMode }) }),
+  updateLanguage:    (language)         => fetchAPI('/settings/language',       { method: 'PUT',    body: JSON.stringify({ language }) }),
+  clearSavedRoutes:  ()                 => fetchAPI('/settings/saved-routes',   { method: 'DELETE' }),
+  deleteAccount:     (password)         => fetchAPI('/settings/account',        { method: 'DELETE', body: JSON.stringify({ password }) }),
+  getFavoriteStops:  ()                 => fetchAPI('/settings/favorite-stops'),
+  addFavoriteStop:   (stop)             => fetchAPI('/settings/favorite-stops',            { method: 'POST',   body: JSON.stringify(stop) }),
+  removeFavoriteStop:(stopId)           => fetchAPI(`/settings/favorite-stops/${stopId}`,  { method: 'DELETE' }),
 };
 
 export const walletAPI = {
-  getWallet:        ()       => fetchAPI('/wallet'),
-  recharge:         (amount) => fetchAPI('/wallet/recharge',    { method: 'POST', body: JSON.stringify({ amount }) }),
-  getTransactions:  (limit)  => fetchAPI(`/wallet/transactions?limit=${limit || 10}`),
+  getWallet:       ()       => fetchAPI('/wallet'),
+  recharge:        (amount) => fetchAPI('/wallet/recharge',     { method: 'POST', body: JSON.stringify({ amount }) }),
+  getTransactions: (limit)  => fetchAPI(`/wallet/transactions?limit=${limit || 10}`),
 };
 
 const api = {

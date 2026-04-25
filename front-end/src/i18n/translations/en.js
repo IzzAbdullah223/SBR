@@ -31,10 +31,7 @@ const en = {
     direct: 'Direct',
   },
 
-  // ── Point 3 fix: all search/find error messages now have translation keys
-  // so they appear in the correct language (Arabic or English).
-  // Before: hardcoded English strings in useFindBuses.js
-  // After:  t('errors.xxx') looked up here at runtime
+ 
   errors: {
     invalidOrigin:      'Please select your origin from the dropdown — don\'t just type it.',
     invalidDestination: 'Please select your destination from the dropdown — don\'t just type it.',
@@ -110,6 +107,9 @@ const en = {
     endPoint: 'End point',
     routes: 'Routes:',
     stopId: 'ID:',
+    board:    'Board',
+    transfer: 'Transfer',
+    arrive:   'Arrive',
   },
 
   stopCard: {

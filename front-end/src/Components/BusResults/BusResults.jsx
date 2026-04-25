@@ -51,16 +51,13 @@ const BusResults = ({
             {t('results.title')}
           </h2>
         </div>
-        <p className={styles.subtitle}>
-          {t('results.subtitle', { count: buses.length })}
-        </p>
+
       </div>
 
       <div className={styles.resultsContainer}>
         {buses.map((bus, index) => {
           const isSelected = selectedBus?.busId === bus.busId;
           const label      = getRouteLabel(bus, buses);
-          
 
           const routeDisplay = bus.journeyType === 'transfer' && bus.leg1 && bus.leg2
             ? `${bus.leg1.routeNumber} → ${bus.leg2.routeNumber}`
@@ -257,7 +254,7 @@ const BusResults = ({
                       <p className={styles.timelineTitle}>
                         {t('results.arrive')} {bus.destinationStop?.name}
                       </p>
-                      {/* totalJourney = walk + wait + ride — the true door-to-door time */}
+                      
                       <p className={styles.timelineSub}>
                         {t('results.totalJourney')} {totalJourney} {t('results.minutes')}
                       </p>
