@@ -9,7 +9,8 @@ Built as a **Final Year Capstone Project** for the Bachelor of Software Engineer
 
 **[Click here to open the app →](https://sbr-delta.vercel.app/)**
 
-##Disclaimer
+#Disclaimer
+
 This is an academic project. A few things to be aware of:
 
 Bus schedules are simulated. Departure times are dynamically generated based on real route frequencies from GTFS data — they are not live real-time feeds from RTA systems.
