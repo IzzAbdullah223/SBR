@@ -135,11 +135,10 @@ const BusResults = ({
                   <span className={styles.criteriaValue}>{bus.arrivalTime} {t('results.minutes')}</span>
                 </div>
 
-                {/* Riding time only — not door-to-door */}
                 <div className={styles.criteriaItem}>
                   <Clock size={15} color="#9C27B0" />
                   <span className={styles.criteriaLabel}>{t('results.journey')}</span>
-                  <span className={styles.criteriaValue}>{ridingTime} {t('results.minutes')}</span>
+                  <span className={styles.criteriaValue}>{totalJourney} {t('results.minutes')}</span>
                 </div>
 
                 <div className={styles.criteriaItem}>
@@ -254,7 +253,7 @@ const BusResults = ({
                       <p className={styles.timelineTitle}>
                         {t('results.arrive')} {bus.destinationStop?.name}
                       </p>
-                      
+                      {/* totalJourney = walk + wait + ride — the true door-to-door time */}
                       <p className={styles.timelineSub}>
                         {t('results.totalJourney')} {totalJourney} {t('results.minutes')}
                       </p>

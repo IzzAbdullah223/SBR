@@ -50,10 +50,10 @@ const Home = ({
     resetLocations,
   } = useLocationPicker();
 
-  // useFindBuses must come before useOptimizationMode so buses + setBuses exist when passed in
+  
   const { buses, setBuses, loading, error, errorType, findBuses, clearResults } = useFindBuses();
 
-  // passes buses + setBuses so switching mode re-ranks existing results without a new search
+  
   const { optimizationMode, handleModeChange, ranking } = useOptimizationMode(user, buses, setBuses);
 
   const [selectedBus, setSelectedBus] = useState(null);

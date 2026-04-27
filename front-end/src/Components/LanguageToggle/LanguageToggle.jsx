@@ -1,11 +1,3 @@
-/**
- * LanguageToggle.jsx
- * AR / EN switcher pill — drop into Navbar
- *
- * Usage:
- *   import LanguageToggle from '../LanguageToggle/LanguageToggle';
- *   <LanguageToggle />
- */
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';

@@ -32,7 +32,7 @@ const createLeafletIcon = (iconType, options = {}) => {
   });
 };
 
-// Shared bus stop SVG body — reused across all colored stop icons
+
 const busStopSVGBody = (pinColor, busColor) => `
   <path fill="${pinColor}" d="M20 0C10.6 0 3 7.6 3 17c0 12.5 17 33 17 33S37 29.5 37 17C37 7.6 29.4 0 20 0z"/>
   <circle cx="20" cy="17" r="12" fill="white"/>
@@ -45,7 +45,7 @@ const busStopSVGBody = (pinColor, busColor) => `
   </g>
 `;
 
-// ── Teardrop pins (typed origin/destination on map) ────────────────────────
+
 
 export const originIcon = new L.DivIcon({
   html: `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="40" viewBox="0 0 24 29" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35))"><path fill-rule="evenodd" clip-rule="evenodd" fill="#4CAF50" d="M12 0C5.373 0 0 5.373 0 12c0 7.5 12 17 12 17S24 19.5 24 12C24 5.373 18.627 0 12 0z M12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg>`,
@@ -59,7 +59,7 @@ export const destinationIcon = new L.DivIcon({
   iconSize: [36, 44], iconAnchor: [18, 44], popupAnchor: [0, -44],
 });
 
-// ── Bus stop icons — default (navy/unselected) ─────────────────────────────
+
 
 export const busStopIcon = new L.DivIcon({
   html: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="30" viewBox="0 0 40 50" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))">${busStopSVGBody('#0a1628', '#0a1628')}</svg>`,
@@ -67,35 +67,35 @@ export const busStopIcon = new L.DivIcon({
   iconSize: [24, 30], iconAnchor: [12, 30], popupAnchor: [0, -30],
 });
 
-// Gold — stop is selected/tapped by user
+
 export const selectedBusStopIcon = new L.DivIcon({
   html: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 40 50" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.4))">${busStopSVGBody('#f0a500', '#f0a500')}</svg>`,
   className: 'custom-leaflet-icon selected-bus-stop-marker',
   iconSize: [32, 40], iconAnchor: [16, 40], popupAnchor: [0, -40],
 });
 
-// Green — origin bus stop (where user boards first bus)
+
 export const originStopIcon = new L.DivIcon({
   html: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 40 50" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.4))">${busStopSVGBody('#4CAF50', '#4CAF50')}</svg>`,
   className: 'custom-leaflet-icon origin-stop-marker',
   iconSize: [32, 40], iconAnchor: [16, 40], popupAnchor: [0, -40],
 });
 
-// Gold — transfer stop (where user switches buses)
+
 export const transferStopIcon = new L.DivIcon({
   html: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 40 50" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.4))">${busStopSVGBody('#f0a500', '#f0a500')}</svg>`,
   className: 'custom-leaflet-icon transfer-stop-marker',
   iconSize: [32, 40], iconAnchor: [16, 40], popupAnchor: [0, -40],
 });
 
-// Red — destination bus stop (where user gets off)
+
 export const destinationStopIcon = new L.DivIcon({
   html: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 40 50" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.4))">${busStopSVGBody('#F44336', '#F44336')}</svg>`,
   className: 'custom-leaflet-icon destination-stop-marker',
   iconSize: [32, 40], iconAnchor: [16, 40], popupAnchor: [0, -40],
 });
 
-// ── User location — small pulsing blue dot ─────────────────────────────────
+
 
 export const userLocationIcon = new L.DivIcon({
   html: `
@@ -126,3 +126,9 @@ export default {
   originStopIcon, transferStopIcon, destinationStopIcon,
   userLocationIcon, busIcon, createRouteIcon,
 };
+/*
+"The map is built using Leaflet — an open source JavaScript mapping library — 
+with OpenStreetMap tiles as the base layer. Leaflet handles all interactive elements: route polylines, 
+custom bus stop markers, and popups. OpenStreetMap provides the underlying map data and tile images. 
+The bus stop icons and route markers are custom SVG designs rendered through Leaflet's DivIcon API."
+*/

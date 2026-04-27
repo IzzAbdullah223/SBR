@@ -1,7 +1,3 @@
-/**
- * Navbar.jsx — updated with i18n + LanguageToggle
- * Replace your existing Navbar.jsx with this file.
- */
 
 import { Bus, Settings, LogIn, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -26,10 +22,10 @@ const Navbar = ({ onSignUpClick, onLoginClick, user }) => {
       </div>
 
       <div className={styles.actions}>
-        {/* Language Toggle — always visible */}
+      
         <LanguageToggle />
 
-        {/* Settings — only visible when logged in */}
+    
         {user && (
           <button className={styles.settingsBtn} onClick={() => navigate('/settings')}>
             <Settings size={15} />

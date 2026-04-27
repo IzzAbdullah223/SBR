@@ -80,7 +80,7 @@ busStopSchema.index({ location: '2dsphere' });
 busStopSchema.index({ routes: 1, status: 1 });
 
 
-busStopSchema.statics.findNearby = function (lat, lng, radiusKm = 1) {//busStopSchema.statics adds a function to the BusStop model itself (not individual stops), busStopSchema.methods/ added to each stop not the model (methods)
+busStopSchema.statics.findNearby = function (lat, lng, radiusKm = 1) {//busStopSchema.statics adds a function to the BusStop model itself  (not individual stops), busStopSchema.methods/ added to each stop not the model (methods)
   return this.find({
     location: {
       $near: {

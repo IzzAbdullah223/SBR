@@ -36,23 +36,19 @@ const fetchBestShape = async (shapeId, shapeIdReturn, originStopId, destStopId) 
   if (shapeId) {
     const outbound = await fetchTrimmedShape(shapeId, originStopId, destStopId);
     if (outbound) {
-      console.log(`✅ Using outbound shape ${shapeId} (trimRatio=${outbound.trimRatio.toFixed(2)})`);
       return outbound.coordinates;
     }
   }
 
   // Step 2 — outbound missing or failed, try return shape as last resort
   if (shapeIdReturn) {
-    console.log(`⚠️  Outbound shape ${shapeId} missing — trying return shape ${shapeIdReturn}`);
     const returnShape = await fetchTrimmedShape(shapeIdReturn, originStopId, destStopId);
     if (returnShape) {
-      console.log(`✅ Using return shape ${shapeIdReturn} as fallback`);
       return returnShape.coordinates;
     }
   }
 
   // Step 3 — both missing, Map.jsx will draw a dashed straight line
-  console.log(`⚠️  No shape available for ${shapeId} — map will use dashed fallback line`);
   return null;
 };
 
@@ -78,7 +74,6 @@ const useShape = (selectedBus) => {
           const originStopId = selectedBus.originStop?.stopId;
           const destStopId   = selectedBus.destinationStop?.stopId;
 
-          console.log('🗺️ Fetching direct shape:', selectedBus.shapeId, originStopId, '→', destStopId);
 
           const coords = await fetchBestShape(
             selectedBus.shapeId,
@@ -87,7 +82,6 @@ const useShape = (selectedBus) => {
             destStopId
           );
           if (coords) {
-            console.log('✅ Direct shape loaded:', coords.length, 'points');
             setShapeCoordinates(coords);
           }
         }
@@ -100,7 +94,6 @@ const useShape = (selectedBus) => {
             const originStopId   = selectedBus.originStop?.stopId;
             const transferStopId = selectedBus.transferStop?.stopId;
 
-            console.log('🗺️ Fetching leg1 shape:', selectedBus.shapeId, originStopId, '→', transferStopId);
 
             const coords1 = await fetchBestShape(
               selectedBus.shapeId,
@@ -109,7 +102,6 @@ const useShape = (selectedBus) => {
               transferStopId
             );
             if (coords1) {
-              console.log('✅ Leg1 shape loaded:', coords1.length, 'points');
               setShapeCoordinates(coords1);
             }
           }
@@ -119,7 +111,6 @@ const useShape = (selectedBus) => {
             const transferStopId = selectedBus.transferStop?.stopId;
             const destStopId     = selectedBus.destinationStop?.stopId;
 
-            console.log('🗺️ Fetching leg2 shape:', selectedBus.shapeIdLeg2, transferStopId, '→', destStopId);
 
             const coords2 = await fetchBestShape(
               selectedBus.shapeIdLeg2,
@@ -128,7 +119,6 @@ const useShape = (selectedBus) => {
               destStopId
             );
             if (coords2) {
-              console.log('✅ Leg2 shape loaded:', coords2.length, 'points');
               setShapeCoordinatesLeg2(coords2);
             }
           }

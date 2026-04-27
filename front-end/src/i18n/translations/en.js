@@ -96,7 +96,7 @@ const en = {
     noResults: 'No locations found in Dubai',
     tokenError: '⚠️ LocationIQ token not configured',
     invalidToken: 'Invalid API token',
-    unavailable: 'Search temporarily unavailable',
+    unavailable: 'Type a Dubai location and select from the dropdown',
   },
 
   map: {

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-     "test": "jest",
+    "test": "jest",
     "test:coverage": "jest --coverage"
   },
   "jest": {
@@ -25,6 +25,7 @@
     "csv-parse": "^6.1.0",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.4.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.5",
     "node-fetch": "^3.3.2",

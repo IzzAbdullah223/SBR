@@ -1,7 +1,3 @@
-/**
- * SignUp.jsx — updated with i18n
- * Replace your existing SignUp.jsx with this file.
- */
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

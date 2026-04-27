@@ -15,11 +15,11 @@ const useSavedRoutes = (user) => {
     if (!user) return;
     setLoadingSaved(true);
     try {
-      // ✅ now uses savedRoutesAPI instead of raw fetch
+      
       const data = await savedRoutesAPI.getAll();
       if (data.success) setSavedRoutes(data.data);
     } catch {
-      // silent — panel will just show empty state
+    
     } finally {
       setLoadingSaved(false);
     }
@@ -59,7 +59,7 @@ const useSavedRoutes = (user) => {
         },
       };
 
-      // ✅ now uses savedRoutesAPI instead of raw fetch
+      
       const data = await savedRoutesAPI.create(payload);
 
       if (data.success) {

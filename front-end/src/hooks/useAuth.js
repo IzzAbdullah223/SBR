@@ -1,24 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import i18n, { skipDbSave } from '../i18n';
+import { authAPI } from '../services/Api';
 
 const useAuth = () => {
-  const [user, setUser] = useState(null);
-  const [showLogin, setShowLogin] = useState(false);
+  const [user, setUser]             = useState(null);
+  const [showLogin, setShowLogin]   = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
+  const profileFetched              = useRef(false);
 
   const [theme, setTheme] = useState(
     () => localStorage.getItem('token') ? (localStorage.getItem('theme') || 'light') : 'light'
   );
 
-  // Persist theme to localStorage only — App.jsx div carries data-theme so
-  // CSS variables always target the correct root element
   useEffect(() => {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
-  };
+  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -28,34 +26,30 @@ const useAuth = () => {
       const payload = JSON.parse(atob(token.split('.')[1]));
 
       if (payload.exp * 1000 > Date.now()) {
-  const storedUser = localStorage.getItem('user');
-  //  always set user immediately from best available data
-  // so saved routes and favorite stops start loading right away
-  // without waiting for the profile network request to complete
-  const immediateUser = storedUser ? JSON.parse(storedUser) : payload.user;
-  setUser(immediateUser);
-  const lang = immediateUser?.preferences?.language;
-  if (lang && lang !== i18n.language) {
-    skipDbSave();
-    i18n.changeLanguage(lang);
-  }
+        const storedUser    = localStorage.getItem('user');
+        const immediateUser = storedUser ? JSON.parse(storedUser) : payload.user;
 
-        fetch('/api/settings/profile', {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-          .then(res => res.json())
+        const lang = immediateUser?.preferences?.language;
+        if (lang && lang !== i18n.language) { skipDbSave(); i18n.changeLanguage(lang); }
+
+        authAPI.getProfile()
           .then(data => {
             if (data?.success && data?.user) {
-              setUser(data.user);
-              localStorage.setItem('user', JSON.stringify(data.user));
-              const lang = data.user?.preferences?.language;
-              if (lang && lang !== i18n.language) {
-                skipDbSave();
-                i18n.changeLanguage(lang);
-              }
+              const freshUser = data.user;
+              localStorage.setItem('user', JSON.stringify(freshUser));
+              const freshLang = freshUser?.preferences?.language;
+              if (freshLang && freshLang !== i18n.language) { skipDbSave(); i18n.changeLanguage(freshLang); }
+              profileFetched.current = true;
+              setUser(freshUser);
+            } else {
+              profileFetched.current = true;
+              setUser(immediateUser);
             }
           })
-          .catch(() => {});
+          .catch(() => {
+            profileFetched.current = true;
+            setUser(immediateUser);
+          });
       } else {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -68,6 +62,7 @@ const useAuth = () => {
 
   const handleLoginSuccess = (loggedInUser) => {
     localStorage.setItem('user', JSON.stringify(loggedInUser));
+    profileFetched.current = true;
     setUser(loggedInUser);
     const lang = loggedInUser?.preferences?.language || 'en';
     skipDbSave();
@@ -83,6 +78,7 @@ const useAuth = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('theme');
     localStorage.removeItem('sbr-lang');
+    profileFetched.current = false;
     setUser(null);
     setTheme('light');
   };

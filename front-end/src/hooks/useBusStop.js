@@ -8,8 +8,7 @@ const useBusStop = () => {
   const selectStop = useCallback(async (basicStop) => {
     if (!basicStop?.stopId) return;
 
-    // Show the card immediately with the basic data we already have
-    // (stopId, name, position) so there's no blank delay
+ 
     setSelectedStop(basicStop);
     setLoadingStop(true);
 

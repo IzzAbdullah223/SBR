@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-import Home     from './Pages/Home/Home';
+import Home from './Pages/Home/Home';
 import Settings from './Pages/Settings/Settings';
-import useAuth   from './hooks/useAuth';
+import useAuth from './hooks/useAuth';
 import useWallet from './hooks/useWallet';
 //Global state ownership — it calls useAuth() and useWallet(user) at the top level. These are the only two hooks here because they produce state that multiple pages need simultaneously.
 function App() {
@@ -37,7 +37,6 @@ function App() {
     <div className="App" data-theme={theme}>
       <BrowserRouter>
         <Routes>
-
           <Route
             path="/"
             element={
@@ -61,24 +60,25 @@ function App() {
           <Route
             path="/settings"
             element={
-              user
-                ? <Settings
-                    user={user}
-                    onUserUpdate={handleLoginSuccess}
-                    onLogout={handleLogout}
-                    theme={theme}
-                    toggleTheme={toggleTheme}
-                    wallet={wallet}
-                    loadingWallet={loadingWallet}
-                    recharging={recharging}
-                    walletError={walletError}
-                    setWalletError={setWalletError}
-                    recharge={recharge}
-                  />
-                : <Navigate to="/" replace />
+              user ? (
+                <Settings
+                  user={user}
+                  onUserUpdate={handleLoginSuccess}
+                  onLogout={handleLogout}
+                  theme={theme}
+                  toggleTheme={toggleTheme}
+                  wallet={wallet}
+                  loadingWallet={loadingWallet}
+                  recharging={recharging}
+                  walletError={walletError}
+                  setWalletError={setWalletError}
+                  recharge={recharge}
+                />
+              ) : (
+                <Navigate to="/" replace />
+              )
             }
           />
-
         </Routes>
       </BrowserRouter>
     </div>

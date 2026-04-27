@@ -24,7 +24,7 @@ useEffect(() => {
   } else {
     setFavoriteStops([]);
   }
-}, [user?.id]); // ✅ FIX: use user.id not whole object — prevents double fetch
+}, [user?.id]); 
 
   const addFavorite = useCallback(async (stop) => {
     try {
@@ -35,7 +35,7 @@ useEffect(() => {
       });
       if (result?.success) setFavoriteStops(result.data);
     } catch {
-      // silent — star just won't fill
+   
     }
   }, []);
 
@@ -44,7 +44,7 @@ useEffect(() => {
       const result = await settingsAPI.removeFavoriteStop(stopId);
       if (result?.success) setFavoriteStops(result.data);
     } catch {
-      // silent
+ 
     }
   }, []);
 

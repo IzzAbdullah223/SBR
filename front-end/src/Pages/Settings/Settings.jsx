@@ -29,6 +29,16 @@ const Accordion = ({ icon: Icon, title, hint, children }) => {
   );
 };
 
+const Feedback = ({ success, error }) => {
+  if (!success && !error) return null;
+  return (
+    <div className={`${styles.inlineFeedback} ${error ? styles.inlineFeedbackError : styles.inlineFeedbackSuccess}`}>
+      {error ? <AlertCircle size={13} /> : <CheckCircle size={13} />}
+      <span>{error || success}</span>
+    </div>
+  );
+};
+
 const ConfirmModal = ({ title, message, onConfirm, onCancel, requirePassword, t }) => {
   const [password, setPassword] = useState('');
   return (
@@ -69,7 +79,7 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme,
   const { t } = useTranslation();
 
   const {
-    saving, success, error, clearFeedback,
+    profile, password, preferences, privacy,
     updateProfile, changePassword, updatePreferences,
     clearSavedRoutes, deleteAccount,
   } = useSettings(user, onUserUpdate, onLogout);
@@ -77,10 +87,12 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme,
   const [name,  setName]  = useState(user?.name  || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phone || '');
+
   const [currentPw, setCurrentPw] = useState('');
   const [newPw,     setNewPw]     = useState('');
   const [confirmPw, setConfirmPw] = useState('');
   const [pwError,   setPwError]   = useState('');
+
   const [optimizationMode, setOptimizationMode] = useState(user?.preferences?.optimizationMode || 'fastest');
   const [confirm, setConfirm] = useState(null);
 
@@ -93,12 +105,33 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme,
   }, [user]);
 
   useEffect(() => {
-    if (!success && !error) return;
-    const timer = setTimeout(clearFeedback, 4000);
-    return () => clearTimeout(timer);
-  }, [success, error]);
+    if (!profile.success && !profile.error) return;
+    const t = setTimeout(profile.clear, 4000);
+    return () => clearTimeout(t);
+  }, [profile.success, profile.error]);
 
-  const handleProfileSave = (e) => { e.preventDefault(); updateProfile({ name, email, phone }); };
+  useEffect(() => {
+    if (!password.success && !password.error) return;
+    const t = setTimeout(password.clear, 4000);
+    return () => clearTimeout(t);
+  }, [password.success, password.error]);
+
+  useEffect(() => {
+    if (!preferences.success && !preferences.error) return;
+    const t = setTimeout(preferences.clear, 4000);
+    return () => clearTimeout(t);
+  }, [preferences.success, preferences.error]);
+
+  useEffect(() => {
+    if (!privacy.success && !privacy.error) return;
+    const t = setTimeout(privacy.clear, 4000);
+    return () => clearTimeout(t);
+  }, [privacy.success, privacy.error]);
+
+  const handleProfileSave = (e) => {
+    e.preventDefault();
+    updateProfile({ name, email, phone });
+  };
 
   const handlePasswordSave = (e) => {
     e.preventDefault();
@@ -109,9 +142,9 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme,
     setCurrentPw(''); setNewPw(''); setConfirmPw('');
   };
 
-  const handleConfirm = async (password) => {
+  const handleConfirm = async (pwd) => {
     if (confirm?.type === 'clearRoutes')   await clearSavedRoutes();
-    if (confirm?.type === 'deleteAccount') await deleteAccount(password);
+    if (confirm?.type === 'deleteAccount') await deleteAccount(pwd);
     setConfirm(null);
   };
 
@@ -143,8 +176,9 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme,
               <label className={styles.label}>{t('settings.emailAddress')}</label>
               <input className={styles.input} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t('settings.emailPlaceholder')} />
             </div>
-            <button type="submit" className={styles.saveBtn} disabled={saving}>
-              {saving ? t('settings.saving') : t('settings.saveChanges')}
+            <Feedback success={profile.success} error={profile.error} />
+            <button type="submit" className={styles.saveBtn} disabled={profile.saving}>
+              {profile.saving ? t('settings.saving') : t('settings.saveChanges')}
             </button>
           </form>
         </Accordion>
@@ -166,8 +200,9 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme,
               </div>
             </div>
             {pwError && <p className={styles.fieldError}><AlertCircle size={12} /> {pwError}</p>}
-            <button type="submit" className={styles.saveBtn} disabled={saving || !currentPw || !newPw || !confirmPw}>
-              {saving ? t('settings.updating') : t('settings.updatePassword')}
+            <Feedback success={password.success} error={password.error} />
+            <button type="submit" className={styles.saveBtn} disabled={password.saving || !currentPw || !newPw || !confirmPw}>
+              {password.saving ? t('settings.updating') : t('settings.updatePassword')}
             </button>
           </form>
         </Accordion>
@@ -183,19 +218,13 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme,
                 <option value="fewest_transfers">{t('settings.optFewestTransfers')}</option>
               </select>
             </div>
-            {(success || error) && (
-              <div className={`${styles.inlineFeedback} ${error ? styles.inlineFeedbackError : styles.inlineFeedbackSuccess}`}>
-                {error ? <AlertCircle size={13} /> : <CheckCircle size={13} />}
-                <span>{error || success}</span>
-              </div>
-            )}
-            <button className={styles.saveBtn} style={{ marginTop: 8 }} onClick={() => updatePreferences(optimizationMode)} disabled={saving}>
-              {saving ? t('settings.saving') : t('settings.savePreferences')}
+            <Feedback success={preferences.success} error={preferences.error} />
+            <button className={styles.saveBtn} style={{ marginTop: 8 }} onClick={() => updatePreferences(optimizationMode)} disabled={preferences.saving}>
+              {preferences.saving ? t('settings.saving') : t('settings.savePreferences')}
             </button>
           </div>
         </Accordion>
 
-        {/* Feature 2 — Nol Virtual Wallet */}
         {user && (
           <Accordion icon={CreditCard} title={t('settings.wallet')} hint={t('settings.walletHint')}>
             <WalletCard
@@ -227,7 +256,7 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme,
               <p className={styles.dangerLabel}>{t('settings.clearRoutes')}</p>
               <p className={styles.dangerHint}>{t('settings.clearRoutesHint')}</p>
             </div>
-            <button className={styles.dangerOutlineBtn} onClick={() => setConfirm({ type: 'clearRoutes' })}>
+            <button className={styles.dangerOutlineBtn} onClick={() => setConfirm({ type: 'clearRoutes' })} disabled={privacy.saving}>
               <Trash2 size={13} /> {t('settings.clearAll')}
             </button>
           </div>
@@ -236,10 +265,11 @@ const Settings = ({ user, onUserUpdate, onLogout, theme, toggleTheme,
               <p className={styles.dangerLabel}>{t('settings.deleteAccount')}</p>
               <p className={styles.dangerHint}>{t('settings.deleteAccountHint')}</p>
             </div>
-            <button className={styles.dangerOutlineBtn} onClick={() => setConfirm({ type: 'deleteAccount' })}>
+            <button className={styles.dangerOutlineBtn} onClick={() => setConfirm({ type: 'deleteAccount' })} disabled={privacy.saving}>
               <Trash2 size={13} /> {t('settings.delete')}
             </button>
           </div>
+          <Feedback success={privacy.success} error={privacy.error} />
         </Accordion>
 
         <Accordion icon={LogOut} title={t('settings.logout')} hint={t('settings.logoutHint')}>

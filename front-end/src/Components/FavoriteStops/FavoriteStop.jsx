@@ -7,7 +7,7 @@ const FavoriteStops = ({ favoriteStops, user, onStopClick, onDelete, isOpen, onT
 
   if (!user) return null;
 
-  // ── COLLAPSED STATE ────────────────────────────────────────────────────────
+ 
   if (!isOpen) {
     return (
       <div className={styles.wrapper}>

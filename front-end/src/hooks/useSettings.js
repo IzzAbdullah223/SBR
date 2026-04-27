@@ -1,21 +1,14 @@
-/**
- * useSettings — all settings logic in one place
- * Handles: profile update, password change, preferences, clear routes, delete account
- * Settings.jsx is pure UI — all API calls and state live here
- */
-
 import { useState } from 'react';
 import { settingsAPI } from '../services/Api';
 
-const useSettings = (user, onUserUpdate, onLogout) => {
-
-  const [saving, setSaving]   = useState(false);
+const useSectionFeedback = () => {
+  const [saving,  setSaving]  = useState(false);
   const [success, setSuccess] = useState(null);
-  const [error, setError]     = useState(null);
+  const [error,   setError]   = useState(null);
 
   const clear = () => { setSuccess(null); setError(null); };
 
-  const withFeedback = async (fn, successMsg) => {
+  const run = async (fn, successMsg) => {
     clear();
     setSaving(true);
     try {
@@ -30,52 +23,54 @@ const useSettings = (user, onUserUpdate, onLogout) => {
     }
   };
 
-  // ── PROFILE ───────────────────────────────────────────────────────────────
+  return { saving, success, error, clear, run };
+};
+
+const useSettings = (user, onUserUpdate, onLogout) => {
+  const profile     = useSectionFeedback();
+  const password    = useSectionFeedback();
+  const preferences = useSectionFeedback();
+  const privacy     = useSectionFeedback();
+
   const updateProfile = async ({ name, email, phone }) => {
-    const result = await withFeedback(
+    const result = await profile.run(
       () => settingsAPI.updateProfile({ name, email, phone }),
       'Profile updated successfully'
     );
     if (result?.success) {
-      const updated = result.user;
-      localStorage.setItem('user', JSON.stringify(updated));
-      onUserUpdate?.(updated);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      onUserUpdate?.(result.user);
     }
   };
 
-  // ── PASSWORD ──────────────────────────────────────────────────────────────
   const changePassword = async ({ currentPassword, newPassword }) => {
-    await withFeedback(
+    await password.run(
       () => settingsAPI.changePassword({ currentPassword, newPassword }),
       'Password changed successfully'
     );
   };
 
-  // ── PREFERENCES (optimization mode) ──────────────────────────────────────
   const updatePreferences = async (optimizationMode) => {
-    const result = await withFeedback(
+    const result = await preferences.run(
       () => settingsAPI.updatePreferences(optimizationMode),
       'Preferences saved'
     );
     if (result?.success) {
-      const updated = result.user;
-      localStorage.setItem('user', JSON.stringify(updated));
-      onUserUpdate?.(updated);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      onUserUpdate?.(result.user);
     }
   };
 
-  // ── CLEAR SAVED ROUTES ────────────────────────────────────────────────────
   const clearSavedRoutes = async () => {
-    await withFeedback(
+    await privacy.run(
       () => settingsAPI.clearSavedRoutes(),
       'All saved routes cleared'
     );
   };
 
-  // ── DELETE ACCOUNT ────────────────────────────────────────────────────────
-  const deleteAccount = async (password) => {
-    const result = await withFeedback(
-      () => settingsAPI.deleteAccount(password),
+  const deleteAccount = async (pwd) => {
+    const result = await privacy.run(
+      () => settingsAPI.deleteAccount(pwd),
       'Account deleted'
     );
     if (result?.success) {
@@ -86,10 +81,10 @@ const useSettings = (user, onUserUpdate, onLogout) => {
   };
 
   return {
-    saving,
-    success,
-    error,
-    clearFeedback: clear,
+    profile,
+    password,
+    preferences,
+    privacy,
     updateProfile,
     changePassword,
     updatePreferences,

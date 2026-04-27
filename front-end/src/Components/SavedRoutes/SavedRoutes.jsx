@@ -5,7 +5,7 @@ import styles from './SavedRoutes.module.css';
 const SavedRoutes = ({ savedRoutes, loading, onDelete, onSelectJourney, user, isOpen, onToggle }) => {
   const { t } = useTranslation();
 
-  // ── COLLAPSED STATE ──────────────────────────────────────────────────────
+
   if (!isOpen) {
     return (
       <div className={styles.wrapper}>
@@ -38,7 +38,7 @@ const SavedRoutes = ({ savedRoutes, loading, onDelete, onSelectJourney, user, is
     );
   }
 
-  // ── EXPANDED STATE ───────────────────────────────────────────────────────
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.panel}>
