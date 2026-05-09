@@ -4,10 +4,8 @@ export const MAP_CONFIG = {
   DEFAULT_ZOOM: 11,
   MIN_ZOOM: 10,
   MAX_ZOOM: 18,
-  TILE_LAYER: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-
-  ATTRIBUTION:
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  TILE_LAYER: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+ATTRIBUTION: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
 };
 
 export const ICON_COLORS = {
