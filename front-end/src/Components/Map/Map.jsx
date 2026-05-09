@@ -134,13 +134,15 @@ const MapView = ({
   const leg2Color      = '#00c9a7';
   const shapeKey       = selectedRoute?.busId || null;
 
+  const tileUrl = theme === 'dark' ? MAP_CONFIG.TILE_LAYER_DARK : MAP_CONFIG.TILE_LAYER_LIGHT;
+
   const leg1Positions     = shapeCoordinates?.length > 1     ? shapeCoordinates.map(c => [c.lat, c.lng])     : null;
   const leg2Positions     = shapeCoordinatesLeg2?.length > 1 ? shapeCoordinatesLeg2.map(c => [c.lat, c.lng]) : null;
   const fallbackPositions = !leg1Positions && hasValidOrigin && hasValidDest
     ? [[origin.lat, origin.lng], [destination.lat, destination.lng]] : null;
 
   const getStopIcon = (stop) => {
-    if (selectedStop?.stopId === stop.stopId)                  return selectedBusStopIcon;
+    if (selectedStop?.stopId === stop.stopId)                   return selectedBusStopIcon;
     if (selectedRoute?.originStop?.stopId      === stop.stopId) return originStopIcon;
     if (selectedRoute?.transferStop?.stopId    === stop.stopId) return transferStopIcon;
     if (selectedRoute?.destinationStop?.stopId === stop.stopId) return destinationStopIcon;
@@ -158,8 +160,15 @@ const MapView = ({
         scrollWheelZoom={true}
         minZoom={MAP_CONFIG.MIN_ZOOM}
         maxZoom={MAP_CONFIG.MAX_ZOOM}
+        preferCanvas={true}
       >
-        <TileLayer attribution={MAP_CONFIG.ATTRIBUTION} url={MAP_CONFIG.TILE_LAYER} />
+        <TileLayer
+          attribution={MAP_CONFIG.ATTRIBUTION}
+          url={tileUrl}
+          keepBuffer={4}
+          updateWhenIdle={true}
+          updateWhenZooming={false}
+        />
 
         <SmartBounds
           origin={origin} destination={destination}
