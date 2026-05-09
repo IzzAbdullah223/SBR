@@ -12,7 +12,9 @@ const REQUIRED_CRITERIA = ['totalJourneyTime', 'cost', 'walkingDistance', 'trans
 export const buildRepresentatives = (allBuses) => {
   const busGroups = {};
   allBuses.forEach((bus) => {
-    if (!busGroups[bus.routeNumber]) busGroups[bus.routeNumber] = [];
+    if (!busGroups[bus.routeNumber])
+      busGroups[bus.routeNumber] = [];
+    
     busGroups[bus.routeNumber].push(bus);
   });
 

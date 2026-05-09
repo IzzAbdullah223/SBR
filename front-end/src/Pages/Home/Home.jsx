@@ -4,7 +4,7 @@ import SearchInput    from '../../Components/SearchInput/SearchInput';
 import BusResults     from '../../Components/BusResults/BusResults';
 import SavedRoutes    from '../../Components/SavedRoutes/SavedRoutes';
 import FavoriteStops  from '../../Components/FavoriteStops/FavoriteStop';
-import { Search, X }  from 'lucide-react';
+import { Search, X, Map, List }  from 'lucide-react';
 import { MAP_CONFIG }  from '../../utils/constants';
 
 import useFindBuses        from '../../hooks/useFindBuses';
@@ -50,17 +50,13 @@ const Home = ({
     resetLocations,
   } = useLocationPicker();
 
-  
   const { buses, setBuses, loading, error, errorType, findBuses, clearResults } = useFindBuses();
-
-  
   const { optimizationMode, handleModeChange, ranking } = useOptimizationMode(user, buses, setBuses);
 
   const [selectedBus, setSelectedBus] = useState(null);
   const { shapeCoordinates, shapeCoordinatesLeg2 } = useShape(selectedBus);
 
   const { selectedStop, loadingStop, selectStop, clearStop } = useBusStop();
-
   const { favoriteStops, addFavorite, removeFavorite, isFavorite } = useFavoriteStops(user);
 
   const {
@@ -69,6 +65,9 @@ const Home = ({
   } = useSavedRoutes(user);
 
   const [showFavorites, setShowFavorites] = useState(false);
+
+  // ── Mobile tab switcher ────────────────────────────────────────────────────
+  const [activeTab, setActiveTab] = useState('search');
 
   const isSavingJourney     = !!(origin && destination && savingKey === `${origin.name}__${destination.name}`);
   const journeyAlreadySaved = !!(origin && destination && isJourneySaved(origin.lat, origin.lng, destination.lat, destination.lng));
@@ -97,12 +96,16 @@ const Home = ({
     clearResults();
   };
 
- useEffect(() => {
-  if (buses?.length > 0) setSelectedBus(buses[0]);
-}, [buses]);
+  useEffect(() => {
+    if (buses?.length > 0) {
+      setSelectedBus(buses[0]);
+      // Auto-switch to map tab when results arrive on mobile
+      setActiveTab('map');
+    }
+  }, [buses]);
 
-  const handleSelectBus      = (bus)   => { setSelectedBus(bus); clearStop(); };
-  const handleSaveJourney    = async () => { if (!origin || !destination) return; await saveRoute(origin, destination); };
+  const handleSelectBus        = (bus)   => { setSelectedBus(bus); clearStop(); setActiveTab('map'); };
+  const handleSaveJourney      = async () => { if (!origin || !destination) return; await saveRoute(origin, destination); };
   const handleSelectSavedJourney = (route) => { fillFromSavedRoute(route); if (showSaved) toggleSavedPanel(); };
   const handleFavoriteStopClick  = (stop)  => selectStop(stop);
   const handleSetStopAsOrigin    = (stop)  => { pinStopAsOrigin(stop);      clearStop(); };
@@ -129,7 +132,9 @@ const Home = ({
       <Navbar onSignUpClick={openSignUp} onLoginClick={openLogin} user={user} />
 
       <div className={styles.content}>
-        <div className={styles.leftPanel}>
+
+        {/* Left panel — search + results */}
+        <div className={`${styles.leftPanel} ${activeTab === 'search' ? styles.tabActive : styles.tabHidden}`}>
 
           <div className={styles.sectionTop}>
             <div className={styles.savedRoutesPinned}>
@@ -245,7 +250,8 @@ const Home = ({
 
         </div>
 
-        <div className={styles.rightPanel}>
+        {/* Right panel — map */}
+        <div className={`${styles.rightPanel} ${activeTab === 'map' ? styles.tabActive : styles.tabHidden}`}>
           <MapComponent
             origin={origin || MAP_CONFIG.DEFAULT_CENTER}
             destination={destination}
@@ -266,6 +272,26 @@ const Home = ({
             theme={theme}
           />
         </div>
+
+      </div>
+
+      {/* Mobile tab bar */}
+      <div className={styles.tabBar}>
+        <button
+          className={`${styles.tabBtn} ${activeTab === 'search' ? styles.tabBtnActive : ''}`}
+          onClick={() => setActiveTab('search')}
+        >
+          <List size={18} />
+          <span>{t('home.findButton')}</span>
+        </button>
+        <button
+          className={`${styles.tabBtn} ${activeTab === 'map' ? styles.tabBtnActive : ''}`}
+          onClick={() => setActiveTab('map')}
+        >
+          <Map size={18} />
+          <span>{t('map.title') || 'Map'}</span>
+          {buses.length > 0 && <span className={styles.tabBadge}>{buses.length}</span>}
+        </button>
       </div>
 
       <Modal isOpen={showSignUp} onClose={closeSignUp}>

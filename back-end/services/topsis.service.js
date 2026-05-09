@@ -29,8 +29,8 @@ export const rankBuses = (buses, weights) => {
       dMinus += Math.pow(v - negativeIdealSolution[cIdx], 2);
     });
     return {
-      distanceToIdeal:    Math.sqrt(dPlus),
-      distanceToNegative: Math.sqrt(dMinus),
+      distanceToIdeal:    Math.sqrt(dPlus), // lower is better
+      distanceToNegative: Math.sqrt(dMinus),// higer is better
     };
   });
   const busesWithScores = buses.map((bus, idx) => {

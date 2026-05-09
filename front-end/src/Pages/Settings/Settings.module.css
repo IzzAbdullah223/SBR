@@ -47,7 +47,7 @@
   max-width: 600px;
   width: 100%;
   margin: 0 auto;
-  padding: 20px 20px 120px;
+  padding: 20px 20px 80px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -107,6 +107,7 @@
 .chevron {
   color: var(--text-muted);
   transition: transform 0.25s ease;
+  margin-left: auto;
 }
 .chevronOpen { transform: rotate(180deg); }
 
@@ -153,16 +154,13 @@
   color: #fff;
   border: none;
   border-radius: 10px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   margin-top: 10px;
   align-self: flex-start;
-  transition: all 0.2s;
 }
+
 .saveBtn:hover:not(:disabled) { background: var(--gold); color: #000; }
-.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .toggleRow, .dangerRow, .logoutRow {
   display: flex;
@@ -172,16 +170,8 @@
   border-bottom: 1px solid var(--border);
 }
 
-.toggleLabel, .dangerLabel, .logoutLabel {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-.toggleHint, .dangerHint, .logoutHint {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
+.toggleLabel, .dangerLabel, .logoutLabel { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.toggleHint, .dangerHint, .logoutHint { font-size: 12px; color: var(--text-muted); }
 
 .toggle {
   width: 42px; height: 22px; border-radius: 20px;
@@ -195,61 +185,30 @@
 }
 .toggleOn .toggleThumb { transform: translateX(20px); }
 
-.dangerOutlineBtn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border: 1.5px solid var(--error);
-  border-radius: 8px;
-  background: transparent;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--error);
-  transition: all 0.2s;
-  white-space: nowrap;
+.dangerOutlineBtn, .logoutBtn {
+  padding: 8px 16px; border: 1.5px solid var(--border);
+  border-radius: 8px; background: transparent; cursor: pointer; font-size: 12px;
   flex-shrink: 0;
-}
-.dangerOutlineBtn:hover {
-  background: rgba(255,77,109,0.08);
-  border-color: var(--error);
 }
 
-.logoutBtn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border: 1.5px solid var(--error);
-  border-radius: 8px;
-  background: transparent;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--error);
-  transition: all 0.2s;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.logoutBtn:hover { background: rgba(255,77,109,0.08); }
+.logoutBtn { color: var(--error); border-color: var(--error); font-weight: 700; }
 
 .inlineFeedback {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
+  gap: 6px;
+  padding: 10px 12px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
 }
+
 .inlineFeedbackSuccess {
   background: rgba(0,201,167,0.08);
   border: 1px solid rgba(0,201,167,0.25);
   color: var(--teal);
 }
+
 .inlineFeedbackError {
   background: rgba(255,77,109,0.08);
   border: 1px solid rgba(255,77,109,0.25);
@@ -262,6 +221,7 @@
   gap: 5px;
   font-size: 12px;
   color: var(--error);
+  margin: 0;
 }
 
 .overlay {
@@ -273,42 +233,105 @@
   max-width: 400px; width: 90%; position: relative;
 }
 .modalClose {
-  position: absolute; top: 14px; right: 14px;
-  background: var(--bg-page); border: none; border-radius: 6px;
-  width: 26px; height: 26px; display: flex; align-items: center;
-  justify-content: center; cursor: pointer; color: var(--text-muted);
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 26px;
+  height: 26px;
+  background: var(--bg-page);
+  border: none;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
 }
-.modalClose:hover { color: var(--text-primary); }
 .modalTitle {
-  font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
-  color: var(--text-primary); margin: 0 0 8px 0;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px;
 }
 .modalMessage {
-  font-size: 13px; color: var(--text-secondary); margin: 0 0 16px 0; line-height: 1.5;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 16px;
+  line-height: 1.5;
 }
 .modalActions {
-  display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 .cancelBtn {
-  padding: 9px 18px; border: 1.5px solid var(--border); border-radius: 8px;
-  background: transparent; cursor: pointer; font-family: 'DM Sans', sans-serif;
-  font-size: 13px; font-weight: 600; color: var(--text-secondary);
-  transition: all 0.2s;
+  padding: 9px 18px;
+  background: var(--bg-page);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-primary);
 }
-.cancelBtn:hover { border-color: var(--text-primary); color: var(--text-primary); }
 .dangerBtn {
-  padding: 9px 18px; border: none; border-radius: 8px;
-  background: var(--error); cursor: pointer; font-family: 'DM Sans', sans-serif;
-  font-size: 13px; font-weight: 700; color: white;
-  transition: all 0.2s;
+  padding: 9px 18px;
+  background: var(--error);
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  color: white;
 }
-.dangerBtn:hover:not(:disabled) { opacity: 0.85; }
-.dangerBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+.dangerBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-.logoutRow { border-bottom: none; }
-.logoutLabel { font-size: 14px; font-weight: 600; color: var(--text-primary); }
-.logoutHint { font-size: 12px; color: var(--text-muted); }
+.triggerText {
+  flex: 1;
+  min-width: 0;
+}
 
-@media (max-width: 600px) {
-  .formGrid { grid-template-columns: 1fr; }
+/* ── Mobile settings ─────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .topBar {
+    padding: 0 14px;
+    gap: 10px;
+  }
+
+  .content {
+    padding: 14px 14px 60px;
+    gap: 10px;
+  }
+
+  .accordionTrigger {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .accordionInner {
+    padding: 10px 14px 20px;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .toggleRow, .dangerRow, .logoutRow {
+    gap: 12px;
+  }
+
+  .dangerOutlineBtn, .logoutBtn {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+
+  .saveBtn {
+    width: 100%;
+    text-align: center;
+  }
 }

@@ -122,3 +122,62 @@
   font-size: 13px;
 }
 .greeting strong { color: var(--gold); }
+
+/* ── Mobile navbar ───────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 14px;
+    gap: 6px;
+  }
+
+  /* Hide badge on mobile — saves space */
+  .logoBadge {
+    display: none;
+  }
+
+  /* Shrink logo text */
+  .logoText {
+    font-size: 13px;
+  }
+
+  /* Hide text labels — keep icons only */
+  .settingsBtn span,
+  .loginBtn span,
+  .signupBtn span {
+    display: none;
+  }
+
+  /* Tighten button padding to icon-only size */
+  .settingsBtn,
+  .loginBtn {
+    padding: 7px;
+    border-radius: 8px;
+  }
+
+  .signupBtn {
+    padding: 7px 10px;
+  }
+
+  /* Shrink greeting — show only first name */
+  .greeting {
+    font-size: 12px;
+    max-width: 90px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .divider {
+    margin: 0;
+  }
+
+  .actions {
+    gap: 5px;
+  }
+}
+
+@media (max-width: 380px) {
+  .logoText {
+    display: none;
+  }
+}
