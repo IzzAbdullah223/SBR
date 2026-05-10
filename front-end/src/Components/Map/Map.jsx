@@ -19,6 +19,14 @@ const isInDubai = (lat, lng) =>
   lat >= DUBAI_BOUNDS.minLat && lat <= DUBAI_BOUNDS.maxLat &&
   lng >= DUBAI_BOUNDS.minLng && lng <= DUBAI_BOUNDS.maxLng;
 
+const MapInvalidator = () => {
+  const map = useMap();
+  useEffect(() => {
+    setTimeout(() => map.invalidateSize(), 100);
+  }, [map]);
+  return null;
+};
+
 const SmartBounds = ({ origin, destination, selectedRoute, shapeCoordinates, shapeCoordinatesLeg2, shapeKey }) => {
   const map = useMap();
   const lastShapeKey  = useRef(null);
@@ -134,8 +142,6 @@ const MapView = ({
   const leg2Color      = '#00c9a7';
   const shapeKey       = selectedRoute?.busId || null;
 
-  const tileUrl = theme === 'dark' ? MAP_CONFIG.TILE_LAYER_DARK : MAP_CONFIG.TILE_LAYER_LIGHT;
-
   const leg1Positions     = shapeCoordinates?.length > 1     ? shapeCoordinates.map(c => [c.lat, c.lng])     : null;
   const leg2Positions     = shapeCoordinatesLeg2?.length > 1 ? shapeCoordinatesLeg2.map(c => [c.lat, c.lng]) : null;
   const fallbackPositions = !leg1Positions && hasValidOrigin && hasValidDest
@@ -162,9 +168,11 @@ const MapView = ({
         maxZoom={MAP_CONFIG.MAX_ZOOM}
         preferCanvas={true}
       >
+        <MapInvalidator />
+
         <TileLayer
           attribution={MAP_CONFIG.ATTRIBUTION}
-          url={tileUrl}
+          url={MAP_CONFIG.TILE_LAYER}
           keepBuffer={4}
           updateWhenIdle={true}
           updateWhenZooming={false}
