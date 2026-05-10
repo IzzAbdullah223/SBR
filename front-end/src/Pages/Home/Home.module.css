@@ -1,7 +1,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100dvh; /* dvh recalculates as browser chrome shows/hides */
   overflow: hidden;
   font-family: 'DM Sans', sans-serif;
   background: var(--navy);
@@ -300,10 +300,13 @@
   margin: 0;
 }
 
+/* ── Desktop: both panels always visible ─────────────────────────────────── */
 @media (min-width: 769px) {
   .tabActive,
   .tabHidden {
     display: flex !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
   }
   .leftPanel {
     display: flex;
@@ -316,6 +319,7 @@
   }
 }
 
+/* ── Mobile: tab switcher ────────────────────────────────────────────────── */
 @media (max-width: 768px) {
 
   .content {
@@ -343,24 +347,37 @@
     position: absolute;
     top: 0;
     left: 0;
-  }
-
-  .tabHidden {
-    display: none !important;
-  }
-
-  .tabActive {
-    display: flex !important;
-  }
-
-  .rightPanel.tabActive {
+    /* Map panel must NEVER be display:none — Leaflet needs layout dimensions
+       at mount time. We use visibility instead so the container stays in flow. */
     display: block !important;
   }
 
+  /* Search panel (no Leaflet) — safe to use display:none */
+  .leftPanel.tabHidden {
+    display: none !important;
+  }
+
+  .leftPanel.tabActive {
+    display: flex !important;
+  }
+
+  /* Map panel — NEVER display:none. Use visibility to show/hide. */
+  .rightPanel.tabHidden {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .rightPanel.tabActive {
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* Tab bar — grows to clear the Android system nav bar */
   .tabBar {
     display: flex;
-    height: 56px;
-    min-height: 56px;
+    height: calc(56px + env(safe-area-inset-bottom, 0px));
+    min-height: calc(56px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     background: var(--navbar-bg);
     border-top: 1px solid rgba(255,255,255,0.08);
     flex-shrink: 0;
@@ -383,6 +400,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
+    padding-bottom: 0;
   }
 
   .tabBtn:hover {

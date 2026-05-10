@@ -19,20 +19,30 @@ const isInDubai = (lat, lng) =>
   lat >= DUBAI_BOUNDS.minLat && lat <= DUBAI_BOUNDS.maxLat &&
   lng >= DUBAI_BOUNDS.minLng && lng <= DUBAI_BOUNDS.maxLng;
 
-const MapInvalidator = () => {
+// Replaces MapInvalidator — uses ResizeObserver so invalidateSize fires
+// exactly when the container gains real dimensions, not after an arbitrary timeout.
+const MapResizeObserver = () => {
   const map = useMap();
+
   useEffect(() => {
-    const fix = () => {
-      const container = map.getContainer();
-      container.style.height = '100%';
-      container.style.width = '100%';
-      map.invalidateSize({ animate: false });
-    };
-    fix();
-    setTimeout(fix, 100);
-    setTimeout(fix, 300);
-    setTimeout(fix, 600);
+    const container = map.getContainer();
+    if (!container) return;
+
+    // Fix immediately on mount (handles cases where container is already visible)
+    map.invalidateSize({ animate: false });
+
+    // Then watch for actual layout changes (visibility toggle, orientation change, etc.)
+    const ro = new ResizeObserver(() => {
+      const { offsetWidth: w, offsetHeight: h } = container;
+      if (w > 0 && h > 0) {
+        map.invalidateSize({ animate: false });
+      }
+    });
+
+    ro.observe(container);
+    return () => ro.disconnect();
   }, [map]);
+
   return null;
 };
 
@@ -140,6 +150,7 @@ const MapView = ({
   onSetAsOrigin, onSetAsDestination, user, theme = 'light',
 }) => {
   const { t } = useTranslation();
+  const mapRef = useRef(null);
   const [userLocation, setUserLocation]   = useState(null);
   const [locationError, setLocationError] = useState(null);
 
@@ -176,8 +187,11 @@ const MapView = ({
         minZoom={MAP_CONFIG.MIN_ZOOM}
         maxZoom={MAP_CONFIG.MAX_ZOOM}
         preferCanvas={true}
+        ref={mapRef}
       >
-        <MapInvalidator />
+        {/* ResizeObserver-based invalidator — fires at the exact moment
+            the container gains real dimensions, not after a blind timeout */}
+        <MapResizeObserver />
 
         <TileLayer
           attribution={MAP_CONFIG.ATTRIBUTION}
