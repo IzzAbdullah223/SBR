@@ -279,12 +279,27 @@
 
 .modeLoginLink:hover { color: var(--gold-light); }
 
-/* ── Tab bar — hidden on desktop ─────────────────────────────────────────── */
 .tabBar {
   display: none;
 }
 
-/* ── Desktop: both panels always visible, no tab switching ───────────────── */
+.mapPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--bg-page);
+}
+
+.mapPlaceholder p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
 @media (min-width: 769px) {
   .tabActive,
   .tabHidden {
@@ -296,17 +311,20 @@
   .rightPanel {
     display: block;
   }
+  .tabBar {
+    display: none !important;
+  }
 }
 
-/* ── Tablet + Mobile: tab switcher layout ────────────────────────────────── */
 @media (max-width: 768px) {
 
   .content {
     flex-direction: column;
     position: relative;
+    flex: 1;
+    min-height: 0;
   }
 
-  /* Both panels go full size and stack — JS controls visibility */
   .leftPanel {
     width: 100%;
     min-width: 100%;
@@ -314,6 +332,9 @@
     border-right: none;
     border-bottom: none;
     flex-shrink: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 
   .rightPanel {
@@ -324,7 +345,6 @@
     left: 0;
   }
 
-  /* Tab visibility */
   .tabHidden {
     display: none !important;
   }
@@ -337,10 +357,10 @@
     display: block !important;
   }
 
-  /* Tab bar visible on mobile */
   .tabBar {
     display: flex;
     height: 56px;
+    min-height: 56px;
     background: var(--navbar-bg);
     border-top: 1px solid rgba(255,255,255,0.08);
     flex-shrink: 0;
@@ -391,7 +411,6 @@
     font-family: 'DM Sans', sans-serif;
   }
 
-  /* Reduce padding on mobile */
   .sectionTop {
     padding: 16px 16px 10px;
   }
@@ -418,7 +437,6 @@
   }
 }
 
-/* ── Small mobile ────────────────────────────────────────────────────────── */
 @media (max-width: 400px) {
   .findButton {
     font-size: 13px;

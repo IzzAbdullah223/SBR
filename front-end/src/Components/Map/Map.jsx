@@ -22,7 +22,16 @@ const isInDubai = (lat, lng) =>
 const MapInvalidator = () => {
   const map = useMap();
   useEffect(() => {
-    setTimeout(() => map.invalidateSize(), 100);
+    const fix = () => {
+      const container = map.getContainer();
+      container.style.height = '100%';
+      container.style.width = '100%';
+      map.invalidateSize({ animate: false });
+    };
+    fix();
+    setTimeout(fix, 100);
+    setTimeout(fix, 300);
+    setTimeout(fix, 600);
   }, [map]);
   return null;
 };
